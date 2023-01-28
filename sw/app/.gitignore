@@ -1,0 +1,15 @@
+# Binaries
+aes
+conv
+dnn
+hls_flow
+gups
+hls_hll
+md5
+nw
+hls_pgrnk
+rng
+sha
+hls_sha
+hls_tri
+cpu_rng
