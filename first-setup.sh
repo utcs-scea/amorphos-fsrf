@@ -1,9 +1,12 @@
 #!/bin/bash
 
-echo "Installing AWS dependencies..."
+echo "Please update packages and reboot prior to first-time setup"
+read -p "Press enter to continue or ctrl-c to cancel: "
+
+echo "Installing AWS dependencies ..."
 sudo pip install boto3==1.16
 
-echo "Setting up AWS FPGA repo..."
+echo "Setting up AWS FPGA repo ..."
 cd /home/centos/src/project_data/
 git clone https://github.com/aws/aws-fpga.git
 cd aws-fpga/
@@ -12,9 +15,8 @@ source sdk_setup.sh
 source hdk_setup.sh
 cd ..
 
-echo "Setting up FSRF repo..."
-git clone https://github.com/utcs-scea/amorphos-fsrf.git fsrf
-cd fsrf
+echo "Setting up FSRF repo ..."
+cd /home/centos/src/project_data/fsrf/
 cd sw/daemon/
 make
 cd ../app/
@@ -23,7 +25,7 @@ cd inputs/
 ./get_data.sh
 cd /home/centos/src/project_data/
 
-echo "Enabling FPGA DMA..."
+echo "Enabling FPGA DMA ..."
 sudo setpci -v -s 0000:00:1d.0 COMMAND=06
 sudo setpci -v -s 0000:00:1b.0 COMMAND=06
 

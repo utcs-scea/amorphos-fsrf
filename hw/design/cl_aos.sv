@@ -748,8 +748,23 @@ generate
 		);
 		
 		// Instantiate app
-		if (F1_CONFIG_APPS == 1) begin : memdrive
-		end else if (F1_CONFIG_APPS == 2) begin : dnn
+		if (F1_CONFIG_APPS == 1) begin : aes
+			AESWrapper #(
+				.app_num(app_num)
+			) aes_inst (
+				// General signals
+				.clk(global_clk),
+				.rst(app_rst),
+				
+				// Virtual memory interface
+				.axi_m(app_axi_bus),
+				
+				// SoftReg control interface
+				.softreg_req(app_softreg_req),
+				.softreg_resp(app_softreg_resp)
+			);
+		end else if (F1_CONFIG_APPS == 2) begin : conv
+		end else if (F1_CONFIG_APPS == 3) begin : dnn
 			DNNWrapper #(
 				.app_num(app_num)
 			) dnn_inst (
@@ -764,13 +779,34 @@ generate
 				.softreg_req(app_softreg_req),
 				.softreg_resp(app_softreg_resp)
 			);
-		end else if (F1_CONFIG_APPS == 3) begin : btc
-		end else if (F1_CONFIG_APPS == 4) begin : cascade
-		end else if (F1_CONFIG_APPS == 5) begin : dram
-		end else if (F1_CONFIG_APPS == 6) begin : aes
-			AESWrapper #(
-				.app_num(app_num)
-			) aes_inst (
+		end else if (F1_CONFIG_APPS == 4) begin : hls_flow
+			HLSFlowWrapper hls_flow_inst (
+				// General signals
+				.clk(global_clk),
+				.rst(app_rst),
+				
+				// Virtual memory interface
+				.axi_m(app_axi_bus),
+				
+				// SoftReg control interface
+				.softreg_req(app_softreg_req),
+				.softreg_resp(app_softreg_resp)
+			);
+		end else if (F1_CONFIG_APPS == 5) begin : gups
+			RandomAccess gups_inst (
+				// General signals
+				.clk(global_clk),
+				.rst(app_rst),
+				
+				// Virtual memory interface
+				.axi_m(app_axi_bus),
+				
+				// SoftReg control interface
+				.softreg_req(app_softreg_req),
+				.softreg_resp(app_softreg_resp)
+			);
+		end else if (F1_CONFIG_APPS == 6) begin : hls_hll
+			HLSHLLWrapper hls_hll_inst (
 				// General signals
 				.clk(global_clk),
 				.rst(app_rst),
@@ -797,8 +833,8 @@ generate
 				.softreg_req(app_softreg_req),
 				.softreg_resp(app_softreg_resp)
 			);
-		end else if (F1_CONFIG_APPS == 8) begin : sha
-			SHAWrapper sha_inst (
+		end else if (F1_CONFIG_APPS == 8) begin : nw
+			NWWrapper nw_inst (
 				// General signals
 				.clk(global_clk),
 				.rst(app_rst),
@@ -810,8 +846,8 @@ generate
 				.softreg_req(app_softreg_req),
 				.softreg_resp(app_softreg_resp)
 			);
-		end else if (F1_CONFIG_APPS == 9) begin : nw
-			NWWrapper nw_inst (
+		end else if (F1_CONFIG_APPS == 9) begin : hls_pgrnk
+			HLSPgRnkWrapper hls_pgrnk_inst (
 				// General signals
 				.clk(global_clk),
 				.rst(app_rst),
@@ -836,7 +872,20 @@ generate
 				.softreg_req(app_softreg_req),
 				.softreg_resp(app_softreg_resp)
 			);
-		end else if (F1_CONFIG_APPS == 11) begin : hls_sha
+		end else if (F1_CONFIG_APPS == 11) begin : sha
+			SHAWrapper sha_inst (
+				// General signals
+				.clk(global_clk),
+				.rst(app_rst),
+				
+				// Virtual memory interface
+				.axi_m(app_axi_bus),
+				
+				// SoftReg control interface
+				.softreg_req(app_softreg_req),
+				.softreg_resp(app_softreg_resp)
+			);
+		end else if (F1_CONFIG_APPS == 12) begin : hls_sha
 			HLSSHAWrapper hls_sha_inst (
 				// General signals
 				.clk(global_clk),
@@ -849,60 +898,8 @@ generate
 				.softreg_req(app_softreg_req),
 				.softreg_resp(app_softreg_resp)
 			);
-		end else if (F1_CONFIG_APPS == 12) begin : hls_fltr
-		end else if (F1_CONFIG_APPS == 13) begin : hls_flow
-			HLSFlowWrapper hls_flow_inst (
-				// General signals
-				.clk(global_clk),
-				.rst(app_rst),
-				
-				// Virtual memory interface
-				.axi_m(app_axi_bus),
-				
-				// SoftReg control interface
-				.softreg_req(app_softreg_req),
-				.softreg_resp(app_softreg_resp)
-			);
-		end else if (F1_CONFIG_APPS == 14) begin : gups
-			RandomAccess gups_inst (
-				// General signals
-				.clk(global_clk),
-				.rst(app_rst),
-				
-				// Virtual memory interface
-				.axi_m(app_axi_bus),
-				
-				// SoftReg control interface
-				.softreg_req(app_softreg_req),
-				.softreg_resp(app_softreg_resp)
-			);
-		end else if (F1_CONFIG_APPS == 15) begin : hls_hll
-			HLSHLLWrapper hls_hll_inst (
-				// General signals
-				.clk(global_clk),
-				.rst(app_rst),
-				
-				// Virtual memory interface
-				.axi_m(app_axi_bus),
-				
-				// SoftReg control interface
-				.softreg_req(app_softreg_req),
-				.softreg_resp(app_softreg_resp)
-			);
-		end else if (F1_CONFIG_APPS == 16) begin : hls_pgrnk
-			HLSPgRnkWrapper hls_pgrnk_inst (
-				// General signals
-				.clk(global_clk),
-				.rst(app_rst),
-				
-				// Virtual memory interface
-				.axi_m(app_axi_bus),
-				
-				// SoftReg control interface
-				.softreg_req(app_softreg_req),
-				.softreg_resp(app_softreg_resp)
-			);
-		end else if (F1_CONFIG_APPS == 17) begin : multi
+		end else if (F1_CONFIG_APPS == 13) begin : tri_cnt
+		end else if (F1_CONFIG_APPS == 14) begin : multi
 			if (app_num == 0) begin
 				RNGWrapper rng_inst (
 					// General signals
