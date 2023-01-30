@@ -175,6 +175,10 @@ file copy -force {*}[glob $CL_DIR/design/hls_hll/fpga/*.dat] $TARGET_DIR
 # HLS Pagerank
 file copy -force $CL_DIR/design/hls_pgrnk/hls_pgrnk_wrapper.sv $TARGET_DIR
 file copy -force {*}[glob $CL_DIR/design/hls_pgrnk/fpga/*.v] $TARGET_DIR
+# HLS Tri
+file copy -force $CL_DIR/design/hls_tri/triangle_wrapper.sv $TARGET_DIR
+file copy -force $CL_DIR/design/hls_tri/triangle_memory.v $TARGET_DIR
+file copy -force {*}[glob $CL_DIR/design/hls_pgrnk/fpga/*.v] $TARGET_DIR
 # Top level module
 file copy -force $CL_DIR/design/cl_aos.sv $TARGET_DIR
 

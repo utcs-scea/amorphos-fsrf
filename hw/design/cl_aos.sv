@@ -958,6 +958,19 @@ generate
 					.softreg_resp(app_softreg_resp)
 				);
 			end
+		end else if (F1_CONFIG_APPS == 18) begin : hls_tri
+			HLSTriWrapper hls_tri_inst (
+				// General signals
+				.clk(global_clk),
+				.rst(app_rst),
+				
+				// Virtual memory interface
+				.axi_m(app_axi_bus),
+				
+				// SoftReg control interface
+				.softreg_req(app_softreg_req),
+				.softreg_resp(app_softreg_resp)
+			);
 		end
 	end
 endgenerate
