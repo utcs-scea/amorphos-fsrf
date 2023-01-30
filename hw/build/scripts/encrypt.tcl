@@ -179,6 +179,12 @@ file copy -force {*}[glob $CL_DIR/design/hls_pgrnk/fpga/*.v] $TARGET_DIR
 file copy -force $CL_DIR/design/hls_tri/triangle_wrapper.sv $TARGET_DIR
 file copy -force $CL_DIR/design/hls_tri/triangle_memory.v $TARGET_DIR
 file copy -force {*}[glob $CL_DIR/design/hls_pgrnk/fpga/*.v] $TARGET_DIR
+# Conv
+file copy -force $CL_DIR/design/conv/conv_wrapper.sv $TARGET_DIR
+file copy -force $CL_DIR/design/conv/conv_constants.v $TARGET_DIR
+file copy -force $CL_DIR/design/conv/conv_top.v $TARGET_DIR
+file copy -force $CL_DIR/design/conv/conv.v $TARGET_DIR
+
 # Top level module
 file copy -force $CL_DIR/design/cl_aos.sv $TARGET_DIR
 
