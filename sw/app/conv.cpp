@@ -35,7 +35,6 @@ int main(int argc, char *argv[]) {
 	bool populate;
 	util.parse_std_args(argc, argv, argi, num_apps, populate);
 	
-	//configs[0].num_words = 1 << length;
 	configs[0].krnl_lower8 = 0x0201020402010201;
 	configs[0].krnl_shift_upper = 0x0401;
 	
@@ -58,7 +57,6 @@ int main(int argc, char *argv[]) {
 		int flags = populate ? MAP_POPULATE : 0;
 		
 		start = high_resolution_clock::now();
-		//length = configs[0].num_words * 64;
 		aos[app]->aos_mmap(addr, maplength/2, PROT_READ , flags, fd[app], 0);
 		configs[app].img_addr = (uint64_t)addr;
 		aos[app]->aos_mmap(addr, maplength/2, PROT_WRITE, flags, fd[app], maplength/2);
@@ -82,21 +80,15 @@ int main(int argc, char *argv[]) {
 		usleep(100);
 		//aos[app]->aos_cntrlreg_write(0x10, configs[app].krnl_lower8);
 		aos[app]->aos_cntrlreg_write(0x18, configs[app].krnl_shift_upper);
-		//if (app == 0)
-		//getState(aos[0]);
 	}
 	
 	// end runs
 	util.finish_runs(aos, end, 0x108, true);
-	/*for (uint64_t app = 0; app < num_apps; ++app) {
-		aos[app]->aos_cntrlreg_write(0x00, 0x10);
-	}*/
 	
 	// print stats
 	uint64_t app_bytes = 2 * I_SIZE2[version];
 	util.print_stats("conv", app_bytes, start, end);
 	
-	//length = configs[0].num_words * 64;
 	for (uint64_t app = 0; app < num_apps; ++app) {
 		aos[app]->aos_munmap((void*)configs[app].img_addr, maplength/2);
 		aos[app]->aos_munmap((void*)configs[app].img_write_addr, maplength/2);

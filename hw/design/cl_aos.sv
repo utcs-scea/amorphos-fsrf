@@ -764,18 +764,18 @@ generate
 				.softreg_resp(app_softreg_resp)
 			);
 		end else if (F1_CONFIG_APPS == 2) begin : conv
-                        ConvWrapper conv_inst (
-                                // General signals
-                                .clk(global_clk),
-                                .rst(app_rst),
-
-                                // Virtual memory interface
-                                .axi_m(app_axi_bus),
-
-                                // SoftReg control interface
-                                .softreg_req(app_softreg_req),
-                                .softreg_resp(app_softreg_resp)
-                        );
+			ConvWrapper conv_inst (
+				// General signals
+				.clk(global_clk),
+				.rst(app_rst),
+				
+				// Virtual memory interface
+				.axi_m(app_axi_bus),
+				
+				// SoftReg control interface
+				.softreg_req(app_softreg_req),
+				.softreg_resp(app_softreg_resp)
+			);
 		end else if (F1_CONFIG_APPS == 3) begin : dnn
 			DNNWrapper #(
 				.app_num(app_num)
@@ -910,7 +910,7 @@ generate
 				.softreg_req(app_softreg_req),
 				.softreg_resp(app_softreg_resp)
 			);
-		end else if (F1_CONFIG_APPS == 13) begin : tri_cnt
+		end else if (F1_CONFIG_APPS == 13) begin : hls_tri
 			HLSTriWrapper hls_tri_inst (
 				// General signals
 				.clk(global_clk),

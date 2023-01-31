@@ -41,11 +41,11 @@ int main(int argc, char *argv[]) {
     }
 	
 	int fd[4];
-	char fnames[4][24] = {"/mnt/nvme0/graph0.binxx", "/mnt/nvme0/graph1.binxx",
-	                         "/mnt/nvme0/graph2.binxx", "/mnt/nvme0/graph3.binxx"};
+	char fnames[4][25] = {"/mnt/nvme0/graphxx_0.bin", "/mnt/nvme0/graphxx_1.bin",
+	                      "/mnt/nvme0/graphxx_2.bin", "/mnt/nvme0/graphxx_3.bin"};
 	for (uint64_t app = 0; app < num_apps; ++app) {
-        fnames[app][21] = large ? '3' : argv[1][0];
-        fnames[app][22] = argv[1][1];
+        fnames[app][16] = large ? '3' : argv[1][0];
+        fnames[app][17] = argv[1][1];
 		aos[app]->aos_file_open(fnames[app], fd[app]);
 	}
 	

@@ -22,7 +22,9 @@ make
 cd ../app/
 make
 cd inputs/
+make
 ./get_data.sh
+./gen_data.sh
 cd /home/centos/src/project_data/
 
 echo "Enabling FPGA DMA ..."
