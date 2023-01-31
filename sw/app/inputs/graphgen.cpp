@@ -80,7 +80,7 @@ int main(int argc, char* argv[]) {
 			if (graph[src].size() == vertices-1) n_full_vertices++;
 			if (graph[dest].size() == vertices-1) n_full_vertices++;
 			if (n_full_vertices == vertices) {
-				printf("Error: all %d vertices have %d edges\n", vertices, graph[src].size());
+				printf("Error: all %lu vertices have %lu edges\n", vertices, graph[src].size());
 				exit(1);
 			}
 		}
@@ -150,8 +150,8 @@ int main(int argc, char* argv[]) {
 
 	printf("Starting counting2\n");
 	uint64_t num_tris_3 = 0;
-	uint64_t cur_node = 0;
 /*
+	uint64_t cur_node = 0;
 	for (uint64_t i = 0; i < fpga_array.size(); i+=2) {
 		if (fpga_array[i] == UL_MAX) {
 			cur_node = 2 + i;
@@ -205,7 +205,6 @@ int main(int argc, char* argv[]) {
 	FILE* f = fopen("params.txt", "w+");
 
 	uint64_t vbytes = 16 * vertices;
-	uint64_t ieaddr = (vbytes % 64) == 0 ? vbytes : vbytes + (64 - (vbytes % 64));
 
 	uint64_t deg_sum = 0;
 	for (uint64_t i = 0; i < vertices; i++) {

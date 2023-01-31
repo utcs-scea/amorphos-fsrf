@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
 	
 	// RNG setup
 	uint64_t rng_value = rng_config.base_addr | (rng_config.size_shift << 48) | (linear << 52);
-	uint64_t rng_prev;
+	uint64_t rng_prev = 0;
 	
 	// HLS SHA setup
 	aos[1]->aos_cntrlreg_write(0x48, hls_sha_config.src_addr);
@@ -298,7 +298,7 @@ int main(int argc, char *argv[]) {
 		if (seconds > max_sec) max_sec = seconds;
 	}
 	
-	const double e2e_tput = ((double)app_bytes[4])/max_sec/(1<<20);
+	//const double e2e_tput = ((double)app_bytes[4])/max_sec/(1<<20);
 	//printf("all e2e %lu %g %g\n", app_bytes[4], max_sec, e2e_tput);
 	
 	// Clean up RNG
