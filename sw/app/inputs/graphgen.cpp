@@ -204,8 +204,6 @@ int main(int argc, char* argv[]) {
 	// write parameters to file
 	FILE* f = fopen("params.txt", "w+");
 
-	uint64_t vbytes = 16 * vertices;
-
 	uint64_t deg_sum = 0;
 	for (uint64_t i = 0; i < vertices; i++) {
 		deg_sum+=deg[i];

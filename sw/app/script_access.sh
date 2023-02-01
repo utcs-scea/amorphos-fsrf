@@ -12,6 +12,8 @@ done
 LOG="logs/access_${I}.log"
 touch $LOG
 
+sudo fpga-load-local-image -S 0 -I agfi-0a61af1de1792a2c4 >> $LOG
+
 for SEQ in 0 1; do
 	for RW in 1 2; do
 		for LEN in {0..11}; do
