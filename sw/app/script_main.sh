@@ -33,7 +33,7 @@ LOG="logs/main_${I}.log"
 touch $LOG
 
 BENCH=(aes conv dnn md5 nw rng sha hls_sha hls_flow hls_hll hls_pgrnk gups hls_tri)
-AGFI=(agfi-0704fdf49203b1415 agfi-0de1e651e85a966f8 agfi-02888566899362e4e agfi-0d1fb0e4f3f2fe828 agfi-0383241d22f62a36b agfi-0a61af1de1792a2c4 agfi-01119bac0bf264483 agfi-0e58b18cd59c51593 agfi-0043d13dc8bf4970d agfi-04b2d4ee3b2ba47b0 agfi-0d3be5dce212b307f agfi-07a50babfdecda519 agfi-06549cf85b4de54a7)
+AGFI=(agfi-0704fdf49203b1415 agfi-0229fea3ca183a4dc agfi-02888566899362e4e agfi-0d1fb0e4f3f2fe828 agfi-0383241d22f62a36b agfi-0a61af1de1792a2c4 agfi-01119bac0bf264483 agfi-0e58b18cd59c51593 agfi-0043d13dc8bf4970d agfi-04b2d4ee3b2ba47b0 agfi-0d3be5dce212b307f agfi-07a50babfdecda519 agfi-0b2c481bdd6bc100c)
 
 for I in {0..12}; do
 	echo ${BENCH[I]}
