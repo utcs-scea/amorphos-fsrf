@@ -83,6 +83,9 @@ reg liveMode;
 `define SR 15
 reg [63:0] stallReasons[`SR-1:0];
 
+reg [$clog2(`PIPELINE_SIZE)+1:0] out_buf_size;
+reg dut_ready_out;
+
 // axi wire
 reg [31:0] cnt = 0;
 wire rready_m_ = state == 4 && dut_ready_out;// && cnt != 28;
@@ -92,6 +95,8 @@ wire rready_m_ = state == 4 && dut_ready_out;// && cnt != 28;
 reg [TRANS_SIZE-1:0] rdata_m_buf;
 reg [63:0]rvalid_count;
 reg [63:0]rvalid_in_bpp;
+reg [BW_IMG-1:0] valid_outs;
+wire done_ = valid_outs == vBURSTS_IMG;
 always @(posedge clk) begin
     if (rst) begin
         rvalid_count <= 0;
@@ -105,35 +110,6 @@ always @(posedge clk) begin
         rvalid_count <= rvalid_count + 1;
         rvalid_in_bpp <= (rvalid_in_bpp == BURSTS_PER_PAGE - 1 ? 0 : rvalid_in_bpp + 1);
         liveMode <= 1;
-    end
-end
-integer abc;
-integer abcd;
-always @(posedge clk) begin
-    if (rst) begin
-	for (abcd = 0; abcd < `SR; abcd = abcd + 1) begin
-		stallReasons[abcd] <= 0;
-	end
-    end else if (state == 1) begin
-	for (abc = 0; abc < `SR; abc = abc + 1) begin
-		stallReasons[abc] <= 0;
-	end
-    end else if (liveMode) begin
-	if (!rvalid_m) stallReasons[0] <= stallReasons[0] + 1;
-	if (!rready_m_) stallReasons[1] <= stallReasons[1] + 1;
-	if (!wvalid_m) stallReasons[2] <= stallReasons[2] + 1;
-	if (!wready_m) stallReasons[3] <= stallReasons[3] + 1;
-	if (!dut_ready_out) stallReasons[4] <= stallReasons[4] + 1;
-	if (!(out_buf_size < 2)) stallReasons[5] <= stallReasons[5] + 1;
-	if (out_buf_empty) stallReasons[6] <= stallReasons[6] + 1;
-	if (!rvalid_m && read_creds == 0) stallReasons[7] <= stallReasons[7] + 1;
-	if (!wready_m && write_creds == 0) stallReasons[8] <= stallReasons[8] + 1;
-	if (!valid_in) stallReasons[9] <= stallReasons[9] + 1;
-	if (!rvalid_m && rready_m_) stallReasons[10] <= stallReasons[10] + 1;
-	if (rvalid_m && !rready_m_) stallReasons[11] <= stallReasons[11] + 1;
-	if (wvalid_m && !wready_m) stallReasons[12] <= stallReasons[12] + 1;
-	if (!wvalid_m && wready_m) stallReasons[13] <= stallReasons[13] + 1;
-	stallReasons[14] <= stallReasons[14] + 1;
     end
 end
 reg rvalid_m_buf;
@@ -179,12 +155,9 @@ HullFIFO #(
     .empty(out_buf_empty)
 );
 
-wire done_ = valid_outs == vBURSTS_IMG;
 reg[31:0] vBURSTS_WHEN_DONE;
 reg[31:0] vo_when_done;
 
-reg [$clog2(`PIPELINE_SIZE)+1:0] out_buf_size;
-reg dut_ready_out;
 always @(posedge clk) begin
     if (rst) begin
         dut_ready_out <= 0;
@@ -236,7 +209,6 @@ reg [7:0] write_creds;
 wire img_reqs_done = img_reqs == vPAGES;
 wire img_writes_done = img_writes == vPAGES;
 
-reg [BW_IMG-1:0] valid_outs;
 reg [BW_IMG-1:0] valid_outs_inv; // counts from all to 0
 reg [BW_IMG-1:0] valid_outs_from_dut;
 //reg [$clog2(BURSTS_PER_PAGE)-1:0] outs_mod_bpp;
@@ -252,6 +224,10 @@ reg debugc = 0;
 
 reg doneWasTripped;
 
+// READ ADDRESS
+wire arvalid_m_ = state >= 4 && !img_reqs_done && read_creds != 0;
+// WRITE ADDRESS
+wire awvalid_m_ = state >= 4 && !img_writes_done && write_creds != 0;
 always @(posedge clk) begin
     cnt <= cnt + 1;
     //$display(" on %d %d its %d %d", rst, cnt, valid_in, valid_out);
@@ -357,7 +333,35 @@ end
 
 reg [63:0]softreg_resp_data_buf;
 reg softreg_resp_valid_buf;
-
+integer abc;
+integer abcd;
+always @(posedge clk) begin
+    if (rst) begin
+	for (abcd = 0; abcd < `SR; abcd = abcd + 1) begin
+		stallReasons[abcd] <= 0;
+	end
+    end else if (state == 1) begin
+	for (abc = 0; abc < `SR; abc = abc + 1) begin
+		stallReasons[abc] <= 0;
+	end
+    end else if (liveMode) begin
+	if (!rvalid_m) stallReasons[0] <= stallReasons[0] + 1;
+	if (!rready_m_) stallReasons[1] <= stallReasons[1] + 1;
+	if (!wvalid_m) stallReasons[2] <= stallReasons[2] + 1;
+	if (!wready_m) stallReasons[3] <= stallReasons[3] + 1;
+	if (!dut_ready_out) stallReasons[4] <= stallReasons[4] + 1;
+	if (!(out_buf_size < 2)) stallReasons[5] <= stallReasons[5] + 1;
+	if (out_buf_empty) stallReasons[6] <= stallReasons[6] + 1;
+	if (!rvalid_m && read_creds == 0) stallReasons[7] <= stallReasons[7] + 1;
+	if (!wready_m && write_creds == 0) stallReasons[8] <= stallReasons[8] + 1;
+	if (!valid_in) stallReasons[9] <= stallReasons[9] + 1;
+	if (!rvalid_m && rready_m_) stallReasons[10] <= stallReasons[10] + 1;
+	if (rvalid_m && !rready_m_) stallReasons[11] <= stallReasons[11] + 1;
+	if (wvalid_m && !wready_m) stallReasons[12] <= stallReasons[12] + 1;
+	if (!wvalid_m && wready_m) stallReasons[13] <= stallReasons[13] + 1;
+	stallReasons[14] <= stallReasons[14] + 1;
+    end
+end
 always @(posedge clk) begin
     softreg_resp_data_buf <= 
 	    softreg_req_addr == 32'h20 ?araddr_m:
@@ -440,8 +444,6 @@ assign softreg_resp_valid = softreg_resp_valid_buf;
 //wire [63:0] img_offset = img_counter * 64;
 //wire [63:0] krnl_offset = krnl_counter * 64;
 
-// READ ADDRESS
-wire arvalid_m_ = state >= 4 && !img_reqs_done && read_creds != 0;
 /*always @(posedge clk) begin
     if (arready_m && arvalid_m_ && !rst && !done_) begin
         img_reqs <= img_reqs + 1;
@@ -468,8 +470,6 @@ end
 always @(*) begin
 	rready_m <= rready_m_;
 end
-// WRITE ADDRESS
-wire awvalid_m_ = state >= 4 && !img_writes_done && write_creds != 0;
 /*always @(posedge clk) begin
     if (awready_m && awvalid_m_ && !rst && !done_) begin
         img_writes <= img_writes + 1;

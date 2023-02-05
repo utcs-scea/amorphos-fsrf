@@ -215,11 +215,6 @@ module ConvGrid #(
 
     wire stalling = !(ready_out && (valid_in || momentum));
 
-    wire bmwr_n = (1+cycles >= 3) && (1+cycles < 3 + vEOF);
-    wire bmrr_n = (1+cycles >= 3 + FIFO_SIZE) && (1+cycles < 3 + FIFO_SIZE + vEOF);
-    wire mtwr_n = (1+cycles >= 6 + FIFO_SIZE) && (1+cycles < 6 + FIFO_SIZE + vEOF);
-    wire mtrr_n = (1+cycles >= 6 + 2*FIFO_SIZE) && (1+cycles < 6 + 2*FIFO_SIZE + vEOF) || (1+cycles < 6 + FIFO_SIZE && !mid_top_empty);
-
     reg bmwr;
     reg bmrr;
     reg mtwr;
@@ -238,6 +233,11 @@ module ConvGrid #(
     wire mid_top_rdreq = !stalling && mtrr;
     wire [TRANS_SIZE-1:0] mid_top_q;
     wire mid_top_empty;
+    
+    wire bmwr_n = (1+cycles >= 3) && (1+cycles < 3 + vEOF);
+    wire bmrr_n = (1+cycles >= 3 + FIFO_SIZE) && (1+cycles < 3 + FIFO_SIZE + vEOF);
+    wire mtwr_n = (1+cycles >= 6 + FIFO_SIZE) && (1+cycles < 6 + FIFO_SIZE + vEOF);
+    wire mtrr_n = (1+cycles >= 6 + 2*FIFO_SIZE) && (1+cycles < 6 + 2*FIFO_SIZE + vEOF) || (1+cycles < 6 + FIFO_SIZE && !mid_top_empty);
 
     genvar bmg;
     for (bmg = 0; bmg < TRANS_SIZE_B; bmg = bmg + 1) begin

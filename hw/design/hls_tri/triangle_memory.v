@@ -205,6 +205,8 @@ output   interrupt;
 
 
 // AR uses these variables to route, R uses RID
+wire m_axi_mem3_ARVALID;
+wire m_axi_mem2_ARVALID;
 wire is_3 = m_axi_mem3_ARVALID; // 3 gets highest priority
 wire is_2 = !is_3 && m_axi_mem2_ARVALID;
 wire is_1 = !is_3 && !is_2;
@@ -232,7 +234,6 @@ wire  [C_M_AXI_GMEM_RUSER_WIDTH - 1:0] m_axi_mem1_RUSER = m_axi_gmem_RUSER;
 wire  [1:0] m_axi_mem1_RRESP = m_axi_gmem_RRESP;
 
 
-wire   m_axi_mem2_ARVALID;
 wire   m_axi_mem2_ARREADY = m_axi_gmem_ARREADY && is_2;
 wire  [C_M_AXI_GMEM_ADDR_WIDTH - 1:0] m_axi_mem2_ARADDR;
 wire  [C_M_AXI_GMEM_ID_WIDTH - 1:0] m_axi_mem2_ARID;
@@ -255,7 +256,6 @@ wire  [C_M_AXI_GMEM_RUSER_WIDTH - 1:0] m_axi_mem2_RUSER = m_axi_gmem_RUSER;
 wire  [1:0] m_axi_mem2_RRESP = m_axi_gmem_RRESP;
 
 
-wire   m_axi_mem3_ARVALID;
 wire   m_axi_mem3_ARREADY = m_axi_gmem_ARREADY && is_3;
 wire  [C_M_AXI_GMEM_ADDR_WIDTH - 1:0] m_axi_mem3_ARADDR;
 wire  [C_M_AXI_GMEM_ID_WIDTH - 1:0] m_axi_mem3_ARID;
