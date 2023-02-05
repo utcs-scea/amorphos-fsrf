@@ -143,6 +143,9 @@ Start up the daemon to manage the FPGA in the background:
 
 - `cd fsrf/sw/daemon`
 - `sudo fpga-load-local-image -S0 -I <agfi>`
+- Enable FPGA BusMaster access:
+ - f1.2xlarge: `sudo setpci -v -s 0000:00:1d.0 COMMAND=06`
+ - f1.4xlarge: `sudo setpci -v -s 0000:00:1b.0 COMMAND=06`
 - `sudo ./daemon > out.txt`
 
 An FPGA image needs to be loaded prior to starting the daemon so it can attach to the PCIe BARs. If an image is not present, the daemon will crash when it attempt to access them.
