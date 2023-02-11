@@ -7,7 +7,7 @@ AOS="${3:-1}"
 PHYS="${4:-1}"
 BIG="${5:-1}"
 
-if [ ! -f "/tmp/aos_daemon.socket" ]; then
+if [ ! -S "/tmp/aos_daemon.socket" ]; then
 	echo "AOS daemon not running"
 	exit 1
 fi
