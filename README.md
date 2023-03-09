@@ -13,7 +13,7 @@ This prototype supports AWS F1 instances with 4 AOS Morphlets per FPGA.
 
 `sw/app/`: application code and scripts
 
-`sw/app/inputs/`: PageRank inputs
+`sw/app/inputs/`: graph inputs
 
 `sw/daemon/`: system code
 
@@ -72,7 +72,7 @@ Set up an F1 EC2 instance:
  - Create or Select a Security Group that allows all inbound SSH traffic. This should be fine since you can only authenticate via private key by default.
 - Configure your Storage. The default setup splits data across a Root / OS volume and an EBS / project volume.
  - Unless you plan to install a GUI, 75GB should be sufficient for the Root volume.
- - We recommend expanding the project volume to 125GB to store the PageRank input files and FPGA build data.
+ - We recommend expanding the project volume to 125GB to store the graph input files and FPGA build data.
  - Alternatively, you can delete the second volume and use a single 200GB Root volume for OS and project files.
 - Launch Instance.
 - Your instance should now be running, and you should be ready to connect to it.
@@ -91,7 +91,7 @@ Set up an F1 EC2 instance:
  - Clones AWS FPGA repo in expected location
  - Sets up AWS FPGA SDK and HDK
  - Makes FSRF binaries
- - Sets up PageRank input files
+ - Sets up graph input files
  - Enables FPGA DMA
 - `aws configure`
  - Enter the Access Key ID and Secret Access Key associated with your account.
