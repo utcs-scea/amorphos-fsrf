@@ -248,3 +248,35 @@ To recover from such an issue:
  - Restart the daemon
 
 It is important to perform these operations in the provided order to prevent causing further issues.
+
+## Workload Citations
+
+#### AES
+
+AES incorporates the [tiny_aes](https://opencores.org/projects/tiny_aes) core from [OpenCores](https://opencores.org).
+
+#### DNN
+
+DNN adapts the DNNWeaver-generated code from AmorphOS for use in FSRF.
+
+Hardik Sharma, Jongse Park, Emmanuel Amaro, Bradley Thwaites, Praneetha Kotha, Anmol Gupta, Joon Kyung Kim, Asit Mishra, and Hadi Esmaeilzadeh. 2016. Dnnweaver: From high-level deep network models to fpga acceleration. In the Workshop on Cognitive Architectures.
+
+#### FLOW
+
+FLOW uses a modified version of the optical-flow accelerator from [Rosetta: A Realistic High-level Synthesis Benchmark Suite for Software Programmable FPGAs](https://github.com/cornell-zhang/rosetta).
+
+Yuan Zhou, Udit Gupta, Steve Dai, Ritchie Zhao, Nitish Srivastava, Hanchen Jin, Joseph Featherston, Yi-Hsiang Lai, Gai Liu, Gustavo Angarita Velasquez, Wenping Wang, and Zhiru Zhang. 2018. Rosetta: A Realistic High-Level Synthesis Benchmark Suite for Software-Programmable FPGAs. Int'l Symp. on Field-Programmable Gate Arrays (FPGA) (Feb 2018).
+
+#### HLL
+
+HLL uses a modified version of [fpga-hyperloglog: FPGA-based HyperLogLog Accelerator](https://github.com/fpgasystems/fpga-hyperloglog).
+
+A. Kulkarni, M. Chiosa, T. B. Preußer, K. Kara, D. Sidler, and G. Alonso. 2020. HyperLogLog Sketch Acceleration on FPGA. In FPL.
+
+#### MD5
+
+MD5 incorporates the [md5_pipelined](https://opencores.org/projects/md5_pipelined) core from [OpenCores](https://opencores.org).
+
+#### SHA and SHA HLS
+
+SHA incorporates SHA-256 code from [Open-Source FPGA Bitcoin Miner](https://github.com/progranism/Open-Source-FPGA-Bitcoin-Miner). SHA HLS incorporates a translated version of this code for use with Vitis HLS.
