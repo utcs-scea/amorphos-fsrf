@@ -1,6 +1,4 @@
 import ShellTypes::*;
-import AMITypes::*;
-import AOSF1Types::*;
 
 module MD5Wrapper
 (
@@ -15,12 +13,8 @@ module MD5Wrapper
 	input  SoftRegReq   softreg_req,
 	output SoftRegResp  softreg_resp
 );
-	parameter app_num = 0;
 	
-	md5_top
-	#(
-		.app_num(app_num)
-	) mt (
+	md5_top mt (
 		.clk(clk),
 		.rst(rst),
 		

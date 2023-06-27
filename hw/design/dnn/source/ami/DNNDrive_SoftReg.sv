@@ -1,6 +1,5 @@
 import ShellTypes::*;
 import AMITypes::*;
-import AOSF1Types::*;
 
 `include "dw_params.vh"
 `include "common.vh"
@@ -55,21 +54,12 @@ module DNNDrive_SoftReg #(
     // User clock and reset
     input                               clk,
     input                               rst, 
-
-    input [AMI_APP_BITS-1:0]            srcApp,
     
     // Simplified Memory interface
     output AMIRequest                   mem_reqs        [1:0],
     input                               mem_req_grants  [1:0],
     input AMIResponse                   mem_resps       [1:0],
     output logic                        mem_resp_grants [1:0],
-
-    // PCIe Slot DMA interface
-    input PCIEPacket                    pcie_packet_in,
-    output                              pcie_full_out,
-
-    output PCIEPacket                   pcie_packet_out,
-    input                               pcie_grant_in,
 
     // Soft register interface
     input SoftRegReq                    softreg_req,
@@ -132,10 +122,6 @@ module DNNDrive_SoftReg #(
           );
         end
     endgenerate
-
-    // Don't need the PCI-e interface
-    assign pcie_full_out = 1'b0;
-    assign pcie_packet_out = '{valid: 1'b0, data: 0, slot: 0, pad: 0, last: 1'b0};
 
     // Information to read/write
     logic[47:0] start_addr;

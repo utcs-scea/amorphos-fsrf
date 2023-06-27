@@ -54,13 +54,10 @@ file copy -force $UNUSED_TEMPLATES_DIR/unused_sh_ocl_template.inc        $TARGET
 # AmorphOS
 file copy -force $CL_DIR/design/aos/ShellTypes.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/AMITypes.sv $TARGET_DIR
-file copy -force $CL_DIR/design/aos/AOSF1Types.sv $TARGET_DIR
 #file copy -force $CL_DIR/design/aos/FIFO.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/SoftFIFO.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/HullFIFO.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/BlockBuffer.sv $TARGET_DIR
-file copy -force $CL_DIR/design/aos/Counter64.sv $TARGET_DIR
-#file copy -force $CL_DIR/design/aos/AmorphOSSoftReg.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/AmorphOSSoftReg_RouteTree.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/pcie_dma.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/rst_pipe.sv $TARGET_DIR
@@ -78,7 +75,6 @@ file copy -force $CL_DIR/design/aos/cy_stripe.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/aos_axi.sv $TARGET_DIR
 # F1 interfaces
 file copy -force $CL_DIR/design/aos/AXIL2SR.sv $TARGET_DIR
-#file copy -force $CL_DIR/design/aos/AXIL2SR_Extended.sv $TARGET_DIR
 # Parameterization
 file copy -force $CL_DIR/design/UserParams.sv $TARGET_DIR
 # AES

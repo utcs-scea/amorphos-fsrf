@@ -119,21 +119,8 @@ for (g = 1; g < 5; g = g + 1) begin: gen_vm
 		.rst_n(rst_n[1]),
         
 		.axi_s(cl_axi_bus_mux0[g]),
-		.axi_m(cl_axi_bus_mux7[g])
+		.axi_m(cl_axi_bus_mux2[g])
 	);
-
-    axi_mux_2s #(
-        .SR_ADDR('h18)
-    ) mux1_0 (
-        .clk(aclk),
-        .rst(!rst_n[1]),
-        
-        .sr_req(sys_softreg_req[g-1]),
-        
-        .axi_m(cl_axi_bus_mux1[g]),
-        .axi_s0(cl_axi_bus_mux2[g]),
-        .axi_s1(cl_axi_bus_mux3[g])
-    );
 
     cy_tlb cytlb (
         .clk(aclk),
@@ -142,68 +129,8 @@ for (g = 1; g < 5; g = g + 1) begin: gen_vm
         .sr_req(sys_softreg_req[g-1+4]),
         .sr_resp(sys_softreg_resp[g-1+4]),
         
-        .virt_m(cl_axi_bus_mux2[g]),
-        .phys_s(cl_axi_bus_mux4[g])
-    );
-    
-    axi_mux_2s #(
-        .SR_ADDR('h20)
-    ) mux2_0 (
-        .clk(aclk),
-        .rst(!rst_n[1]),
-        
-        .sr_req(sys_softreg_req[g-1]),
-        
-        .axi_m(cl_axi_bus_mux4[g]),
-        .axi_s0(cl_axi_bus_mux8[g]),
-        .axi_s1(cl_axi_bus_mux10[g])
-    );
-    
-    aos_axi aaxi (
-        .clk(aclk),
-        .rst(!rst_n[1]),
-        
-        .axi_m(cl_axi_bus_mux8[g]),
-        .axi_s(cl_axi_bus_mux9[g])
-    );
-    
-    axi_mux_2m #(
-        .SR_ADDR('h20)
-    ) mux2_1 (
-        .clk(aclk),
-        .rst(!rst_n[1]),
-        
-        .sr_req(sys_softreg_req[g-1]),
-        
-        .axi_m0(cl_axi_bus_mux9[g]),
-        .axi_m1(cl_axi_bus_mux10[g]),
-        .axi_s(cl_axi_bus_mux11[g])
-    );
-
-    axi_tlb #(
-        .SR_ID(g-1)
-    ) atlb (
-        .clk(aclk),
-        .rst(!rst_n[1]),
-        
-        .sr_req(sys_softreg_req[g-1]),
-        .sr_resp(sys_softreg_resp[g-1]),
-        
-        .virt_m(cl_axi_bus_mux3[g]),
-        .phys_s(cl_axi_bus_mux5[g])
-    );
-
-    axi_mux_2m #(
-        .SR_ADDR('h18)
-    ) mux1_1 (
-        .clk(aclk),
-        .rst(!rst_n[1]),
-        
-        .sr_req(sys_softreg_req[g-1]),
-        
-        .axi_m0(cl_axi_bus_mux11[g]),
-        .axi_m1(cl_axi_bus_mux5[g]),
-        .axi_s(cl_axi_bus_mux6[g])
+        .virt_m(cl_axi_bus_mux1[g]),
+        .phys_s(cl_axi_bus_mux3[g])
     );
 
     axi_mux_2m #(
@@ -214,8 +141,8 @@ for (g = 1; g < 5; g = g + 1) begin: gen_vm
         
         .sr_req(sys_softreg_req[g-1]),
         
-        .axi_m0(cl_axi_bus_mux7[g]),
-        .axi_m1(cl_axi_bus_mux6[g]),
+        .axi_m0(cl_axi_bus_mux2[g]),
+        .axi_m1(cl_axi_bus_mux3[g]),
         .axi_s(cl_axi_bus_phys0[g])
     );
 end

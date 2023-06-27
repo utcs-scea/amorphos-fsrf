@@ -7,14 +7,11 @@
 */
 
 import ShellTypes::*;
-import AMITypes::*;
-import AOSF1Types::*;
 
 module AOS_SR_1_to_2#(parameter SELECT_BIT_INDEX = 0, FIFO_LOG_DEPTH = 1, FIFO_TYPE = 0)
 (
     input                               clk,
     input                               rst,
-	//input								app_enable[1:0],
 	// Incoming SoftReg request
 	input  SoftRegReq					sr_req_in,
 	// Routed to the correct destination
@@ -90,7 +87,6 @@ module AOS_SR_2_to_1#(parameter FIFO_LOG_DEPTH = 1, FIFO_TYPE = 0)
 (
     input                               clk,
     input                               rst,
-	//input								app_enable[1:0],
 	//  Two incoming SoftReg Responses
 	input SoftRegResp                   sr_resp_in_0,
 	input SoftRegResp                   sr_resp_in_1,
@@ -179,7 +175,6 @@ module AOS_Request_RouteTree#(parameter SR_NUM_APPS = 2)
     // User clock and reset
     input                               clk,
     input                               rst,
-	input								app_enable[SR_NUM_APPS-1:0],
 	// Request from host
 	input SoftRegReq                    sr_req_from_host,
 	// Requests to each app
@@ -203,7 +198,6 @@ generate
 		AOS_SR_1_to_2 #(.SELECT_BIT_INDEX(NUM_LAYERS-1)) aos_sr_1_to_2_layer_0_inst(
 			.clk(clk),
 			.rst(rst),
-			//.app_enable(),
 			.sr_req_in(sr_req_from_host),
 			.sr_req_out_0(connects[0][0]),
 			.sr_req_out_1(connects[0][1])
@@ -215,7 +209,6 @@ generate
 				AOS_SR_1_to_2 #(.SELECT_BIT_INDEX(NUM_LAYERS-layer_num-1)) aos_sr_1_to_2_inst(
 					.clk(clk),
 					.rst(rst),
-					//.app_enable(),
 					.sr_req_in(connects[layer_num-1][inst_num]),
 					.sr_req_out_0(connects[layer_num][(2*inst_num)]),
 					.sr_req_out_1(connects[layer_num][(2*inst_num)+1])
@@ -241,7 +234,6 @@ module AOS_Response_RouteTree#(parameter SR_NUM_APPS = 2)
     // User clock and reset
     input                               clk,
     input                               rst,
-	input								app_enable[SR_NUM_APPS-1:0],
 	// Input from apps
 	input  SoftRegResp                  sr_resp_from_app[SR_NUM_APPS-1:0],
 	// Output to host
@@ -297,7 +289,6 @@ module AmorphOSSoftReg_RouteTree#(parameter SR_NUM_APPS = 2)
     // User clock and reset
     input                               clk,
     input                               rst,
-	input								app_enable[SR_NUM_APPS-1:0],
 	// Interface to Host
 	input  SoftRegReq					softreg_req,
 	output SoftRegResp					softreg_resp,
@@ -306,11 +297,9 @@ module AmorphOSSoftReg_RouteTree#(parameter SR_NUM_APPS = 2)
 	input  SoftRegResp					app_softreg_resp[SR_NUM_APPS-1:0]	
 );
 
-	// TODO: Wire the app_enables if we plan to run less apps than the size of the route tree
 	AOS_Request_RouteTree #(.SR_NUM_APPS(SR_NUM_APPS)) aos_request_routetree_inst(
 		.clk(clk),
 		.rst(rst),
-		.app_enable(app_enable),
 		.sr_req_from_host(softreg_req),
 		.sr_req_to_app(app_softreg_req)		
 	);
@@ -318,7 +307,6 @@ module AmorphOSSoftReg_RouteTree#(parameter SR_NUM_APPS = 2)
 	AOS_Response_RouteTree #(.SR_NUM_APPS(SR_NUM_APPS)) aos_response_routetree_inst(
 		.clk(clk),
 		.rst(rst),
-		.app_enable(app_enable),
 		.sr_resp_from_app(app_softreg_resp),
 		.sr_resp_to_host(softreg_resp)
 	);

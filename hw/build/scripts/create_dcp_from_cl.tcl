@@ -154,6 +154,12 @@ set_msg_config -id {Synth 8-7129} -suppress
 set_msg_config -id {DRC RPBF-3} -suppress
 set_msg_config -id {Vivado 12-1421} -suppress
 set_msg_config -id {Constraints 18-5648} -suppress
+set_msg_config -id {IP_Flow 19-4832} -suppress
+set_msg_config -id {Synth 8-5856} -suppress
+set_msg_config -id {Vivado 12-2489} -suppress
+set_msg_config -id {Synth 8-6779} -suppress
+
+set_msg_config -severity "INFO" -string "WRAPPER_INST/SH" -suppress
 
 # Check that an email address has been set, else unset notify_via_sns
 

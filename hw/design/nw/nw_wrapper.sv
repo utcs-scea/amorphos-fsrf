@@ -1,6 +1,4 @@
 import ShellTypes::*;
-import AMITypes::*;
-import AOSF1Types::*;
 
 module NWWrapper
 (

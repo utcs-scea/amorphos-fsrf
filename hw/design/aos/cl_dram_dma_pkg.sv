@@ -26,7 +26,6 @@ interface axi_bus_t;
    logic awvalid;
    logic awready;
 
-//   logic[15:0] wid;
    logic[511:0] wdata;
    logic[63:0] wstrb;
    logic wlast;
@@ -53,14 +52,12 @@ interface axi_bus_t;
    logic rready;
 
    modport master (input awid, awaddr, awlen, awsize, awvalid, output awready,
-//                  input wid, wdata, wstrb, wlast, wvalid, output wready,
                   input wdata, wstrb, wlast, wvalid, output wready,
                   output bid, bresp, bvalid, input bready,
                   input arid, araddr, arlen, arsize, arvalid, output arready,
                   output rid, rdata, rresp, rlast, rvalid, input rready);
 
    modport slave (output awid, awaddr, awlen, awsize, awvalid, input awready,
-//                  output wid, wdata, wstrb, wlast, wvalid, input wready,
                   output wdata, wstrb, wlast, wvalid, input wready,
                   input bid, bresp, bvalid, output bready,
                   output arid, araddr, arlen, arsize, arvalid, input arready,

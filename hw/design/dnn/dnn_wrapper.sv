@@ -1,6 +1,5 @@
 import ShellTypes::*;
 import AMITypes::*;
-import AOSF1Types::*;
 
 module DNNWrapper
 (
@@ -15,8 +14,6 @@ module DNNWrapper
 	input  SoftRegReq   softreg_req,
 	output SoftRegResp  softreg_resp
 );
-	parameter app_num = 0;
-	
 	
 	//// Legacy AMI interface
 	AMIRequest  mem_reqs        [1:0];
@@ -61,33 +58,15 @@ module DNNWrapper
 	assign axi_m.bready = 1;
 	
 	
-	//// Legacy PCIe interface
-	PCIEPacket pcie_packet_in;
-	logic      pcie_full_out;
-	PCIEPacket pcie_packet_out;
-	logic      pcie_grant_in;
-	
-	// Currently unsupported and unused, tie off
-	assign pcie_packet_in = '{valid: 0, data: 0, slot: 0, pad: 0, last: 0};
-	assign pcie_grant_in = 0;
-	
-	
 	//// Legacy app instantiation
 	DNNDrive_SoftReg dnn (
 		.clk(clk),
 		.rst(rst),
 		
-		.srcApp(app_num),
-		
 		.mem_reqs(mem_reqs),
 		.mem_req_grants(mem_req_grants),
 		.mem_resps(mem_resps),
 		.mem_resp_grants(mem_resp_grants),
-		
-		.pcie_packet_in(pcie_packet_in),
-		.pcie_full_out(pcie_full_out),
-		.pcie_packet_out(pcie_packet_out),
-		.pcie_grant_in(pcie_grant_in),
 		
 		.softreg_req(softreg_req),
 		.softreg_resp(softreg_resp)

@@ -81,18 +81,7 @@ module DNN2AMI_WRPath
 		for (pu_num = 0; pu_num < NUM_PU; pu_num = pu_num + 1) begin : per_pu_buf_rename
 			assign pu_outbuf_data[pu_num] = data_from_outbuf[((pu_num+1)*AXI_DATA_WIDTH)-1:(pu_num*AXI_DATA_WIDTH)];
 		end
-	endgenerate	
-	
-	// Counter for time  stamps
-	wire[63:0] current_timestamp;
-	Counter64
-	time_stamp_counter
-	(
-		.clk (clk),
-		.rst (rst), 
-		.increment (1'b1),
-		.count (current_timestamp)
-	);	
+	endgenerate
 	
 	// Queue to buffer Write requests
 	wire             macroWrQ_empty;
@@ -141,18 +130,8 @@ module DNN2AMI_WRPath
 	endgenerate	
 
 	// Inputs to the MacroWriteQ
-	assign macroWrQ_in  = '{valid: wr_req, isWrite: 1'b1, addr: wr_addr, size: wr_req_size, pu_id: wr_pu_id, time_stamp: current_timestamp};
-	assign macroWrQ_enq = wr_req && !macroWrQ_full;		
-
-	// Debug
-	always@(posedge clk) begin
-		if (macroWrQ_enq) begin
-			$display("DNN2AMI:============================================================ Accepting macro WRITE request ADDR: %h Size: %d ",wr_addr,wr_req_size);
-		end
-		if (wr_req) begin
-			$display("DNN2AMI: WR_req is being asserted");
-		end	
-	end	
+	assign macroWrQ_in  = '{valid: wr_req, isWrite: 1'b1, addr: wr_addr, size: wr_req_size, pu_id: wr_pu_id};
+	assign macroWrQ_enq = wr_req && !macroWrQ_full;
 	
 	// reqOut queue to simplify the sequencing logic
 	wire             reqQ_empty;

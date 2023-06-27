@@ -7,8 +7,7 @@
 */
 
 import ShellTypes::*;
-import AMITypes::*;
-import AOSF1Types::*;
+import UserParams::*;
 
 module cl_aos (
    `include "cl_ports.vh" // Fixed port definition
@@ -44,6 +43,9 @@ module cl_aos (
 `include "unused_cl_sda_template.inc"
 //`include "unused_sh_ocl_template.inc"
 //`include "unused_sh_bar1_template.inc"
+
+localparam F1_NUM_APPS = UserParams::NUM_APPS;
+localparam F1_CONFIG_APPS = UserParams::CONFIG_APPS;
 
 // Gen vars
 genvar i;
@@ -135,7 +137,6 @@ sys_sr_tree
 	// User clock and reset
 	.clk(global_clk),
 	.rst(!rst_n[1]),
-	//.app_enable(1),
 	// Interface to Host
 	.softreg_req(sys_softreg_req_buf),
 	.softreg_resp(sys_softreg_resp_buf),
@@ -459,9 +460,9 @@ assign {lcl_cl_sh_ddrd.rvalid, lcl_cl_sh_ddrb.rvalid, lcl_cl_sh_ddra.rvalid} = s
 assign cl_sh_ddr_rready_2d = {lcl_cl_sh_ddrd.rready, lcl_cl_sh_ddrb.rready, lcl_cl_sh_ddra.rready};
 
 sh_ddr #(
-	.DDR_A_PRESENT(1),
-	.DDR_B_PRESENT(1),
-	.DDR_D_PRESENT(1)
+	.DDR_A_PRESENT(0),
+	.DDR_B_PRESENT(0),
+	.DDR_D_PRESENT(0)
 ) SH_DDR (
 	.clk(global_clk),
 	.rst_n(rst_n[1]),
@@ -588,18 +589,7 @@ sh_ddr #(
 	.ddr_sh_stat_int2   (ddr_sh_stat_int_q[2])
 );
 
-//------------------------------------
-// App and port enables
-//------------------------------------
-logic app_enable [F1_NUM_APPS-1:0];
 
-genvar port_num;
-generate
-	for (app_num = 0; app_num < F1_NUM_APPS; app_num = app_num + 1) begin : enables_set
-		assign app_enable[app_num] = 1'b1;
-	end
-endgenerate
-   
 //------------------------------------
 // Application SoftReg
 //------------------------------------
@@ -672,39 +662,19 @@ SoftRegReq  app_softreg_req_  [F1_NUM_APPS-1:0];
 SoftRegResp app_softreg_resp_ [F1_NUM_APPS-1:0];
 
 // Connect to AmorphOS or test module
-generate
-	// Full AmorphOS system
-	// SoftReg Interface
-	if (F1_AXIL_USE_ROUTE_TREE == 0) begin : sr_no_tree
-		AmorphOSSoftReg app_softreg_inst (
-			// User clock and reset
-			.clk(global_clk),
-			.rst(!rst_n[1]),
-			.app_enable(app_enable),
-			// Interface to Host
-			.softreg_req(app_softreg_req_buf[0]),
-			.softreg_resp(app_softreg_resp_buf[0]),
-			// Virtualized interface each app
-			.app_softreg_req(app_softreg_req_),
-			.app_softreg_resp(app_softreg_resp_)
-		);
-	end else begin : sr_with_tree
-		AmorphOSSoftReg_RouteTree #(.SR_NUM_APPS(F1_NUM_APPS))
-		app_softreg_inst
-		(
-			// User clock and reset
-			.clk(global_clk),
-			.rst(!rst_n[1]),
-			.app_enable(app_enable),
-			// Interface to Host
-			.softreg_req(app_softreg_req_buf[0]),
-			.softreg_resp(app_softreg_resp_buf[0]),
-			// Virtualized interface each app
-			.app_softreg_req(app_softreg_req_),
-			.app_softreg_resp(app_softreg_resp_)
-		);
-	end
-endgenerate
+AmorphOSSoftReg_RouteTree #(.SR_NUM_APPS(F1_NUM_APPS))
+app_softreg_inst
+(
+	// User clock and reset
+	.clk(global_clk),
+	.rst(!rst_n[1]),
+	// Interface to Host
+	.softreg_req(app_softreg_req_buf[0]),
+	.softreg_resp(app_softreg_resp_buf[0]),
+	// Virtualized interface each app
+	.app_softreg_req(app_softreg_req_),
+	.app_softreg_resp(app_softreg_resp_)
+);
 
 
 //------------------------------------
@@ -749,9 +719,7 @@ generate
 		
 		// Instantiate app
 		if (F1_CONFIG_APPS == 1) begin : aes
-			AESWrapper #(
-				.app_num(app_num)
-			) aes_inst (
+			AESWrapper aes_inst (
 				// General signals
 				.clk(global_clk),
 				.rst(app_rst),
@@ -777,9 +745,7 @@ generate
 				.softreg_resp(app_softreg_resp)
 			);
 		end else if (F1_CONFIG_APPS == 3) begin : dnn
-			DNNWrapper #(
-				.app_num(app_num)
-			) dnn_inst (
+			DNNWrapper dnn_inst (
 				// General signals
 				.clk(global_clk),
 				.rst(app_rst),
@@ -831,9 +797,7 @@ generate
 				.softreg_resp(app_softreg_resp)
 			);
 		end else if (F1_CONFIG_APPS == 7) begin : md5
-			MD5Wrapper #(
-				.app_num(app_num)
-			) md5_inst (
+			MD5Wrapper md5_inst (
 				// General signals
 				.clk(global_clk),
 				.rst(app_rst),
@@ -964,9 +928,7 @@ generate
 					.softreg_resp(app_softreg_resp)
 				);
 			end else if (app_num == 3) begin
-				AESWrapper #(
-					.app_num(app_num)
-				) aes_inst (
+				AESWrapper aes_inst (
 					// General signals
 					.clk(global_clk),
 					.rst(app_rst),
@@ -1016,24 +978,5 @@ assign tdo = 1'b0; // TODO: Not really sure what this does since we're not creat
 //-------------------------------------------------------------
 //input[63:0] sh_cl_glcount0                   //Global counter 0
 //input[63:0] sh_cl_glcount1                   //Global counter 1
-
-//------------------------------------
-// Tie-Off HMC Interfaces
-//------------------------------------
-assign hmc_iic_scl_o            =  1'b0;
-assign hmc_iic_scl_t            =  1'b0;
-assign hmc_iic_sda_o            =  1'b0;
-assign hmc_iic_sda_t            =  1'b0;
-
-assign hmc_sh_stat_ack          =  1'b0;
-//assign hmc_sh_stat_rdata[31:0]  = 32'b0;
-//assign hmc_sh_stat_int[7:0]     =  8'b0;
-
-//------------------------------------
-// Tie-Off Aurora Interfaces
-//------------------------------------
-assign aurora_sh_stat_ack   =  1'b0;
-assign aurora_sh_stat_rdata = 32'b0;
-assign aurora_sh_stat_int   =  8'b0;
 
 endmodule

@@ -42,7 +42,6 @@ module aes_top (
 	output reg        softreg_resp_valid,
 	output reg [63:0] softreg_resp_data
 );
-parameter app_num = 0;
 
 //// AES stream
 // state and signals

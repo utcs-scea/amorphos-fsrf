@@ -142,17 +142,6 @@ module DNN2AMI
 		.wr_done(wr_done),  // no writes left to submit
 		.reqOut(reqWrPath)
 	);
-
-	// Counter for time  stamps
-	wire[63:0] current_timestamp;
-	Counter64
-	time_stamp_counter
-	(
-		.clk (clk),
-		.rst (rst), 
-		.increment (1'b1),
-		.count (current_timestamp)
-	);
 	
 	// Queue to buffer Read requests
 	wire             macroRdQ_empty;
@@ -339,7 +328,7 @@ module DNN2AMI
 	endgenerate
 
 	// Inputs to the MacroReadQ
-	assign macroRdQ_in  = '{valid: rd_req, isWrite: 1'b0, addr: rd_addr , size: rd_req_size, pu_id: 0, time_stamp: current_timestamp};
+	assign macroRdQ_in  = '{valid: rd_req, isWrite: 1'b0, addr: rd_addr , size: rd_req_size, pu_id: 0};
 	assign macroRdQ_enq = rd_req && !macroRdQ_full; // no back pressure mechanism, so assume its never full
 
 	// Accept responses from the block buffer
@@ -432,32 +421,6 @@ module DNN2AMI
 				macro_arbiter_output = macroRdQ_out;
 			end
 		end
-		/*macroRdQ_deq = 1'b0;
-		macroWrQ_deq = 1'b0;
-		macro_arbiter_output = macroRdQ_out;
-		if (accept_new_active_req) begin
-			if (!macroRdQ_empty && !macroWrQ_empty) begin
-				// Where arbitration actually takes place
-				if (macroRdQ_out.time_stamp > macroWrQ_out.time_stamp) begin
-					// Select Read
-					macroRdQ_deq = 1'b1;
-					macro_arbiter_output = macroRdQ_out;
-				end else begin
-					// Select Write
-					macroWrQ_deq = 1'b1;
-					macro_arbiter_output = macroWrQ_out;
-				end
-			end else if (!macroRdQ_empty) begin
-				// Select Read
-				macroRdQ_deq = 1'b1;
-				macro_arbiter_output = macroRdQ_out;
-			end else if (!macroWrQ_empty) begin
-				// Select Write
-				macroWrQ_deq = 1'b1;
-				macro_arbiter_output = macroWrQ_out;
-			end
-		end
-		*/
 	end
 	
 	// Current macro request being sequenced (fractured into smaller operations)

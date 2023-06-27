@@ -5,8 +5,6 @@
 */
 
 import ShellTypes::*;
-import AMITypes::*;
-import AOSF1Types::*;
 
 module AXIL2SR(
 
@@ -51,15 +49,21 @@ module AXIL2SR(
 
 );
 
-	// Debug counter
-	wire[63:0] debug_cntr;
-	// Debug counter
-	Counter64 cntr(
-		.clk(clk),
-		.rst(rst), 
-		.increment(1'b1),
-		.count(debug_cntr)
-	);
+    // Write addresses coming from the F1 Shell
+    parameter F1_AXIL_wr_addr_FIFO_Type  = 0;
+    parameter F1_AXIL_wr_addr_FIFO_Depth = 1;
+    // Write data coming from the F1 Shell
+    parameter F1_AXIL_wr_data_FIFO_Type  = 0;
+    parameter F1_AXIL_wr_data_FIFO_Depth = 1;
+    // Read requests coming from the F1 Shell
+    parameter F1_AXIL_rd_req_FIFO_Type   = 0;
+    parameter F1_AXIL_rd_req_FIFO_Depth  = 1;
+    // Read response data from AOS
+    parameter F1_AXIL_rd_resp_FIFO_Type  = 0;
+    parameter F1_AXIL_rd_resp_FIFO_Depth = 1;
+    // Buffer output of the AXIL2SR module
+    parameter F1_AXIL_buffer_sr_req_FIFO_Type = 0;
+    parameter F1_AXIL_buffer_sr_req_FIFO_Depth = 1;
 
 	// work around for genvar expecting constant expressions
 	logic selects[1:0];
@@ -330,22 +334,18 @@ module AXIL2SR(
         //read_req_FIFO_deq[1] = 1'b0;
     
         if (write_sr_req.valid == 1'b1) begin 
-			$display("Cycle: %d AXIL2SR: Trying to submit a Write request to SR addr: %x data: %x", debug_cntr, softreg_req.addr, softreg_req.data);
             softreg_req.valid = 1'b1;
             if (softreg_req_grant) begin
-				$display("Cycle: %d AXIL2SR: Write request accepted by SR",debug_cntr);
                 wr_addr_FIFO_deq    = 1'b1;
                 wr_data_FIFO_deq[0] = 1'b1;
                 wr_data_FIFO_deq[1] = 1'b1;
             end
         end else if (read_sr_req.valid == 1'b1) begin
-			$display("Cycle: %d AXIL2SR: Trying to submit a Read request to SR addr: %x ", debug_cntr, read_sr_req.addr);
             softreg_req.valid   = 1'b1;
             softreg_req.isWrite = 1'b0;
             softreg_req.addr    = read_sr_req.addr;
             softreg_req.data    = read_sr_req.data;
             if (softreg_req_grant) begin
-				$display("Cycle: %d AXIL2SR: Read request accepted by SR", debug_cntr);
                 read_req_FIFO_deq[0] = 1'b1;
                 //read_req_FIFO_deq[1] = 1'b1;
             end
@@ -380,12 +380,6 @@ module AXIL2SR(
 
     assign rd_resp_FIFO_enq   = softreg_resp.valid && !rd_resp_FIFO_full;
     assign softreg_resp_grant = rd_resp_FIFO_enq;
-
-	always_comb begin
-		if (rd_resp_FIFO_enq) begin
-			$display("Cycle: %d AXIL2SR: Read data returned from SR (%x)", debug_cntr, softreg_resp.data);
-		end
-	end
 	
 	// only signal data ready when a credit is available, this avoids issues with 64-bit data being ready
 	// before the second 32-bit read request comes in from F1_AXIL_rd_req_FIFO_Depth

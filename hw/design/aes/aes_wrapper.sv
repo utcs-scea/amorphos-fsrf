@@ -1,6 +1,4 @@
 import ShellTypes::*;
-import AMITypes::*;
-import AOSF1Types::*;
 
 module AESWrapper
 (
@@ -15,12 +13,8 @@ module AESWrapper
 	input  SoftRegReq   softreg_req,
 	output SoftRegResp  softreg_resp
 );
-	parameter app_num = 0;
 	
-	aes_top
-	#(
-		.app_num(app_num)
-	) pl (
+	aes_top pl (
 		.clk(clk),
 		.rst(rst),
 		
