@@ -5,7 +5,7 @@ LDLIBS = -pthread
 
 HSRC = aos.hpp utils.hpp
 
-BENCHES = aes conv dnn gups hls_flow hls_hll hls_pgrnk hls_sha hls_tri md5 multi nw rng sha cpu_rng
+BENCHES = aes conv dnn gups hls_flow hls_hll hls_pgrnk hls_sha hls_tri md5 multi nw rng sha strm cpu_rng
 
 all: $(BENCHES)
 
@@ -50,6 +50,9 @@ rng: $(HSRC) rng.cpp
 
 sha: $(HSRC) sha.cpp
 	$(CC) $(CFLAGS) $(LDLIBS) sha.cpp -o sha
+
+strm: $(HSRC) strm.cpp
+	$(CC) $(CFLAGS) $(LDLIBS) strm.cpp -o strm
 
 cpu_rng: cpu_rng.cpp
 	$(CC) $(CFLAGS) $(LDLIBS) cpu_rng.cpp -o cpu_rng

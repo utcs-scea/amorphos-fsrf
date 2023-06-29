@@ -61,7 +61,7 @@ file copy -force $CL_DIR/design/aos/BlockBuffer.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/AmorphOSSoftReg_RouteTree.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/pcie_dma.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/rst_pipe.sv $TARGET_DIR
-# DRAM, DMA, TLB
+# DRAM, DMA, TLB, AXI
 file copy -force $CL_DIR/design/aos/cl_dram_dma_pkg.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/cl_dma_pcis_slv.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/axi_tlb.sv $TARGET_DIR
@@ -73,6 +73,7 @@ file copy -force $CL_DIR/design/aos/axi_xbar.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/cy_tlb.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/cy_stripe.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/aos_axi.sv $TARGET_DIR
+file copy -force $CL_DIR/design/aos/axi_strm.sv $TARGET_DIR
 # F1 interfaces
 file copy -force $CL_DIR/design/aos/AXIL2SR.sv $TARGET_DIR
 # Parameterization
@@ -180,6 +181,8 @@ file copy -force $CL_DIR/design/conv/conv_wrapper.sv $TARGET_DIR
 file copy -force $CL_DIR/design/conv/conv_constants.v $TARGET_DIR
 file copy -force $CL_DIR/design/conv/conv_top.v $TARGET_DIR
 file copy -force $CL_DIR/design/conv/conv.v $TARGET_DIR
+# Strm
+file copy -force $CL_DIR/design/strm/strm.sv $TARGET_DIR
 
 # Top level module
 file copy -force $CL_DIR/design/cl_aos.sv $TARGET_DIR

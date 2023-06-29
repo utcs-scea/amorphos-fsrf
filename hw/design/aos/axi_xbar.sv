@@ -66,6 +66,7 @@ logic [NUM_MI-1:0] si_awready [NUM_SI-1:0];
 logic [511:0] si_wdata [NUM_SI-1:0];
 logic [63:0] si_wstrb [NUM_SI-1:0];
 logic si_wlast [NUM_SI-1:0];
+logic si_wuser [NUM_SI-1:0];
 logic [NUM_MI-1:0] si_wvalid [NUM_SI-1:0];
 logic [NUM_MI-1:0] si_wready [NUM_SI-1:0];
 
@@ -83,6 +84,7 @@ logic [NUM_SI-1:0] mi_bready [NUM_MI-1:0];
 logic [511:0] mi_rdata [NUM_MI-1:0];
 logic [1:0] mi_rresp [NUM_MI-1:0];
 logic mi_rlast [NUM_MI-1:0];
+logic mi_ruser [NUM_MI-1:0];
 logic [NUM_SI-1:0] mi_rvalid [NUM_MI-1:0];
 logic [NUM_SI-1:0] mi_rready [NUM_MI-1:0];
 
@@ -192,6 +194,7 @@ for (s = 0; s < NUM_SI; s = s + 1) begin: si_logic
 	assign si_wdata[s] = si_reg.wdata;
 	assign si_wstrb[s] = si_reg.wstrb;
 	assign si_wlast[s] = si_reg.wlast;
+	assign si_wuser[s] = si_reg.wuser;
 	for (m = 0; m < NUM_MI; m = m + 1) begin
 		assign si_wvalid[s][m] = si_reg.wvalid && !wmf_empty && (m == w_mi_sel);
 	end
@@ -232,6 +235,7 @@ for (s = 0; s < NUM_SI; s = s + 1) begin: si_logic
 	assign si_reg.rdata = mi_rdata[r_mi_sel];
 	assign si_reg.rresp = mi_rresp[r_mi_sel];
 	assign si_reg.rlast = mi_rlast[r_mi_sel];
+	assign si_reg.ruser = mi_ruser[r_mi_sel];
 	assign si_reg.rvalid = !rmf_empty && mi_rvalid[r_mi_sel][s];
 	for (m = 0; m < NUM_MI; m = m + 1) begin
 		assign mi_rready[m][s] = si_reg.rready && !rmf_empty && (m == r_mi_sel);
@@ -359,6 +363,7 @@ for (m = 0; m < NUM_MI; m = m + 1) begin: mi_logic
 	assign mi_reg.wdata = si_wdata[w_si_sel];
 	assign mi_reg.wstrb = si_wstrb[w_si_sel];
 	assign mi_reg.wlast = si_wlast[w_si_sel];
+	assign mi_reg.wuser = si_wuser[w_si_sel];
 	assign mi_reg.wvalid = !wmf_empty && si_wvalid[w_si_sel][m];
 	for (s = 0; s < NUM_SI; s = s + 1) begin
 		assign si_wready[s][m] = mi_reg.wready && !wmf_empty && (s == w_si_sel);
@@ -411,6 +416,7 @@ for (m = 0; m < NUM_MI; m = m + 1) begin: mi_logic
 	assign mi_rdata[m] = mi_reg.rdata;
 	assign mi_rresp[m] = mi_reg.rresp;
 	assign mi_rlast[m] = mi_reg.rlast;
+	assign mi_ruser[m] = mi_reg.ruser;
 	for (s = 0; s < NUM_SI; s = s + 1) begin
 		assign mi_rvalid[m][s] = mi_reg.rvalid && !rmf_empty && (s == r_si_sel);
 	end

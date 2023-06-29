@@ -32,11 +32,13 @@ always_comb begin
 	axi_m0.rdata = mux ? 0 : axi_s.rdata;
 	axi_m0.rresp = mux ? 0 : axi_s.rresp;
 	axi_m0.rlast = mux ? 0 : axi_s.rlast;
+	axi_m0.ruser = mux ? 0 : axi_s.ruser;
 	axi_m0.rvalid = mux ? 0 : axi_s.rvalid;
 	axi_m1.rid = mux ? axi_s.rid : 0;
 	axi_m1.rdata = mux ? axi_s.rdata : 0;
 	axi_m1.rresp = mux ? axi_s.rresp : 0;
 	axi_m1.rlast = mux ? axi_s.rlast : 0;
+	axi_m1.ruser = mux ? axi_s.ruser : 0;
 	axi_m1.rvalid = mux ? axi_s.rvalid : 0;
 	axi_s.rready = mux ? axi_m1.rready : axi_m0.rready;
 	
@@ -51,6 +53,7 @@ always_comb begin
 	axi_s.wdata = mux ? axi_m1.wdata : axi_m0.wdata;
 	axi_s.wstrb = mux ? axi_m1.wstrb : axi_m0.wstrb;
 	axi_s.wlast = mux ? axi_m1.wlast : axi_m0.wlast;
+	axi_s.wuser = mux ? axi_m1.wuser : axi_m0.wuser;
 	axi_s.wvalid = mux ? axi_m1.wvalid : axi_m0.wvalid;
 	axi_m0.wready = mux ? 0 : axi_s.wready;
 	axi_m1.wready = mux ? axi_s.wready : 0;
@@ -105,6 +108,7 @@ always_comb begin
 	axi_m.rdata = mux ? axi_s1.rdata : axi_s0.rdata;
 	axi_m.rresp = mux ? axi_s1.rresp : axi_s0.rresp;
 	axi_m.rlast = mux ? axi_s1.rlast : axi_s0.rlast;
+	axi_m.ruser = mux ? axi_s1.ruser : axi_s0.ruser;
 	axi_m.rvalid = mux ? axi_s1.rvalid : axi_s0.rvalid;
 	axi_s0.rready = mux ? 0 : axi_m.rready;
 	axi_s1.rready = mux ? axi_m.rready : 0;
@@ -124,10 +128,12 @@ always_comb begin
 	axi_s0.wdata = mux ? 0 : axi_m.wdata;
 	axi_s0.wstrb = mux ? 0 : axi_m.wstrb;
 	axi_s0.wlast = mux ? 0 : axi_m.wlast;
+	axi_s0.wuser = mux ? 0 : axi_m.wuser;
 	axi_s0.wvalid = mux ? 0 : axi_m.wvalid;
 	axi_s1.wdata = mux ? axi_m.wdata : 0;
 	axi_s1.wstrb = mux ? axi_m.wstrb : 0;
 	axi_s1.wlast = mux ? axi_m.wlast : 0;
+	axi_s1.wuser = mux ? axi_m.wuser : 0;
 	axi_s1.wvalid = mux ? axi_m.wvalid : 0;
 	axi_m.wready = mux ? axi_s1.wready : axi_s0.wready;
 	

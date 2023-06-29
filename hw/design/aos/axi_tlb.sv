@@ -36,6 +36,7 @@ module read_mgr (
 	output [511:0] rdata_m,
 	output [1:0]   rresp_m,
 	output         rlast_m,
+	output         ruser_m,
 	output         rvalid_m,
 	input          rready_m,
 	
@@ -177,7 +178,7 @@ HullFIFO #(
 //// Return read / dummy data
 // read return FIFO signals
 wire rrf_wrreq;
-wire [514:0] rrf_data;
+wire [515:0] rrf_data;
 wire rrf_full;
 wire [514:0] rrf_q;
 wire rrf_empty;
@@ -193,20 +194,21 @@ end
 // assigns
 assign phys_read_s.rready = !rrf_full;
 assign rrf_wrreq = phys_read_s.rvalid;
-assign rrf_data = {phys_read_s.rdata, phys_read_s.rresp, phys_read_s.rlast};
+assign rrf_data = {phys_read_s.ruser, phys_read_s.rdata, phys_read_s.rresp, phys_read_s.rlast};
 assign rrf_rdreq = rready_m && !omf_empty && omf_q[0];
 assign omf_rdreq = rready_m && (omf_q[0] ? (!rrf_empty && rrf_q[0]) : 1'b1);
 
 assign rid_m = omf_q[24:9];
 assign rdata_m = rrf_q[514:3];
 assign rresp_m = omf_q[0] ? rrf_q[2:1] : 2'b10;
+assign ruser_m = rrf_q[515];
 assign rlast_m = omf_q[0] ? rrf_q[0] : (rdata_out == omf_q[8:1]);
 assign rvalid_m = !omf_empty && (omf_q[0] ? !rrf_empty : 1'b1);
 
 // read return FIFO instantiation
 HullFIFO #(
 	.TYPE(0),
-	.WIDTH(515),
+	.WIDTH(516),
 	.LOG_DEPTH(1)
 ) read_return_fifo (
 	.clock(clk),
@@ -247,6 +249,7 @@ module write_mgr (
 	input [511:0] wdata_m,
 	input [63:0]  wstrb_m,
 	input         wlast_m,
+	input         wuser_m,
 	input         wvalid_m,
 	output        wready_m,
 	
@@ -393,7 +396,7 @@ HullFIFO #(
 //// Accept and forward write data
 // write data FIFO signals
 wire wdf_wrreq;
-wire [576:0] wdf_data;
+wire [577:0] wdf_data;
 wire wdf_full;
 wire [576:0] wdf_q;
 wire wdf_empty;
@@ -410,11 +413,12 @@ wire rmf_rdreq;
 // assigns
 assign wready_m = !wdf_full;
 assign wdf_wrreq = wvalid_m;
-assign wdf_data = {wdata_m, wstrb_m, wlast_m};
+assign wdf_data = {wuser_m, wdata_m, wstrb_m, wlast_m};
 
 assign phys_write_s.wdata = wdf_q[576:65];
 assign phys_write_s.wstrb = wdf_q[64:1];
 assign phys_write_s.wlast = wdf_q[0];
+assign phys_write_s.wuser = wdf_q[577];
 assign phys_write_s.wvalid = !rmf_full && !wdf_empty && !imf_empty && imf_q[0];
 assign wdf_rdreq = !rmf_full && !imf_empty && (imf_q[0] ? phys_write_s.wready : 1'b1);
 assign imf_rdreq = !rmf_full && !wdf_empty && (imf_q[0] ? phys_write_s.wready : 1'b1) && wdf_q[0];
@@ -425,7 +429,7 @@ assign rmf_data = imf_q;
 // FIFO instantiations
 HullFIFO #(
 	.TYPE(0),
-	.WIDTH(577),
+	.WIDTH(578),
 	.LOG_DEPTH(1)
 ) write_data_fifo (
 	.clock(clk),
@@ -531,6 +535,8 @@ assign phys_tlb.rresp = phys_s.rresp;
 assign phys_rm.rresp = phys_s.rresp;
 assign phys_tlb.rlast = phys_s.rlast;
 assign phys_rm.rlast = phys_s.rlast;
+assign phys_tlb.ruser = phys_s.ruser;
+assign phys_rm.ruser = phys_s.ruser;
 assign phys_tlb.rvalid = phys_s.rvalid && (phys_s.rid[0] == 1'b0);
 assign phys_rm.rvalid = phys_s.rvalid && (phys_s.rid[0] == 1'b1);
 assign phys_s.rready = (phys_s.rid[0] == 1'b0) ? phys_tlb.rready : phys_rm.rready;
@@ -547,6 +553,7 @@ assign phys_wm.awready = phys_s.awready;
 assign phys_s.wdata = phys_wm.wdata;
 assign phys_s.wstrb = phys_wm.wstrb;
 assign phys_s.wlast = phys_wm.wlast;
+assign phys_s.wuser = phys_wm.wuser;
 assign phys_s.wvalid = phys_wm.wvalid;
 assign phys_wm.wready = phys_s.wready;
 
@@ -985,6 +992,7 @@ read_mgr rm (
 	.rdata_m (virt_m.rdata),
 	.rresp_m (virt_m.rresp),
 	.rlast_m (virt_m.rlast),
+	.ruser_m (virt_m.ruser),
 	.rvalid_m(virt_m.rvalid),
 	.rready_m(virt_m.rready),
 	
@@ -1005,6 +1013,7 @@ write_mgr wm (
 	.wdata_m (virt_m.wdata),
 	.wstrb_m (virt_m.wstrb),
 	.wlast_m (virt_m.wlast),
+	.wuser_m (virt_m.wuser),
 	.wvalid_m(virt_m.wvalid),
 	.wready_m(virt_m.wready),
 	

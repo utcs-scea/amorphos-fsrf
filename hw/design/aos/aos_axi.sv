@@ -95,15 +95,15 @@ end
 // Read responses
 // Read data FIFO
 wire rdf_wrreq;
-wire [513:0] rdf_din;
+wire [514:0] rdf_din;
 wire rdf_full;
-wire [513:0] rdf_dout;
+wire [514:0] rdf_dout;
 wire rdf_empty;
 wire rdf_rdreq;
 
 HullFIFO #(
 	.TYPE(0),
-	.WIDTH(512+2),
+	.WIDTH(512+2+1),
 	.LOG_DEPTH(1)
 ) r_data_fifo (
 	.clock(clk),
@@ -117,7 +117,7 @@ HullFIFO #(
 );
 
 assign rdf_wrreq = axi_s.rvalid;
-assign rdf_din = {axi_s.rdata, axi_s.rresp};
+assign rdf_din = {axi_s.rdata, axi_s.rresp, axi_s.ruser};
 assign axi_s.rready = !rdf_full;
 
 reg [7:0] rlen;
@@ -131,7 +131,7 @@ always_ff @(posedge clk) begin
 	if (rst) rlen <= 0;
 end
 
-assign {axi_m.rdata, axi_m.rresp} = rdf_dout;
+assign {axi_m.rdata, axi_m.rresp, axi_m.ruser} = rdf_dout;
 assign axi_m.rid = rmf_dout[23:8];
 assign axi_m.rlast = rlast;
 assign axi_m.rvalid = !rdf_empty;
@@ -225,15 +225,15 @@ end
 // Write data
 // Write data FIFO
 wire wdf_wrreq;
-wire [575:0] wdf_din;
+wire [576:0] wdf_din;
 wire wdf_full;
-wire [575:0] wdf_dout;
+wire [576:0] wdf_dout;
 wire wdf_empty;
 wire wdf_rdreq;
 
 HullFIFO #(
 	.TYPE(0),
-	.WIDTH(512+64),
+	.WIDTH(512+64+1),
 	.LOG_DEPTH(1)
 ) w_data_fifo (
 	.clock(clk),
@@ -247,10 +247,10 @@ HullFIFO #(
 );
 
 assign wdf_wrreq = axi_m.wvalid;
-assign wdf_din = {axi_m.wdata, axi_m.wstrb};
+assign wdf_din = {axi_m.wdata, axi_m.wstrb, axi_m.wuser};
 assign axi_m.wready = !wdf_full;
 
-assign {axi_s.wdata, axi_s.wstrb} = wdf_dout;
+assign {axi_s.wdata, axi_s.wstrb, axi_s.wuser} = wdf_dout;
 assign axi_s.wlast = 1;
 assign axi_s.wvalid = !wdf_empty;
 assign wdf_rdreq = axi_s.wready;

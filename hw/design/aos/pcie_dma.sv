@@ -178,12 +178,14 @@ assign cl_sh_pcim.rready = !pdf_full;
 assign pdf_wrreq = cl_sh_pcim.rvalid;
 assign pdf_data = {cl_sh_pcim.rdata, cl_sh_pcim.rlast};
 assign {dram_dma.wdata, dram_dma.wlast} = pdf_q;
+assign dram_dma.wuser = 0;   // TODO: packetize?
 assign dram_dma.wstrb = 64'hFFFFFFFFFFFFFFFF;
 assign pdf_rdreq = dram_dma.wready;
 assign dram_dma.wvalid = !pdf_empty;
 
 HullFIFO #(
 	.TYPE(3),
+	.TYPES("URAM"),
 	.WIDTH(512+1),
 	.LOG_DEPTH(12)
 ) pcie_dram_fifo (
@@ -405,11 +407,13 @@ always_comb begin
 	axi_m0.rdata = arb_r ? 0 : axi_s.rdata;
 	axi_m0.rresp = arb_r ? 0 : axi_s.rresp;
 	axi_m0.rlast = arb_r ? 0 : axi_s.rlast;
+	axi_m0.ruser = arb_r ? 0 : axi_s.ruser;
 	axi_m0.rvalid = arb_r ? 0 : axi_s.rvalid;
 	axi_m1.rid = arb_r ? axi_s.rid[15:1] : 0;
 	axi_m1.rdata = arb_r ? axi_s.rdata : 0;
 	axi_m1.rresp = arb_r ? axi_s.rresp : 0;
 	axi_m1.rlast = arb_r ? axi_s.rlast : 0;
+	axi_m1.ruser = arb_r ? axi_s.ruser : 0;
 	axi_m1.rvalid = arb_r ? axi_s.rvalid : 0;
 	axi_s.rready = arb_r ? axi_m1.rready : axi_m0.rready;
 	
@@ -585,6 +589,7 @@ always_comb begin
 	cl_sh_dma_pcis_rdata = sh_cl_pcis.rdata;
 	cl_sh_dma_pcis_rresp = sh_cl_pcis.rresp;
 	cl_sh_dma_pcis_rlast = sh_cl_pcis.rlast;
+	//cl_sh_dma_pcis_ruser = sh_cl_pcis.ruser;
 	cl_sh_dma_pcis_rvalid = sh_cl_pcis.rvalid;
 	sh_cl_pcis.rready = sh_cl_dma_pcis_rready;
 end
@@ -647,6 +652,7 @@ always_comb begin
 	cl_sh_pcim.rdata = sh_cl_pcim_rdata;
 	cl_sh_pcim.rresp = sh_cl_pcim_rresp;
 	cl_sh_pcim.rlast = sh_cl_pcim_rlast;
+	//cl_sh_pcim.ruser = sh_cl_pcim_ruser;
 	cl_sh_pcim.rvalid = sh_cl_pcim_rvalid;
 	cl_sh_pcim_rready = cl_sh_pcim.rready;
 end

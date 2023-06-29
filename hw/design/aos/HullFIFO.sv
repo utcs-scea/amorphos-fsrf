@@ -12,7 +12,7 @@
 
 */
 
-module HullFIFO #(parameter TYPE = 0, WIDTH = 32, LOG_DEPTH = 2)
+module HullFIFO #(parameter TYPE = 0, WIDTH = 32, LOG_DEPTH = 2, TYPES="auto")
 (
     // General signals
     input  clock,
@@ -98,7 +98,7 @@ module HullFIFO #(parameter TYPE = 0, WIDTH = 32, LOG_DEPTH = 2)
 			xpm_fifo_sync #(
 				.DOUT_RESET_VALUE("0"),
 				.ECC_MODE("no_ecc"),
-				.FIFO_MEMORY_TYPE("auto"),
+				.FIFO_MEMORY_TYPE(TYPES),
 				.FIFO_READ_LATENCY(0),
 				.FIFO_WRITE_DEPTH(1 << LOG_DEPTH),
 				.FULL_RESET_VALUE(1),
@@ -117,7 +117,23 @@ module HullFIFO #(parameter TYPE = 0, WIDTH = 32, LOG_DEPTH = 2)
 				.rd_en(xaf_rd_en),
 				.rst(~reset_n),
 				.wr_clk(clock),
-				.wr_en(xaf_wr_en)
+				.wr_en(xaf_wr_en),
+				.injectsbiterr(0),
+				.injectdbiterr(0),
+				.sleep(0),
+				 // unused ports
+				.almost_empty(),
+				.almost_full(),
+				.prog_empty(),
+				.prog_full(),
+				.wr_ack(),
+				.data_valid(),
+				.rd_data_count(),
+				.wr_data_count(),
+				.overflow(),
+				.underflow(),
+				.sbiterr(),
+				.dbiterr()
 			);
 			
 			assign empty = xaf_rd_rst_busy || xaf_wr_rst_busy || xaf_empty;

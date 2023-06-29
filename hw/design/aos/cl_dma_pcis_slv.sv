@@ -92,14 +92,6 @@ for (g = 1; g < 5; g = g + 1) begin: gen_vm
     axi_bus_t cl_axi_bus_mux1 [4:1] ();
     axi_bus_t cl_axi_bus_mux2 [4:1] ();
     axi_bus_t cl_axi_bus_mux3 [4:1] ();
-    axi_bus_t cl_axi_bus_mux4 [4:1] ();
-    axi_bus_t cl_axi_bus_mux5 [4:1] ();
-    axi_bus_t cl_axi_bus_mux6 [4:1] ();
-    axi_bus_t cl_axi_bus_mux7 [4:1] ();
-    axi_bus_t cl_axi_bus_mux8 [4:1] ();
-    axi_bus_t cl_axi_bus_mux9 [4:1] ();
-    axi_bus_t cl_axi_bus_mux10 [4:1] ();
-    axi_bus_t cl_axi_bus_mux11 [4:1] ();
     
     axi_mux_2s #(
         .SR_ADDR('h10)
@@ -181,13 +173,22 @@ axi_reg ddrc_src_reg (
 	.axi_m(cl_sh_ddr_q2[2])
 );
 
+axi_strm ddrc_strm (
+	.clk(aclk),
+	.rst(!rst_n[1]),
+	
+	.axi_s(cl_sh_ddr_q2[2]),
+	.axi_m(cl_sh_ddr_q3[2])
+);
+
+/*
 axi_reg ddrc_mid_reg (
 	.clk(aclk),
 	.rst_n(rst_n[1]),
 	
 	.axi_s(cl_sh_ddr_q2[2]),
 	.axi_m(cl_sh_ddr_q3[2])
-);
+);*/
 
 axi_reg ddrc_dst_reg (
 	.clk(aclk),
@@ -210,13 +211,22 @@ axi_reg ddra_src_reg (
 	.axi_m(cl_sh_ddr_q2[0])
 );
 
+axi_strm ddra_strm (
+	.clk(aclk),
+	.rst(!rst_n[1]),
+	
+	.axi_s(cl_sh_ddr_q2[0]),
+	.axi_m(cl_sh_ddr_q3[0])
+);
+
+/*
 axi_reg ddra_mid_reg (
 	.clk(aclk),
 	.rst_n(rst_n[1]),
 	
 	.axi_s(cl_sh_ddr_q2[0]),
 	.axi_m(cl_sh_ddr_q3[0])
-);
+);*/
 
 axi_reg ddra_dst_reg (
 	.clk(aclk),
@@ -239,13 +249,22 @@ axi_reg ddrb_src_reg (
 	.axi_m(cl_sh_ddr_q2[1])
 );
 
+axi_strm ddrb_strm (
+	.clk(aclk),
+	.rst(!rst_n[1]),
+	
+	.axi_s(cl_sh_ddr_q2[1]),
+	.axi_m(cl_sh_ddr_q3[1])
+);
+
+/*
 axi_reg ddrb_mid_reg (
 	.clk(aclk),
 	.rst_n(rst_n[1]),
 	
 	.axi_s(cl_sh_ddr_q2[1]),
 	.axi_m(cl_sh_ddr_q3[1])
-);
+);*/
 
 axi_reg ddrb_dst_reg (
 	.clk(aclk),
@@ -268,13 +287,22 @@ axi_reg ddrd_src_reg (
 	.axi_m(cl_sh_ddr_q2[3])
 );
 
+axi_strm ddrd_strm (
+	.clk(aclk),
+	.rst(!rst_n[1]),
+	
+	.axi_s(cl_sh_ddr_q2[3]),
+	.axi_m(cl_sh_ddr_q3[3])
+);
+
+/*
 axi_reg ddrd_mid_reg (
 	.clk(aclk),
 	.rst_n(rst_n[1]),
 	
 	.axi_s(cl_sh_ddr_q2[3]),
 	.axi_m(cl_sh_ddr_q3[3])
-);
+);*/
 
 axi_reg ddrd_dst_reg (
 	.clk(aclk),

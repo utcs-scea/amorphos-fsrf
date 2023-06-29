@@ -42,15 +42,15 @@ assign {axi_m.awid, axi_m.awaddr, axi_m.awlen, axi_m.awsize} = awf_q;
 
 // W channel
 wire wf_wrreq;
-wire [576:0] wf_data;
+wire [577:0] wf_data;
 wire wf_full;
-wire [576:0] wf_q;
+wire [577:0] wf_q;
 wire wf_empty;
 wire wf_rdreq;
 
 HullFIFO #(
     .TYPE(0),
-    .WIDTH(512+64+1),
+    .WIDTH(512+64+1+1),
     .LOG_DEPTH(FIFO_LD)
 ) w_fifo (
     .clock(clk),
@@ -138,15 +138,15 @@ assign {axi_m.arid, axi_m.araddr, axi_m.arlen, axi_m.arsize} = arf_q;
 
 // R channel
 wire rf_wrreq;
-wire [530:0] rf_data;
+wire [531:0] rf_data;
 wire rf_full;
-wire [530:0] rf_q;
+wire [531:0] rf_q;
 wire rf_empty;
 wire rf_rdreq;
 
 HullFIFO #(
     .TYPE(0),
-    .WIDTH(16+512+2+1),
+    .WIDTH(16+512+2+1+1),
     .LOG_DEPTH(FIFO_LD)
 ) r_fifo (
     .clock(clk),
@@ -161,11 +161,11 @@ HullFIFO #(
 
 assign axi_m.rready = !rf_full;
 assign rf_wrreq = axi_m.rvalid;
-assign rf_data = {axi_m.rid, axi_m.rdata, axi_m.rresp, axi_m.rlast};
+assign rf_data = {axi_m.rid, axi_m.rdata, axi_m.rresp, axi_m.rlast, axi_m.ruser};
 
 assign axi_s.rvalid = !rf_empty;
 assign rf_rdreq = axi_s.rready;
-assign {axi_s.rid, axi_s.rdata, axi_s.rresp, axi_s.rlast} = rf_q;
+assign {axi_s.rid, axi_s.rdata, axi_s.rresp, axi_s.rlast, axi_s.ruser} = rf_q;
 
 
 endmodule

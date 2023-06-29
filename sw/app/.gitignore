@@ -11,5 +11,6 @@ hls_pgrnk
 rng
 sha
 hls_sha
+strm
 hls_tri
 cpu_rng
