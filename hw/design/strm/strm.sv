@@ -61,6 +61,7 @@ always @(posedge clk) begin
 				read_cycles <= 0;
 				
 				ar_cred <= 1;
+				r_creds <= 0;
 			end
 			32'h28: begin
 				write_creds <= softreg_req.data;
@@ -69,6 +70,8 @@ always @(posedge clk) begin
 				write_cycles <= 0;
 				
 				aw_cred <= 1;
+				w_creds <= 0;
+				b_creds <= 0;
 			end
 		endcase
 	end

@@ -30,7 +30,7 @@ public:
 		
 		// Allocate huge pages
 		fd = open("/proc/sys/vm/nr_hugepages", O_WRONLY);
-		pwrite(fd, "4\n", 3, 0);
+		pwrite(fd, "8\n", 3, 0);
 		close(fd);
 		
 		// Open XDMA device files

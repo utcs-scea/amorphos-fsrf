@@ -79,6 +79,7 @@ struct aos_cntrlreg_write_request_packet {
 };
 
 struct aos_file_open_request_packet {
+    uint64_t slot_id;
     uint64_t app_id;
     char file_path[PATH_MAX];
 };
@@ -88,11 +89,13 @@ struct aos_file_open_response_packet {
 };
 
 struct aos_file_close_request_packet {
+    uint64_t slot_id;
     uint64_t app_id;
     int fd;
 };
 
 struct aos_mmap_request_packet {
+    uint64_t slot_id;
     uint64_t app_id;
     void *addr;
     uint64_t length;
@@ -107,12 +110,14 @@ struct aos_mmap_response_packet {
 };
 
 struct aos_munmap_request_packet {
+    uint64_t slot_id;
     uint64_t app_id;
     void *addr;
     uint64_t length;
 };
 
 struct aos_msync_request_packet {
+    uint64_t slot_id;
     uint64_t app_id;
     void *addr;
     uint64_t length;
@@ -120,6 +125,7 @@ struct aos_msync_request_packet {
 };
 
 struct aos_set_mode_request_packet {
+    uint64_t slot_id;
     uint64_t app_id;
     uint64_t mode;
     uint64_t data;
@@ -198,6 +204,7 @@ public:
         assert(connectionOpen);
         // Create the packet
         aos_file_open_request_packet cmd_pckt;
+        cmd_pckt.slot_id = slot_id;
         cmd_pckt.app_id = app_id;
         realpath(path.c_str(), cmd_pckt.file_path);
         // Send over the request
@@ -216,12 +223,13 @@ public:
         assert(connectionOpen);
         // Create the packet
         aos_file_close_request_packet cmd_pckt;
+        cmd_pckt.slot_id = slot_id;
         cmd_pckt.app_id = app_id;
         cmd_pckt.fd = fd;
         // Send over the request
         writeCommandPacket(aos_socket_command::FILE_CLOSE_REQUEST, cmd_pckt);
-	// block so all data is flushed out
-	// read the response packet
+        // block so all data is flushed out
+        // read the response packet
         aos_file_open_response_packet resp_pckt;
         readResponsePacket(resp_pckt);
         // read the error code
@@ -233,6 +241,7 @@ public:
         assert(connectionOpen);
         // Create the packet
         aos_mmap_request_packet cmd_pckt;
+        cmd_pckt.slot_id = slot_id;
         cmd_pckt.app_id = app_id;
         cmd_pckt.addr = addr;
         cmd_pckt.length = length;
@@ -256,6 +265,7 @@ public:
         assert(connectionOpen);
         // Create the packet
         aos_munmap_request_packet cmd_pckt;
+        cmd_pckt.slot_id = slot_id;
         cmd_pckt.app_id = app_id;
         cmd_pckt.addr = addr;
         cmd_pckt.length = length;
@@ -270,6 +280,7 @@ public:
         assert(connectionOpen);
         // Create the packet
         aos_msync_request_packet cmd_pckt;
+        cmd_pckt.slot_id = slot_id;
         cmd_pckt.app_id = app_id;
         cmd_pckt.addr = addr;
         cmd_pckt.length = length;
@@ -285,6 +296,7 @@ public:
         assert(connectionOpen);
         // Create the packet
         aos_set_mode_request_packet cmd_pckt;
+        cmd_pckt.slot_id = slot_id;
         cmd_pckt.app_id = app_id;
         cmd_pckt.mode = mode;
         cmd_pckt.data = data;

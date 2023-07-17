@@ -18,7 +18,7 @@ public:
     const bool error_codes = false;
 
     aos_host() {
-        fpga = new aos_fpga(0);
+        fpga[0] = new aos_fpga(0);
         
         socket_initialized = false;
     }
@@ -260,13 +260,17 @@ restartTransaction:
     }
     
     int handleCntrlReqReadRequest(int cfd) {
-        //uint64_t slot_id_ = aos_pkt.cntrl_read_req.slot_id;
+        uint64_t slot_id_ = aos_pkt.cntrl_read_req.slot_id;
         uint64_t app_id_ = aos_pkt.cntrl_read_req.app_id;
         uint64_t addr64_ = aos_pkt.cntrl_read_req.addr64;
         uint64_t data64_ = 0;
         aos_errcode errco = aos_errcode::SUCCESS;
         
-        int success = fpga->read_app_reg(app_id_, addr64_, data64_);
+        if (fpga[slot_id_] == nullptr) {
+            fpga[slot_id_] = new aos_fpga(slot_id_);
+        }
+        
+        int success = fpga[slot_id_]->read_app_reg(app_id_, addr64_, data64_);
         if (success != 0) {
             errco = aos_errcode::UNKNOWN_FAILURE;
             perror("Read pci bar failed");
@@ -280,13 +284,17 @@ restartTransaction:
     }
 
     int handleCntrlRegWriteRequest(int cfd) {
-        //uint64_t slot_id_ = aos_pkt.cntrl_write_req.slot_id;
+        uint64_t slot_id_ = aos_pkt.cntrl_write_req.slot_id;
         uint64_t app_id_ = aos_pkt.cntrl_write_req.app_id;
         uint64_t addr64_ = aos_pkt.cntrl_write_req.addr64;
         uint64_t data64_ = aos_pkt.cntrl_write_req.data64;
         aos_errcode errco = aos_errcode::SUCCESS;
         
-        int success = fpga->write_app_reg(app_id_, addr64_, data64_);
+        if (fpga[slot_id_] == nullptr) {
+            fpga[slot_id_] = new aos_fpga(slot_id_);
+        }
+        
+        int success = fpga[slot_id_]->write_app_reg(app_id_, addr64_, data64_);
         if (success != 0) {
             errco = aos_errcode::UNKNOWN_FAILURE;
             perror("Write pci bar failed");
@@ -299,16 +307,21 @@ restartTransaction:
     }
     
     int handleFileOpenRequest(int cfd) {
+        uint64_t slot_id_ = aos_pkt.file_open_req.slot_id;
         uint64_t app_id_ = aos_pkt.file_open_req.app_id;
         const char* file_path = aos_pkt.file_open_req.file_path;
         aos_errcode errco = aos_errcode::SUCCESS;
         
-        if (file_io.find(app_id_) == file_io.end()) {
-            file_io[app_id_] = new aos_fio(fpga, app_id_);
-            file_io[app_id_]->set_mode(0, 0);
+        if (fpga[slot_id_] == nullptr) {
+            fpga[slot_id_] = new aos_fpga(slot_id_);
         }
         
-        aos_pkt.file_open_resp.fd = file_io[app_id_]->file_open(file_path);
+        if (file_io[{slot_id_, app_id_}] == nullptr) {
+            file_io[{slot_id_, app_id_}] = new aos_fio(fpga[slot_id_], app_id_);
+            file_io[{slot_id_, app_id_}]->set_mode(0, 0);
+        }
+        
+        aos_pkt.file_open_resp.fd = file_io[{slot_id_, app_id_}]->file_open(file_path);
         if (aos_pkt.file_open_resp.fd == -1) {
             errco = aos_errcode::UNKNOWN_FAILURE;
         }
@@ -319,12 +332,15 @@ restartTransaction:
     }
     
     int handleFileCloseRequest(int cfd) {
+        uint64_t slot_id_ = aos_pkt.file_close_req.slot_id;
         uint64_t app_id_ = aos_pkt.file_close_req.app_id;
         int app_fd_ = aos_pkt.file_close_req.fd;
         aos_errcode errco = aos_errcode::SUCCESS;
-        assert(file_io[app_id_] != nullptr);
         
-        int fd = file_io[app_id_]->file_close(app_fd_);
+        aos_fio *file_io_ptr = file_io[{slot_id_, app_id_}];
+        assert(file_io_ptr != nullptr);
+        
+        int fd = file_io_ptr->file_close(app_fd_);
         if (fd == -1) {
             errco = aos_errcode::UNKNOWN_FAILURE;
         }
@@ -335,6 +351,7 @@ restartTransaction:
     }
     
     int handleMmapRequest(int cfd) {
+        uint64_t slot_id_ = aos_pkt.mmap_req.slot_id;
         uint64_t app_id_ = aos_pkt.mmap_req.app_id;
         void *addr_ = aos_pkt.mmap_req.addr;
         uint64_t length_ = aos_pkt.mmap_req.length;
@@ -343,12 +360,14 @@ restartTransaction:
         int fd_ = aos_pkt.mmap_req.fd;
         uint64_t offset_ = aos_pkt.mmap_req.offset;
         aos_errcode errco = aos_errcode::SUCCESS;
-        assert(file_io[app_id_] != nullptr);
+        
+        aos_fio *file_io_ptr = file_io[{slot_id_, app_id_}];
+        assert(file_io_ptr != nullptr);
         
         if (offset_ % (4<<10)) {
             errco = aos_errcode::ALIGNMENT_FAILURE;
         } else {
-            void *addr = file_io[app_id_]->mmap(addr_, length_, prot_, flags_, fd_, offset_);
+            void *addr = file_io_ptr->mmap(addr_, length_, prot_, flags_, fd_, offset_);
             aos_pkt.mmap_resp.addr = addr;
             if (addr == (void*)-1) errco = aos_errcode::UNKNOWN_FAILURE;
         }
@@ -359,13 +378,16 @@ restartTransaction:
     }
     
     int handleMunmapRequest(int cfd) {
+        uint64_t slot_id_ = aos_pkt.munmap_req.slot_id;
         uint64_t app_id_ = aos_pkt.munmap_req.app_id;
         void *addr_ = aos_pkt.munmap_req.addr;
         uint64_t length_ = aos_pkt.munmap_req.length;
         aos_errcode errco = aos_errcode::SUCCESS;
-        assert(file_io[app_id_] != nullptr);
         
-        int rc = file_io[app_id_]->munmap(addr_, length_);
+        aos_fio *file_io_ptr = file_io[{slot_id_, app_id_}];
+        assert(file_io_ptr != nullptr);
+        
+        int rc = file_io_ptr->munmap(addr_, length_);
         if (rc) errco = aos_errcode::UNKNOWN_FAILURE;
         
         writeResponse(cfd, errco, aos_socket_command::MUNMAP_RESPONSE);
@@ -374,15 +396,18 @@ restartTransaction:
     }
     
     int handleMsyncRequest(int cfd) {
+        uint64_t slot_id_ = aos_pkt.msync_req.slot_id;
         uint64_t app_id_ = aos_pkt.msync_req.app_id;
         void *addr_ = aos_pkt.msync_req.addr;
         uint64_t length_ = aos_pkt.msync_req.length;
         int flags_ = aos_pkt.msync_req.length;
         aos_errcode errco = aos_errcode::SUCCESS;
-        assert(file_io[app_id_] != nullptr);
+        
+        aos_fio *file_io_ptr = file_io[{slot_id_, app_id_}];
+        assert(file_io_ptr != nullptr);
         
         const bool invalidate = flags_ & MS_INVALIDATE;
-        int rc = file_io[app_id_]->msync(addr_, length_, invalidate);
+        int rc = file_io_ptr->msync(addr_, length_, invalidate);
         if (rc) errco = aos_errcode::UNKNOWN_FAILURE;
         
         writeResponse(cfd, errco, aos_socket_command::MSYNC_RESPONSE);
@@ -391,16 +416,21 @@ restartTransaction:
     }
     
     int handleSetModeRequest(int cfd) {
+        uint64_t slot_id_ = aos_pkt.msync_req.slot_id;
         uint64_t app_id_ = aos_pkt.msync_req.app_id;
         uint64_t mode_ = aos_pkt.set_mode_req.mode;
         uint64_t data_ = aos_pkt.set_mode_req.data;
         aos_errcode errco = aos_errcode::SUCCESS;
         
-        if (file_io.find(app_id_) == file_io.end()) {
-            file_io[app_id_] = new aos_fio(fpga, app_id_);
+        if (fpga[slot_id_] == nullptr) {
+            fpga[slot_id_] = new aos_fpga(slot_id_);
         }
         
-        file_io[app_id_]->set_mode(mode_, data_);
+        if (file_io[{slot_id_, app_id_}] == nullptr) {
+            file_io[{slot_id_, app_id_}] = new aos_fio(fpga[slot_id_], app_id_);
+        }
+        
+        file_io[{slot_id_, app_id_}]->set_mode(mode_, data_);
         
         writeResponse(cfd, errco, aos_socket_command::SET_MODE_RESPONSE);
         
@@ -437,10 +467,10 @@ private:
     } aos_pkt;
     
     // FPGA management
-    aos_fpga *fpga;
+    aos_fpga *fpga[8];
     
     // File / VM management
-    std::map<uint64_t, aos_fio*> file_io;
+    std::map<std::pair<uint64_t,uint64_t>, aos_fio*> file_io;
 };
 
 #endif  // AOS_DAEMON_

@@ -22,6 +22,9 @@ module cl_dma_pcis_slv
     
     input  SoftRegReq  sys_softreg_req[8:0],
     output SoftRegResp sys_softreg_resp[8:0],
+	
+    input  SoftRegReq  aux_sys_softreg_req[13:10],
+    output SoftRegResp aux_sys_softreg_resp[13:10],
     
     axi_bus_t.master cl_axi_dma_bus,
     axi_bus_t.master cl_axi_mstr_bus [3:0],
@@ -177,6 +180,9 @@ axi_strm ddrc_strm (
 	.clk(aclk),
 	.rst(!rst_n[1]),
 	
+	.sr_req(aux_sys_softreg_req[12]),
+	.sr_resp(aux_sys_softreg_resp[12]),
+	
 	.axi_s(cl_sh_ddr_q2[2]),
 	.axi_m(cl_sh_ddr_q3[2])
 );
@@ -214,6 +220,9 @@ axi_reg ddra_src_reg (
 axi_strm ddra_strm (
 	.clk(aclk),
 	.rst(!rst_n[1]),
+	
+	.sr_req(aux_sys_softreg_req[10]),
+	.sr_resp(aux_sys_softreg_resp[10]),
 	
 	.axi_s(cl_sh_ddr_q2[0]),
 	.axi_m(cl_sh_ddr_q3[0])
@@ -253,6 +262,9 @@ axi_strm ddrb_strm (
 	.clk(aclk),
 	.rst(!rst_n[1]),
 	
+	.sr_req(aux_sys_softreg_req[11]),
+	.sr_resp(aux_sys_softreg_resp[11]),
+	
 	.axi_s(cl_sh_ddr_q2[1]),
 	.axi_m(cl_sh_ddr_q3[1])
 );
@@ -290,6 +302,9 @@ axi_reg ddrd_src_reg (
 axi_strm ddrd_strm (
 	.clk(aclk),
 	.rst(!rst_n[1]),
+	
+	.sr_req(aux_sys_softreg_req[13]),
+	.sr_resp(aux_sys_softreg_resp[13]),
 	
 	.axi_s(cl_sh_ddr_q2[3]),
 	.axi_m(cl_sh_ddr_q3[3])

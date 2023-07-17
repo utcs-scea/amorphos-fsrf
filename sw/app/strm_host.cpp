@@ -46,16 +46,11 @@ void strm_thread(
 	uint64_t hread_comps  = hread  ? 1 << len : 0;
 	uint64_t hwrite_comps = hwrite ? 1 << len : 0;
 	
-	aos[app]->aos_cntrlreg_write(0x20, configs[app].read_creds);
-	aos[app]->aos_cntrlreg_write(0x28, configs[app].write_creds);
+	if (!hread)  aos[app]->aos_cntrlreg_write(0x20, configs[app].read_creds);
+	if (!hwrite) aos[app]->aos_cntrlreg_write(0x28, configs[app].write_creds);
 	
-	uint64_t hread_creds  = dmem64[16];
-	uint64_t hwrite_creds = dmem64[24];
-	
-	//volatile uint64_t waste;
-	//if (hread)  waste = dmem64[0];
-	//if (hwrite) waste = dmem64[8];
-	if (hwrite) while (dmem64[8]) {}
+	uint64_t hread_creds  = 0;
+	uint64_t hwrite_creds = 0;
 	
 	bool reading = true;
 	bool writing = true;
@@ -128,6 +123,12 @@ int main(int argc, char *argv[]) {
 	util.parse_std_args(argc, argv, argi, num_apps, populate);
 	util.setup_aos_client(aos);
 	
+	// block until set_mode completes
+	for (uint64_t app = 0; app < num_apps; ++app) {
+		uint64_t temp;
+		aos[app]->aos_cntrlreg_read(0, temp);
+	}
+	
 	int fd = open("/sys/bus/pci/devices/0000:00:1d.0/resource4", O_RDWR);
 	assert(fd >= 0);
 	
@@ -170,7 +171,7 @@ int main(int argc, char *argv[]) {
 	}
 	
 	// print stats
-	uint64_t app_bytes = (uint64_t{128} << length);
+	uint64_t app_bytes = (uint64_t{64} << length);
 	util.print_stats("strm_host", app_bytes, start, end);
 	
 	// print more stats
@@ -193,16 +194,6 @@ int main(int argc, char *argv[]) {
 	const double avg_tput = ((double)total_bytes)/avg_sec/(1<<20);
 	const double min_tput = ((double)total_bytes)/max_sec/(1<<20);
 	printf("%g %g\n", avg_tput, min_tput);
-	
-	/*
-	for (uint64_t i = 0; i < 1; ++i) {
-		uint64_t temp;
-		for (uint64_t addr = 0x00; addr <= 0x70; addr += 0x8) {
-			aos[0]->aos_cntrlreg_read(addr, temp);
-			printf("%lu ", temp);
-		}
-		printf("\n");
-	}*/
 	
 	return 0;
 }

@@ -498,6 +498,15 @@ public:
 		
 		// Enable PCIe ROB
 		//fpga->write_sys_reg(0, 0x28, 0x1);
+		
+		// Reset FIFO credits
+		fpga->write_sys_reg(app_id+10, 0x0, 0);
+		fpga->write_sys_reg(app_id+10, 0x8, (1<<14));
+		
+		// Check that FIFO is empty
+		uint64_t fw_creds;
+		fpga->read_sys_reg(app_id+10, 0x18, fw_creds);
+		assert(fw_creds == 1<<14);
 	}
 	
 private:
@@ -1019,4 +1028,3 @@ private:
 };
 
 #endif  // AOS_FIO_
-						

@@ -2,11 +2,12 @@
 // Joshua Landgraf
 
 typedef struct packed {
-	logic dram_read;
+	logic fpga_read;
 	logic [1:0] channel;
-	logic [8:0] count;
-	logic [23:0] dram_addr;
-	logic [27:0] pcie_addr;
+	logic [15:0] count;
+	logic [5:0] pcie_sel;
+	logic [23:0] fpga_addr;
+	logic [14:0] padding;
 } PCIM_CMD;
 
 module pcim_dma (
@@ -27,6 +28,14 @@ localparam FIFO_LD = 6;
 wire sr_read  = softreg_req.valid && !softreg_req.isWrite;
 wire sr_write = softreg_req.valid &&  softreg_req.isWrite;
 
+//// Manage address RAM
+reg [63:0] pcie_addrs [63:0];
+
+wire ram_write = sr_write && (softreg_req.addr < 32'd512);
+always @(posedge clk) begin
+	if (ram_write) pcie_addrs[softreg_req.addr[8:3]] <= softreg_req.data;
+end
+
 //// Buffer SoftReg commands
 logic srf_wrreq;
 logic [63:0] srf_data;
@@ -35,9 +44,11 @@ logic [63:0] srf_q;
 logic srf_empty;
 logic srf_rdreq;
 
-assign srf_wrreq = sr_write;
+assign srf_wrreq = sr_write && (softreg_req.addr == 32'd2048);
 assign srf_data = softreg_req.data;
 //assign srf_rdreq = TODO; // will assign later
+
+PCIM_CMD srf_cmd = srf_q;
 
 HullFIFO #(
 	.TYPE(0),
@@ -56,9 +67,9 @@ HullFIFO #(
 
 //// Buffer DRAM write addresses
 logic dwf_wrreq;
-logic [63:0] dwf_data;
+logic [71:0] dwf_data;
 logic dwf_full;
-logic [63:0] dwf_q;
+logic [71:0] dwf_q;
 logic dwf_empty;
 logic dwf_rdreq;
 
@@ -68,7 +79,7 @@ logic dwf_rdreq;
 
 HullFIFO #(
 	.TYPE(0),
-	.WIDTH(64),
+	.WIDTH(8+64),
 	.LOG_DEPTH(FIFO_LD)
 ) dw_fifo (
 	.clock(clk),
@@ -83,9 +94,9 @@ HullFIFO #(
 
 //// Buffer PCIe write addresses
 logic pwf_wrreq;
-logic [63:0] pwf_data;
+logic [71:0] pwf_data;
 logic pwf_full;
-logic [63:0] pwf_q;
+logic [71:0] pwf_q;
 logic pwf_empty;
 logic pwf_rdreq;
 
@@ -95,7 +106,7 @@ logic pwf_rdreq;
 
 HullFIFO #(
 	.TYPE(0),
-	.WIDTH(64),
+	.WIDTH(8+64),
 	.LOG_DEPTH(FIFO_LD)
 ) pw_fifo (
 	.clock(clk),
@@ -247,33 +258,34 @@ end
 reg [1:0] state;
 PCIM_CMD cmd;
 reg [63:0] counts [3:0];
+reg [63:0] pcie_addr;
 
 always_comb begin
 	cl_sh_pcim.awid = 0;
-	cl_sh_pcim.awaddr = pwf_q;
-	cl_sh_pcim.awlen = 8'h3F;
+	cl_sh_pcim.awaddr = pwf_q[63:0];
+	cl_sh_pcim.awlen = pwf_q[71:64];
 	cl_sh_pcim.awsize = 3'b110;
 	cl_sh_pcim.awvalid = !pwf_empty && have_pw_cred;
 	
 	cl_sh_pcim.arid = 0;
-	cl_sh_pcim.araddr = {24'h000000, cmd.pcie_addr, 12'h000};
-	cl_sh_pcim.arlen = 8'h3F;
+	cl_sh_pcim.araddr = pcie_addr;
+	cl_sh_pcim.arlen = (cmd.count < 63) ? cmd.count[7:0] : 8'd63;
 	cl_sh_pcim.arsize = 3'b110;
-	cl_sh_pcim.arvalid = (state == 1) && !cmd.dram_read;
+	cl_sh_pcim.arvalid = (state == 1) && !cmd.fpga_read;
 	
 	cl_sh_pcim.bready = 1;
 	
 	dram_dma.awid = 0;
-	dram_dma.awaddr = dwf_q;
-	dram_dma.awlen = 8'h3F;
+	dram_dma.awaddr = dwf_q[63:0];
+	dram_dma.awlen = dwf_q[71:64];
 	dram_dma.awsize = 3'b110;
 	dram_dma.awvalid = !dwf_empty & have_dw_cred;
 	
 	dram_dma.arid = 0;
-	dram_dma.araddr = {28'h0000000, cmd.dram_addr, 12'h000};
-	dram_dma.arlen = 8'h3F;
+	dram_dma.araddr = {28'h0000000, cmd.fpga_addr, 12'h000};
+	dram_dma.arlen = (cmd.count < 63) ? cmd.count[7:0] : 8'd63;
 	dram_dma.arsize = 3'b110;
-	dram_dma.arvalid = (state == 1) && cmd.dram_read;
+	dram_dma.arvalid = (state == 1) && cmd.fpga_read;
 	
 	dram_dma.bready = 1;
 	
@@ -291,47 +303,47 @@ always_comb begin
 	
 	srf_rdreq = state == 0;
 	
-	dwf_wrreq = (state == 2) && !cmd.dram_read;
-	dwf_data  = {28'h0000000, cmd.dram_addr, 12'h000};
+	dwf_wrreq = (state == 2) && !cmd.fpga_read;
+	dwf_data  = {dram_dma.arlen, dram_dma.araddr};
 	dwf_rdreq = dram_dma.awready && dram_dma.awvalid;
 	
-	pwf_wrreq = (state == 2) && cmd.dram_read;
-	pwf_data  = {24'h000000, cmd.pcie_addr, 12'h000};
+	pwf_wrreq = (state == 2) && cmd.fpga_read;
+	pwf_data  = {cl_sh_pcim.arlen, cl_sh_pcim.araddr};
 	pwf_rdreq = cl_sh_pcim.awready && cl_sh_pcim.awvalid;
 	
 	cif_wrreq = state == 3;
-	cif_data = {cmd.channel, cmd.dram_read};
+	cif_data = {cmd.channel, cmd.fpga_read};
 	cif_rdreq = cif_q[0] ? have_pb_cred : have_db_cred;
 end
 always @(posedge clk) begin
 	case (state)
 		0: begin
+			cmd <= srf_q;
+			pcie_addr <= pcie_addrs[srf_cmd.pcie_sel];
 			if (!srf_empty) begin
-				cmd <= srf_q;
 				state <= 1;
 			end
 		end
 		1: begin
-			if (cmd.dram_read ? dram_dma.arready : cl_sh_pcim.arready) begin
+			if (cmd.fpga_read ? dram_dma.arready : cl_sh_pcim.arready) begin
 				state <= 2;
 			end
 		end
 		2: begin
-			if (cmd.dram_read ? !pwf_full : !dwf_full) begin
+			if (cmd.fpga_read ? !pwf_full : !dwf_full) begin
 				state <= 3;
 			end
 		end
 		3: begin
 			if (!cif_full) begin
-				if (cmd.count == 0) begin
+				if (cmd.count <= 63) begin
 					state <= 0;
 				end else begin
 					state <= 1;
 				end
-				cmd.count <= cmd.count - 1;
-				cmd.dram_addr <= cmd.dram_addr + 1;
-				cmd.pcie_addr <= cmd.pcie_addr + 1;
-				
+				cmd.count <= cmd.count - 64;
+				cmd.fpga_addr <= cmd.fpga_addr + 1;
+				pcie_addr <= {pcie_addr[63:12] + 1, 12'h000};
 			end
 		end
 	endcase

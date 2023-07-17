@@ -146,7 +146,7 @@ sys_sr_tree
 );
 
 generate
-	for (i = 0; i < 10; i = i + 1) begin : sys_sr_pipe
+	for (i = 0; i < 15; i = i + 1) begin : sys_sr_pipe
 		lib_pipe #(.WIDTH(98), .STAGES(2)) PIPE_SYS_SR_REQ  (.clk(global_clk), .rst_n(rst_n[1]), .in_bus(sys_softreg_req_[i]), .out_bus(sys_softreg_req[i]));
 		lib_pipe #(.WIDTH(65), .STAGES(2)) PIPE_SYS_SR_RESP (.clk(global_clk), .rst_n(rst_n[1]), .in_bus(sys_softreg_resp[i]), .out_bus(sys_softreg_resp_[i]));
 	end
@@ -309,6 +309,9 @@ cl_dma_pcis_slv CL_DMA_PCIS_SLV (
 	
 	.sys_softreg_req(sys_softreg_req[8:0]),
 	.sys_softreg_resp(sys_softreg_resp[8:0]),
+	
+	.aux_sys_softreg_req(sys_softreg_req[13:10]),
+	.aux_sys_softreg_resp(sys_softreg_resp[13:10]),
 	
 	.cl_axi_dma_bus(cl_axi_dma_bus),
 	.cl_axi_mstr_bus(cl_axi_mstr_bus),

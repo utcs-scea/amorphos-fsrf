@@ -6,6 +6,9 @@ module axi_strm (
 	input clk,
 	input rst,
 	
+	input  SoftRegReq  sr_req,
+	output SoftRegResp sr_resp,
+	
 	axi_bus_t.master axi_s,
 	axi_bus_t.slave  axi_m
 );
@@ -156,14 +159,20 @@ HullFIFO #(
 // Read credits
 // New readable data
 reg [DATA_FIFO_LD:0] r_creds;
+logic [DATA_FIFO_LD:0] ovw_r_creds;
 logic add_r_cred = fifo_write;
-logic use_r_creds;
+logic use_r_creds0;
+logic use_r_creds1;
+logic ovw_r_cred;
 
 // Write credits
 // New writable space
 reg [DATA_FIFO_LD:0] w_creds;
+logic [DATA_FIFO_LD:0] ovw_w_creds;
 logic add_w_cred = fifo_read;
-logic use_w_creds;
+logic use_w_creds0;
+logic use_w_creds1;
+logic ovw_w_cred;
 
 // FIFO read credits
 // Current used space
@@ -179,10 +188,13 @@ logic use_fw_cred = fifo_write;
 
 // Credit logic
 always @(posedge clk) begin
-	r_creds <= (use_r_creds ? 0 : r_creds) + add_r_cred;
-	w_creds <= (use_w_creds ? 0 : w_creds) + add_w_cred;
+	r_creds <= ((use_r_creds0 || use_r_creds1) ? 0 : r_creds) + add_r_cred;
+	w_creds <= ((use_w_creds0 || use_w_creds1) ? 0 : w_creds) + add_w_cred;
 	fr_creds <= fr_creds + add_fr_cred - use_fr_cred;
 	fw_creds <= fw_creds + add_fw_cred - use_fw_cred;
+	
+	if (ovw_r_cred) r_creds <= ovw_r_creds;
+	if (ovw_w_cred) w_creds <= ovw_w_creds;
 	
 	if (rst) begin
 		r_creds <= 0;
@@ -231,8 +243,8 @@ end
 
 wire reading = (read_state == READ_DATA);
 always_comb begin
-	use_r_creds = 0;
-	use_w_creds = 0;
+	use_r_creds0 = 0;
+	use_w_creds0 = 0;
 	df_rdreq = 0;
 	
 	axi_s.arready = !reading;
@@ -248,12 +260,12 @@ always_comb begin
 		R_STAT: begin
 			axi_s.rdata = r_creds;
 			
-			use_r_creds = axi_s.rready && axi_s.rvalid;
+			use_r_creds0 = axi_s.rready && axi_s.rvalid;
 		end
 		W_STAT: begin
 			axi_s.rdata = w_creds;
 			
-			use_w_creds = axi_s.rready && axi_s.rvalid;
+			use_w_creds0 = axi_s.rready && axi_s.rvalid;
 		end
 		FR_STAT: begin
 			axi_s.rdata = fr_creds;
@@ -270,6 +282,7 @@ always_comb begin
 		end
 	endcase
 end
+
 
 //// AXI write interface
 // B FIFO
@@ -326,5 +339,31 @@ always @(posedge clk) begin
 	if (rst) wl_creds <= 0;
 end
 
+
+//// SR interface
+wire sr_read  = sr_req.valid && !sr_req.isWrite;
+wire sr_write = sr_req.valid &&  sr_req.isWrite;
+
+always_comb begin
+	use_r_creds1 = sr_read && (sr_req.addr == 32'd0);
+	use_w_creds1 = sr_read && (sr_req.addr == 32'd8);
+	
+	ovw_r_cred = sr_write && (sr_req.addr == 32'd0);
+	ovw_w_cred = sr_write && (sr_req.addr == 32'd8);
+	ovw_r_creds = sr_req.data;
+	ovw_w_creds = sr_req.data;
+end
+
+always @(posedge clk) begin
+	sr_resp.valid <= sr_read;
+	
+	case (sr_req.addr)
+		32'h00: sr_resp.data <= r_creds;
+		32'h08: sr_resp.data <= w_creds;
+		32'h10: sr_resp.data <= fr_creds;
+		32'h18: sr_resp.data <= fw_creds;
+		default: sr_resp.data <= 64'hAAAAAAAA55555555;
+	endcase
+end
 
 endmodule
