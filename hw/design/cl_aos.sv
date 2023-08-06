@@ -154,30 +154,12 @@ endgenerate
 
 
 //------------------------------------
-// DRAM DMA
+// DDR
 //------------------------------------
 
-// Internal signals
-axi_bus_t lcl_cl_sh_ddra();
-axi_bus_t lcl_cl_sh_ddrb();
-axi_bus_t lcl_cl_sh_ddrd();
-axi_bus_t cl_sh_ddr_bus();
-
-axi_bus_t cl_axi_dma_bus();
-axi_bus_t cl_axi_mstr_bus [3:0] ();
-
+// DDR Ready
 logic [3:0] all_ddr_is_ready;
 logic [2:0] lcl_sh_cl_ddr_is_ready;
-
-// Unused 'full' signals
-assign cl_sh_dma_rd_full  = 1'b0;
-assign cl_sh_dma_wr_full  = 1'b0;
-
-// Unused *burst signals
-assign cl_sh_ddr_arburst[1:0] = 2'b01;
-assign cl_sh_ddr_awburst[1:0] = 2'b01;
-
-// DDR Ready
 logic sh_cl_ddr_is_ready_q;
 always_ff @(posedge global_clk) // or negedge global_rst_n)
 	if (!rst_n[1])
@@ -191,11 +173,14 @@ always_ff @(posedge global_clk) // or negedge global_rst_n)
 	
 assign all_ddr_is_ready = {lcl_sh_cl_ddr_is_ready[2], sh_cl_ddr_is_ready_q, lcl_sh_cl_ddr_is_ready[1:0]};
 
-// Interface bridge
+
+// DDRC interface bridge
+axi_bus_t cl_sh_ddr_bus();
 assign cl_sh_ddr_awid = cl_sh_ddr_bus.awid;
 assign cl_sh_ddr_awaddr = cl_sh_ddr_bus.awaddr;
 assign cl_sh_ddr_awlen = cl_sh_ddr_bus.awlen;
 assign cl_sh_ddr_awsize = cl_sh_ddr_bus.awsize;
+assign cl_sh_ddr_awburst = 2'b01;
 assign cl_sh_ddr_awvalid = cl_sh_ddr_bus.awvalid;
 assign cl_sh_ddr_bus.awready = sh_cl_ddr_awready;
 assign cl_sh_ddr_wid = 16'b0;
@@ -212,6 +197,7 @@ assign cl_sh_ddr_arid = cl_sh_ddr_bus.arid;
 assign cl_sh_ddr_araddr = cl_sh_ddr_bus.araddr;
 assign cl_sh_ddr_arlen = cl_sh_ddr_bus.arlen;
 assign cl_sh_ddr_arsize = cl_sh_ddr_bus.arsize;
+assign cl_sh_ddr_arburst = 2'b01;
 assign cl_sh_ddr_arvalid = cl_sh_ddr_bus.arvalid;
 assign cl_sh_ddr_bus.arready = sh_cl_ddr_arready;
 assign cl_sh_ddr_bus.rid = sh_cl_ddr_rid;
@@ -220,108 +206,6 @@ assign cl_sh_ddr_bus.rvalid = sh_cl_ddr_rvalid;
 assign cl_sh_ddr_bus.rdata = sh_cl_ddr_rdata;
 assign cl_sh_ddr_bus.rlast = sh_cl_ddr_rlast;
 assign cl_sh_ddr_rready = cl_sh_ddr_bus.rready;
-
-// DMA module
-pcie_dma dma (
-	.clk(global_clk),
-	.rst_n(rst_n),
-	
-	.cl_sh_pcim_awid(cl_sh_pcim_awid),
-	.cl_sh_pcim_awaddr(cl_sh_pcim_awaddr),
-	.cl_sh_pcim_awlen(cl_sh_pcim_awlen),
-	.cl_sh_pcim_awsize(cl_sh_pcim_awsize),
-	.cl_sh_pcim_awuser(cl_sh_pcim_awuser),
-	.cl_sh_pcim_awvalid(cl_sh_pcim_awvalid),
-	.sh_cl_pcim_awready(sh_cl_pcim_awready),
-	
-	.cl_sh_pcim_wdata(cl_sh_pcim_wdata),
-	.cl_sh_pcim_wstrb(cl_sh_pcim_wstrb),
-	.cl_sh_pcim_wlast(cl_sh_pcim_wlast),
-	.cl_sh_pcim_wvalid(cl_sh_pcim_wvalid),
-	.sh_cl_pcim_wready(sh_cl_pcim_wready),
-	
-	.sh_cl_pcim_bid(sh_cl_pcim_bid),
-	.sh_cl_pcim_bresp(sh_cl_pcim_bresp),
-	.sh_cl_pcim_bvalid(sh_cl_pcim_bvalid),
-	.cl_sh_pcim_bready(cl_sh_pcim_bready),
-	
-	.cl_sh_pcim_arid(cl_sh_pcim_arid),
-	.cl_sh_pcim_araddr(cl_sh_pcim_araddr),
-	.cl_sh_pcim_arlen(cl_sh_pcim_arlen),
-	.cl_sh_pcim_arsize(cl_sh_pcim_arsize),
-	.cl_sh_pcim_aruser(cl_sh_pcim_aruser),
-	.cl_sh_pcim_arvalid(cl_sh_pcim_arvalid),
-	.sh_cl_pcim_arready(sh_cl_pcim_arready),
-	
-	.sh_cl_pcim_rid(sh_cl_pcim_rid),
-	.sh_cl_pcim_rdata(sh_cl_pcim_rdata),
-	.sh_cl_pcim_rresp(sh_cl_pcim_rresp),
-	.sh_cl_pcim_rlast(sh_cl_pcim_rlast),
-	.sh_cl_pcim_rvalid(sh_cl_pcim_rvalid),
-	.cl_sh_pcim_rready(cl_sh_pcim_rready),
-	
-	.sh_cl_dma_pcis_awid(sh_cl_dma_pcis_awid),
-	.sh_cl_dma_pcis_awaddr(sh_cl_dma_pcis_awaddr),
-	.sh_cl_dma_pcis_awlen(sh_cl_dma_pcis_awlen),
-	.sh_cl_dma_pcis_awsize(sh_cl_dma_pcis_awsize),
-	.sh_cl_dma_pcis_awvalid(sh_cl_dma_pcis_awvalid),
-	.cl_sh_dma_pcis_awready(cl_sh_dma_pcis_awready),
-	
-	.sh_cl_dma_pcis_wdata(sh_cl_dma_pcis_wdata),
-	.sh_cl_dma_pcis_wstrb(sh_cl_dma_pcis_wstrb),
-	.sh_cl_dma_pcis_wlast(sh_cl_dma_pcis_wlast),
-	.sh_cl_dma_pcis_wvalid(sh_cl_dma_pcis_wvalid),
-	.cl_sh_dma_pcis_wready(cl_sh_dma_pcis_wready),
-	
-	.cl_sh_dma_pcis_bid(cl_sh_dma_pcis_bid),
-	.cl_sh_dma_pcis_bresp(cl_sh_dma_pcis_bresp),
-	.cl_sh_dma_pcis_bvalid(cl_sh_dma_pcis_bvalid),
-	.sh_cl_dma_pcis_bready(sh_cl_dma_pcis_bready),
-	
-	.sh_cl_dma_pcis_arid(sh_cl_dma_pcis_arid),
-	.sh_cl_dma_pcis_araddr(sh_cl_dma_pcis_araddr),
-	.sh_cl_dma_pcis_arlen(sh_cl_dma_pcis_arlen),
-	.sh_cl_dma_pcis_arsize(sh_cl_dma_pcis_arsize),
-	.sh_cl_dma_pcis_arvalid(sh_cl_dma_pcis_arvalid),
-	.cl_sh_dma_pcis_arready(cl_sh_dma_pcis_arready),
-	
-	.cl_sh_dma_pcis_rid(cl_sh_dma_pcis_rid),
-	.cl_sh_dma_pcis_rdata(cl_sh_dma_pcis_rdata),
-	.cl_sh_dma_pcis_rresp(cl_sh_dma_pcis_rresp),
-	.cl_sh_dma_pcis_rlast(cl_sh_dma_pcis_rlast),
-	.cl_sh_dma_pcis_rvalid(cl_sh_dma_pcis_rvalid),
-	.sh_cl_dma_pcis_rready(sh_cl_dma_pcis_rready),
-	
-	.cfg_max_payload(cfg_max_payload),
-	.cfg_max_read_req(cfg_max_read_req),
-	
-	.softreg_req(sys_softreg_req[9]),
-	.softreg_resp(sys_softreg_resp[9]),
-	
-	.dram_dma(cl_axi_dma_bus)
-);
-
-
-// Interconnect
-cl_dma_pcis_slv CL_DMA_PCIS_SLV (
-	.aclk(global_clk),
-	.rst_n(rst_n),
-	
-	.sys_softreg_req(sys_softreg_req[8:0]),
-	.sys_softreg_resp(sys_softreg_resp[8:0]),
-	
-	.aux_sys_softreg_req(sys_softreg_req[13:10]),
-	.aux_sys_softreg_resp(sys_softreg_resp[13:10]),
-	
-	.cl_axi_dma_bus(cl_axi_dma_bus),
-	.cl_axi_mstr_bus(cl_axi_mstr_bus),
-	
-	.lcl_cl_sh_ddra(lcl_cl_sh_ddra),
-	.lcl_cl_sh_ddrb(lcl_cl_sh_ddrb),
-	.lcl_cl_sh_ddrd(lcl_cl_sh_ddrd),
-	
-	.cl_sh_ddr_bus(cl_sh_ddr_bus)
-);
 
 
 // DDR Stats
@@ -391,7 +275,12 @@ lib_pipe #(.WIDTH(1+8+32), .STAGES(NUM_CFG_STGS_CL_DDR_ATG)) PIPE_DDR_STAT_ACK2 
 	.out_bus({ddr_sh_stat_ack2, ddr_sh_stat_int2, ddr_sh_stat_rdata2})
 );
 
-// DDR Controllers
+
+// DDR interface bridge
+axi_bus_t lcl_cl_sh_ddra();
+axi_bus_t lcl_cl_sh_ddrb();
+axi_bus_t lcl_cl_sh_ddrd();
+
 logic[15:0] cl_sh_ddr_awid_2d[2:0];
 logic[63:0] cl_sh_ddr_awaddr_2d[2:0];
 logic[7:0] cl_sh_ddr_awlen_2d[2:0];
@@ -462,6 +351,8 @@ assign {lcl_cl_sh_ddrd.rlast, lcl_cl_sh_ddrb.rlast, lcl_cl_sh_ddra.rlast} = sh_c
 assign {lcl_cl_sh_ddrd.rvalid, lcl_cl_sh_ddrb.rvalid, lcl_cl_sh_ddra.rvalid} = sh_cl_ddr_rvalid_2d;
 assign cl_sh_ddr_rready_2d = {lcl_cl_sh_ddrd.rready, lcl_cl_sh_ddrb.rready, lcl_cl_sh_ddra.rready};
 
+
+// SH DDR
 sh_ddr #(
 	.DDR_A_PRESENT(0),
 	.DDR_B_PRESENT(0),
@@ -594,6 +485,136 @@ sh_ddr #(
 
 
 //------------------------------------
+// PCIe
+//------------------------------------
+
+// PCIM interface bridge
+axi_bus_t cl_sh_pcim ();
+
+always_comb begin
+	cl_sh_pcim_awid = cl_sh_pcim.awid;
+	cl_sh_pcim_awaddr = cl_sh_pcim.awaddr;
+	cl_sh_pcim_awlen = cl_sh_pcim.awlen;
+	cl_sh_pcim_awsize = cl_sh_pcim.awsize;
+	//cl_sh_pcim_awuser = 0;
+	cl_sh_pcim_awvalid = cl_sh_pcim.awvalid;
+	cl_sh_pcim.awready = sh_cl_pcim_awready;
+	
+	cl_sh_pcim_wdata = cl_sh_pcim.wdata;
+	cl_sh_pcim_wstrb = cl_sh_pcim.wstrb;
+	cl_sh_pcim_wlast = cl_sh_pcim.wlast;
+	cl_sh_pcim_wvalid = cl_sh_pcim.wvalid;
+	cl_sh_pcim.wready = sh_cl_pcim_wready;
+	
+	cl_sh_pcim.bid = sh_cl_pcim_bid;
+	cl_sh_pcim.bresp = sh_cl_pcim_bresp;
+	cl_sh_pcim.bvalid = sh_cl_pcim_bvalid;
+	cl_sh_pcim_bready = cl_sh_pcim.bready;
+	
+	cl_sh_pcim_arid = cl_sh_pcim.arid;
+	cl_sh_pcim_araddr = cl_sh_pcim.araddr;
+	cl_sh_pcim_arlen = cl_sh_pcim.arlen;
+	cl_sh_pcim_arsize = cl_sh_pcim.arsize;
+	//cl_sh_pcim_aruser = 0;
+	cl_sh_pcim_arvalid = cl_sh_pcim.arvalid;
+	cl_sh_pcim.arready = sh_cl_pcim_arready;
+	
+	cl_sh_pcim.rid = sh_cl_pcim_rid;
+	cl_sh_pcim.rdata = sh_cl_pcim_rdata;
+	cl_sh_pcim.rresp = sh_cl_pcim_rresp;
+	cl_sh_pcim.rlast = sh_cl_pcim_rlast;
+	//cl_sh_pcim.ruser = sh_cl_pcim_ruser;
+	cl_sh_pcim.rvalid = sh_cl_pcim_rvalid;
+	cl_sh_pcim_rready = cl_sh_pcim.rready;
+end
+
+
+// PCIS interface bridge
+axi_bus_t sh_cl_pcis ();
+
+always_comb begin
+	sh_cl_pcis.awid = sh_cl_dma_pcis_awid;
+	sh_cl_pcis.awaddr = sh_cl_dma_pcis_awaddr;
+	sh_cl_pcis.awlen = sh_cl_dma_pcis_awlen;
+	sh_cl_pcis.awsize = sh_cl_dma_pcis_awsize;
+	sh_cl_pcis.awvalid = sh_cl_dma_pcis_awvalid;
+	cl_sh_dma_pcis_awready = sh_cl_pcis.awready;
+	
+	sh_cl_pcis.wdata = sh_cl_dma_pcis_wdata;
+	sh_cl_pcis.wstrb = sh_cl_dma_pcis_wstrb;
+	sh_cl_pcis.wlast = sh_cl_dma_pcis_wlast;
+	sh_cl_pcis.wvalid = sh_cl_dma_pcis_wvalid;
+	cl_sh_dma_pcis_wready = sh_cl_pcis.wready;
+	
+	cl_sh_dma_pcis_bid = sh_cl_pcis.bid;
+	cl_sh_dma_pcis_bresp = sh_cl_pcis.bresp;
+	cl_sh_dma_pcis_bvalid = sh_cl_pcis.bvalid;
+	sh_cl_pcis.bready = sh_cl_dma_pcis_bready;
+	
+	sh_cl_pcis.arid = sh_cl_dma_pcis_arid;
+	sh_cl_pcis.araddr = sh_cl_dma_pcis_araddr;
+	sh_cl_pcis.arlen = sh_cl_dma_pcis_arlen;
+	sh_cl_pcis.arsize = sh_cl_dma_pcis_arsize;
+	sh_cl_pcis.arvalid = sh_cl_dma_pcis_arvalid;
+	cl_sh_dma_pcis_arready = sh_cl_pcis.arready;
+	
+	cl_sh_dma_pcis_rid = sh_cl_pcis.rid;
+	cl_sh_dma_pcis_rdata = sh_cl_pcis.rdata;
+	cl_sh_dma_pcis_rresp = sh_cl_pcis.rresp;
+	cl_sh_dma_pcis_rlast = sh_cl_pcis.rlast;
+	//cl_sh_dma_pcis_ruser = sh_cl_pcis.ruser;
+	cl_sh_dma_pcis_rvalid = sh_cl_pcis.rvalid;
+	sh_cl_pcis.rready = sh_cl_dma_pcis_rready;
+end
+
+assign cl_sh_dma_rd_full  = 1'b0;
+assign cl_sh_dma_wr_full  = 1'b0;
+
+
+//------------------------------------
+// DMA and Interconnect
+//------------------------------------
+
+// DMA module
+axi_bus_t cl_axi_dma_bus();
+
+pcie_dma dma (
+	.clk(global_clk),
+	.rst_n(rst_n),
+	
+	.softreg_req(sys_softreg_req[9]),
+	.softreg_resp(sys_softreg_resp[9]),
+	
+	.sh_cl_pcis(sh_cl_pcis),
+	.dram_dma(cl_axi_dma_bus)
+);
+
+
+// Interconnect
+axi_bus_t cl_axi_mstr_bus [3:0] ();
+
+cl_dma_pcis_slv CL_DMA_PCIS_SLV (
+	.aclk(global_clk),
+	.rst_n(rst_n),
+	
+	.sys_softreg_req(sys_softreg_req[8:0]),
+	.sys_softreg_resp(sys_softreg_resp[8:0]),
+	
+	.aux_sys_softreg_req(sys_softreg_req[13:10]),
+	.aux_sys_softreg_resp(sys_softreg_resp[13:10]),
+	
+	.cl_axi_dma_bus(cl_axi_dma_bus),
+	.cl_axi_mstr_bus(cl_axi_mstr_bus),
+	
+	.lcl_cl_sh_ddra(lcl_cl_sh_ddra),
+	.lcl_cl_sh_ddrb(lcl_cl_sh_ddrb),
+	.cl_sh_ddr_bus(cl_sh_ddr_bus),
+	.lcl_cl_sh_ddrd(lcl_cl_sh_ddrd),
+	.cl_sh_pcim(cl_sh_pcim)
+);
+
+
+//------------------------------------
 // Application SoftReg
 //------------------------------------
 
@@ -654,17 +675,18 @@ AXIL2SR app_axil2sr (
 );
 assign app_softreg_req_grant = 1;
 
+
 // App SoftReg buffering
 lib_pipe #(.WIDTH(98), .STAGES(1)) PIPE_APP_SR_REQ0  (.clk(global_clk), .rst_n(rst_n[0]), .in_bus(app_softreg_req_buf[2]),  .out_bus(app_softreg_req_buf[1]));
 lib_pipe #(.WIDTH(98), .STAGES(2)) PIPE_APP_SR_REQ1  (.clk(global_clk), .rst_n(rst_n[1]), .in_bus(app_softreg_req_buf[1]),  .out_bus(app_softreg_req_buf[0]));
 lib_pipe #(.WIDTH(65), .STAGES(2)) PIPE_APP_SR_RESP1 (.clk(global_clk), .rst_n(rst_n[1]), .in_bus(app_softreg_resp_buf[0]), .out_bus(app_softreg_resp_buf[1]));
 lib_pipe #(.WIDTH(65), .STAGES(1)) PIPE_APP_SR_RESP0 (.clk(global_clk), .rst_n(rst_n[0]), .in_bus(app_softreg_resp_buf[1]), .out_bus(app_softreg_resp_buf[2]));
 
+
 // AmorphOS to apps
 SoftRegReq  app_softreg_req_  [F1_NUM_APPS-1:0];
 SoftRegResp app_softreg_resp_ [F1_NUM_APPS-1:0];
 
-// Connect to AmorphOS or test module
 AmorphOSSoftReg_RouteTree #(.SR_NUM_APPS(F1_NUM_APPS))
 app_softreg_inst
 (
@@ -696,8 +718,6 @@ generate
 				3: app_rst_n = rst_n[2];
 			endcase
 		end
-		//wire app_rst_n = (app_num > 1) ? rst_n[2] : ((app_num == 1) ? rst_n[0] : rst_n[1]);
-		//(* KEEP_HIERARCHY = "TRUE" *) rst_pipe app_rp (.clk(global_clk), .rst_n_in(rst_main_n), .rst_n(app_rst_n));
 		wire app_rst = !app_rst_n;
 		
 		// Buffer app SoftReg
@@ -961,22 +981,10 @@ generate
 	end
 endgenerate
 
+
 //------------------------------------
 // Misc/Debug Bridge
 //------------------------------------
-/*
-// Outputs need to be assigned
-output logic[31:0] cl_sh_status0,           //Functionality TBD
-output logic[31:0] cl_sh_status1,           //Functionality TBD
-output logic[31:0] cl_sh_id0,               //15:0 - PCI Vendor ID
-											//31:16 - PCI Device ID
-output logic[31:0] cl_sh_id1,               //15:0 - PCI Subsystem Vendor ID
-											//31:16 - PCI Subsystem ID
-output logic[15:0] cl_sh_status_vled,       //Virtual LEDs, monitored through FPGA management PF and tools
-
-output logic tdo (for debug)
-*/
-
 assign cl_sh_id0[31:0]       = `CL_SH_ID0;
 assign cl_sh_id1[31:0]       = `CL_SH_ID1;
 assign cl_sh_status0[31:0]   = 32'h0000_0000;
@@ -986,13 +994,5 @@ assign cl_sh_status_vled = 16'h0000;
 
 assign tdo = 1'b0; // TODO: Not really sure what this does since we're not creating a debug bridge
 
-// Counters
-//-------------------------------------------------------------
-// These are global counters that increment every 4ns.  They
-// are synchronized to clk_main_a0.  Note if clk_main_a0 is
-// slower than 250MHz, the CL will see skips in the counts
-//-------------------------------------------------------------
-//input[63:0] sh_cl_glcount0                   //Global counter 0
-//input[63:0] sh_cl_glcount1                   //Global counter 1
 
 endmodule

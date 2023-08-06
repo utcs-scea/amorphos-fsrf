@@ -40,7 +40,7 @@ endmodule
 // Addressing logic current hardcoded
 module axi_xbar #(
 	parameter NUM_SI = 5,
-	parameter NUM_MI = 4
+	parameter NUM_MI = 5
 ) (
 	input clk,
 	input rst,
@@ -57,7 +57,7 @@ genvar m, s;
 
 //// Shared interface
 // Slave signals
-logic [33:0] si_awaddr [NUM_SI-1:0];
+logic [47:0] si_awaddr [NUM_SI-1:0];
 logic [7:0] si_awlen [NUM_SI-1:0];
 logic [2:0] si_awsize [NUM_SI-1:0];
 logic [NUM_MI-1:0] si_awvalid [NUM_SI-1:0];
@@ -70,7 +70,7 @@ logic si_wuser [NUM_SI-1:0];
 logic [NUM_MI-1:0] si_wvalid [NUM_SI-1:0];
 logic [NUM_MI-1:0] si_wready [NUM_SI-1:0];
 
-logic [33:0] si_araddr [NUM_SI-1:0];
+logic [47:0] si_araddr [NUM_SI-1:0];
 logic [7:0] si_arlen [NUM_SI-1:0];
 logic [2:0] si_arsize [NUM_SI-1:0];
 logic [NUM_MI-1:0] si_arvalid [NUM_SI-1:0];
@@ -173,9 +173,9 @@ for (s = 0; s < NUM_SI; s = s + 1) begin: si_logic
 	
 	//// Logic
 	// AW channel
-	wire [MI_BITS-1:0] aw_mi_sel = si_reg.awaddr[35:34];
+	wire [MI_BITS-1:0] aw_mi_sel = (|si_reg.awaddr[47:37]) ? 4 : si_reg.awaddr[35:34];
 	
-	assign si_awaddr[s] = si_reg.awaddr[33:0];
+	assign si_awaddr[s] = (|si_reg.awaddr[47:37]) ? si_reg.awaddr[47:0] : {14'h0000, si_reg.awaddr[33:0]};
 	assign si_awlen[s] = si_reg.awlen;
 	assign si_awsize[s] = si_reg.awsize;
 	for (m = 0; m < NUM_MI; m = m + 1) begin
@@ -215,9 +215,9 @@ for (s = 0; s < NUM_SI; s = s + 1) begin: si_logic
 	assign bmf_rdreq = si_reg.bready && si_reg.bvalid;
 	
 	// AR channel
-	wire [MI_BITS-1:0] ar_mi_sel = si_reg.araddr[35:34];
+	wire [MI_BITS-1:0] ar_mi_sel = (|si_reg.araddr[47:37]) ? 4 : si_reg.araddr[35:34];
 	
-	assign si_araddr[s] = si_reg.araddr[33:0];
+	assign si_araddr[s] = (|si_reg.araddr[47:37]) ? si_reg.araddr[47:0] : {14'h0000, si_reg.araddr[33:0]};
 	assign si_arlen[s] = si_reg.arlen;
 	assign si_arsize[s] = si_reg.arsize;
 	for (m = 0; m < NUM_MI; m = m + 1) begin
@@ -332,7 +332,7 @@ for (m = 0; m < NUM_MI; m = m + 1) begin: mi_logic
 	wire [SI_BITS-1:0] aw_si_sel;
 	
 	assign mi_reg.awid = 0;
-	assign mi_reg.awaddr = {30'h00000000, si_awaddr[aw_si_sel]};
+	assign mi_reg.awaddr = {16'h0000, si_awaddr[aw_si_sel]};
 	assign mi_reg.awlen = si_awlen[aw_si_sel];
 	assign mi_reg.awsize = si_awsize[aw_si_sel];
 	assign mi_reg.awvalid = si_awvalid[aw_si_sel][m] && !bmf_full;
@@ -387,7 +387,7 @@ for (m = 0; m < NUM_MI; m = m + 1) begin: mi_logic
 	wire [SI_BITS-1:0] ar_si_sel;
 	
 	assign mi_reg.arid = 0;
-	assign mi_reg.araddr = {30'h00000000, si_araddr[ar_si_sel]};
+	assign mi_reg.araddr = {16'h0000, si_araddr[ar_si_sel]};
 	assign mi_reg.arlen = si_arlen[ar_si_sel];
 	assign mi_reg.arsize = si_arsize[ar_si_sel];
 	assign mi_reg.arvalid = si_arvalid[ar_si_sel][m] && !rmf_full;

@@ -5,7 +5,7 @@ LDLIBS = -pthread
 
 HSRC = aos.hpp utils.hpp
 
-BENCHES = aes conv dnn gups hls_flow hls_hll hls_pgrnk hls_sha hls_tri md5 multi nw rng sha strm strm_host strm_p2p cpu_rng
+BENCHES = aes conv dnn gups hls_flow hls_hll hls_pgrnk hls_sha hls_tri md5 multi nw rng sha strm strm_host strm_p2p strm_p2p2 cpu_rng
 
 all: $(BENCHES)
 

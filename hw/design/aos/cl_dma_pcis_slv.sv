@@ -31,9 +31,9 @@ module cl_dma_pcis_slv
     
     axi_bus_t.slave lcl_cl_sh_ddra,
     axi_bus_t.slave lcl_cl_sh_ddrb,
+	axi_bus_t.slave cl_sh_ddr_bus,
     axi_bus_t.slave lcl_cl_sh_ddrd,
-    
-    axi_bus_t.slave cl_sh_ddr_bus
+    axi_bus_t.slave cl_sh_pcim
 );
 
 //----------------------------
@@ -42,29 +42,16 @@ module cl_dma_pcis_slv
 
 axi_bus_t cl_axi_bus_rs1 [4:1] ();
 axi_bus_t cl_axi_bus_rs2 [4:1] ();
-axi_bus_t cl_axi_bus_phys0 [4:0] ();
+axi_bus_t cl_axi_bus_phys0 [4:1] ();
 axi_bus_t cl_axi_bus_phys1 [4:0] ();
 
-axi_bus_t cl_sh_ddr_q  [3:0]();
-axi_bus_t cl_sh_ddr_q2 [3:0]();
-axi_bus_t cl_sh_ddr_q3 [3:0]();
+axi_bus_t cl_sh_ddr_q  [4:0]();
+axi_bus_t cl_sh_ddr_q2 [4:0]();
+axi_bus_t cl_sh_ddr_q3 [4:0]();
 
 //----------------------------
 // End Internal signals
 //----------------------------
-
-cy_stripe #(
-    .INIT_MODE(0),
-    .SR_ADDR('h18)
-) cy_str (
-    .clk(aclk),
-    .rst(!rst_n[1]),
-    
-    .sr_req(sys_softreg_req[8]),
-    
-    .phys_m(cl_axi_dma_bus),
-    .phys_s(cl_axi_bus_phys0[0])
-);
 
 genvar g;
 for (g = 1; g < 5; g = g + 1) begin: gen_ar
@@ -142,7 +129,7 @@ for (g = 1; g < 5; g = g + 1) begin: gen_vm
     );
 end
 
-for (g = 0; g < 5; g = g + 1) begin: gen_pr
+for (g = 1; g < 5; g = g + 1) begin: gen_pr
 	axi_reg phys_reg (
 		.clk(aclk),
 		.rst_n(rst_n[1]),
@@ -151,6 +138,14 @@ for (g = 0; g < 5; g = g + 1) begin: gen_pr
 		.axi_m(cl_axi_bus_phys1[g])
 	);
 end
+
+axi_reg phys_reg (
+	.clk(aclk),
+	.rst_n(rst_n[1]),
+	
+	.axi_s(cl_axi_dma_bus),
+	.axi_m(cl_axi_bus_phys1[0])
+);
 
 
 //----------------------------
@@ -325,6 +320,26 @@ axi_reg ddrd_dst_reg (
 	
 	.axi_s(cl_sh_ddr_q3[3]),
 	.axi_m(lcl_cl_sh_ddrd)
+);
+
+
+//----------------------------
+// flop the output of interconnect for PCIM
+//----------------------------
+axi_reg pcim_src_reg (
+	.clk(aclk),
+	.rst_n(rst_n[1]),
+	
+	.axi_s(cl_sh_ddr_q[4]),
+	.axi_m(cl_sh_ddr_q2[4])
+);
+
+axi_reg pcim_dst_reg (
+	.clk(aclk),
+	.rst_n(rst_n[1]),
+	
+	.axi_s(cl_sh_ddr_q2[4]),
+	.axi_m(cl_sh_pcim)
 );
 
 

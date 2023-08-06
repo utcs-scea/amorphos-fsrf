@@ -75,6 +75,7 @@ logic [512:0] df_q;
 logic df_empty;
 logic df_rdreq;
 
+/*
 logic ddf_wrreq;
 logic [511:0] ddf_data;
 logic ddf_full;
@@ -99,14 +100,15 @@ assign udf_rdreq = df_rdreq && !ddf_empty;
 assign df_full = ddf_full || udf_full;
 assign df_q = {udf_q, ddf_q};
 assign df_empty = ddf_empty || udf_empty;
+*/
 
 wire fifo_read = df_rdreq && !df_empty;
 wire fifo_write = df_wrreq && !df_full;
 
-/*
 HullFIFO #(
 	.TYPE(3),
-	.WIDTH(513),
+	.TYPES("URAM"),
+	.WIDTH(1+512),
 	.LOG_DEPTH(DATA_FIFO_LD)
 ) data_fifo (
 	.clock(clk),
@@ -118,9 +120,8 @@ HullFIFO #(
 	.empty(df_empty),
 	.rdreq(df_rdreq)
 );
-*/
 
-
+/*
 HullFIFO #(
 	.TYPE(3),
 	.TYPES("URAM"),
@@ -152,7 +153,7 @@ HullFIFO #(
 	.empty(udf_empty),
 	.rdreq(udf_rdreq)
 );
-
+*/
 
 //// Credit system
 
