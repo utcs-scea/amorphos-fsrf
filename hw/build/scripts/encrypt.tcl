@@ -74,7 +74,6 @@ file copy -force $CL_DIR/design/aos/axi_xbar.sv $TARGET_DIR
 #file copy -force $CL_DIR/design/aos/aos_axi.sv $TARGET_DIR
 #file copy -force $CL_DIR/design/aos/axi_strm.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/axis_buf.sv $TARGET_DIR
-file copy -force $CL_DIR/design/aos/pcis_shim.sv $TARGET_DIR
 # F1 interfaces
 file copy -force $CL_DIR/design/aos/AXIL2SR.sv $TARGET_DIR
 # Parameterization
