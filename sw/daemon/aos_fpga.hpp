@@ -1,5 +1,6 @@
 #ifndef AOS_FPGA_
 #define AOS_FPGA_
+#include <unistd.h>
 
 // FPGA specific includes
 #include <fpga_pci.h>
@@ -18,15 +19,23 @@ public:
 		int rc, fd;
 		char xdma_str[19];
 		
+		slot_id = slot;
+		
 		// Init FPGA library
 		rc = fpga_mgmt_init();
-		fail_on(rc, out, "Unable to initialize the fpga_mgmt library\n");
+		if (rc) {
+			printf("Unable to initialize the fpga_mgmt library\n");
+			exit(EXIT_FAILURE);
+		}
 		
 		// Attach PCIe BARs
 		rc |= fpga_pci_attach(slot, FPGA_APP_PF, APP_PF_BAR0, 0, &app_bar_handle);
 		rc |= fpga_pci_attach(slot, FPGA_APP_PF, APP_PF_BAR1, 0, &sys_bar_handle);
 		rc |= fpga_pci_attach(slot, FPGA_APP_PF, APP_PF_BAR4, BURST_CAPABLE, &mem_bar_handle);
-		fail_on(rc, out, "Unable to attach PCIe BAR(s)\n");
+		if (rc) {
+			printf("Unable to attach PCIe BAR(s)\n");
+			exit(EXIT_FAILURE);
+		}
 		
 		// Allocate huge pages
 		fd = open("/proc/sys/vm/nr_hugepages", O_WRONLY);
@@ -37,14 +46,91 @@ public:
 		for (int i = 0; pcis && (i < 4); ++i) {
 			snprintf(xdma_str, 19, "/dev/xdma%d_c2h_%d", slot, i);
 			dth_fd[i] = open(xdma_str, O_RDONLY);
-			fail_on(dth_fd[i] == -1, out, "Unable to open XDMA device\n");
-			
 			snprintf(xdma_str, 19, "/dev/xdma%d_h2c_%d", slot, i);
 			htd_fd[i] = open(xdma_str, O_WRONLY);
-			fail_on(htd_fd[i] == -1, out, "Unable to open XDMA device\n");
+			
+			if ((dth_fd[i] == -1) || (htd_fd[i] == -1)) {
+				printf("Unable to open XDMA device\n");
+				exit(EXIT_FAILURE);
+			}
 		}
 		
-	out:
+		// Load PCIe addresses
+		const char * pcie_strs[] = {
+			"/sys/bus/pci/devices/0000:00:0f.0/resource",
+			"/sys/bus/pci/devices/0000:00:11.0/resource",
+			"/sys/bus/pci/devices/0000:00:13.0/resource",
+			"/sys/bus/pci/devices/0000:00:15.0/resource",
+			"/sys/bus/pci/devices/0000:00:17.0/resource",
+			"/sys/bus/pci/devices/0000:00:19.0/resource",
+			"/sys/bus/pci/devices/0000:00:1b.0/resource",
+			"/sys/bus/pci/devices/0000:00:1d.0/resource"
+		};
+		uint64_t pcie_idx = 0;
+		if (access(pcie_strs[0], F_OK) == 0) {
+			// f1.16xlarge
+			pcie_idx = 0;
+		} else if (access(pcie_strs[6], F_OK) == 0) {
+			// f1.4xlarge
+			pcie_idx = 6;
+		} else if (access(pcie_strs[7], F_OK) == 0) {
+			// f1.2xlarge
+			pcie_idx = 7;
+		} else {
+			printf("Could not find FPGA PCIe device\n");
+			exit(EXIT_FAILURE);
+		}
+		uint64_t *pcie_addr_p = pcie_addr;
+		for (; pcie_idx < 8; ++pcie_idx) {
+			FILE *fp = fopen(pcie_strs[pcie_idx], "r");
+			for (uint64_t bar = 0; bar <= 4; ++bar) {
+				uint64_t addr_last = 0;
+				uint64_t flags = 0;
+				int n = fscanf(fp, "0x%lx 0x%lx 0x%lx\n", pcie_addr_p, &addr_last, &flags);
+				
+				if (bar == 4 && n != 3) {
+					printf("Could not read PCIe bar address\n");
+					exit(EXIT_FAILURE);
+				}
+				if (bar == 4) {
+					//printf("Found PCIe device at 0x%lx\n", *pcie_addr_p);
+				}
+			}
+			++pcie_addr_p;
+		}
+		
+		// Set up streams
+		for (uint64_t app_id = 0; app_id < 4; ++app_id) {
+			const uint64_t src = 4*slot_id + app_id;
+			for (uint64_t dst = 0; dst < 8; ++dst) {
+				const uint64_t dm4 = dst % 4;
+				
+				// Local addrs
+				uint64_t cntrl_addr = (dm4<<34) + (1<<18) + (1<<12) + (src<<6);
+				uint64_t data_addr = (dm4<<34) + (src<<13);
+				if (slot_id != dst/4) {
+					// Use pcie addr
+					const uint64_t pa = pcie_addr[dst/4];
+					cntrl_addr += pa;
+					cntrl_addr += uint64_t{1}<<48;
+					data_addr += pa;
+					data_addr += uint64_t{1}<<48;
+				}
+				
+				// Stream enable on data addr write
+				data_addr += (uint64_t{1}<<49);
+				
+				uint64_t cfg_addr = 8 * dst;
+				write_sys_reg(app_id, cfg_addr, cntrl_addr);
+				//printf("%lu %lu 0x%lx 0x%lx\n", src, dst, cfg_addr, cntrl_addr);
+				cfg_addr += (1 << 8);
+				write_sys_reg(app_id, cfg_addr, data_addr);
+				//printf("%lu %lu 0x%lx 0x%lx\n", src, dst, cfg_addr, data_addr);
+			}
+		}
+		
+		// TODO: Enable PCIM?
+		
 		return;
 	}
 	
@@ -94,7 +180,17 @@ public:
 		return 0;
 	}
 	
+	uint64_t get_slot_id() {
+		return slot_id;
+	}
+	
+	uint64_t get_pcie_addr(uint64_t idx) {
+		return pcie_addr[idx];
+	}
+	
 private:
+	uint64_t slot_id;
+	
 	// PCIe IDs
 	const static uint16_t pci_vendor_id = 0x1D0F; /* PCI Vendor ID */
 	const static uint16_t pci_device_id = 0xF001; /* PCI Device ID */
@@ -107,6 +203,9 @@ private:
 	// XDMA fds
 	int dth_fd[4];
 	int htd_fd[4];
+	
+	// FPGA PCIe addresses
+	uint64_t pcie_addr[8];
 	
 	int reg_access(pci_bar_handle_t &bar_handle, uint64_t app_id, uint64_t addr,
 			       uint64_t &value, bool write, bool mask) {
@@ -137,3 +236,4 @@ private:
 };
 
 #endif  // AOS_FPGA_
+	

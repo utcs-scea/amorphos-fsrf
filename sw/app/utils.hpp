@@ -24,7 +24,7 @@ public:
 	) {
 		num_apps = 1;
 		if (argi < argc) num_apps = atol(argv[argi]);
-		assert(1 <= num_apps && num_apps <= 4);
+		assert(1 <= num_apps && num_apps <= 32);
 		this->num_apps = num_apps;
 		++argi;
 		
@@ -53,11 +53,11 @@ public:
 	) {
 		for (uint64_t app = 0; app < num_apps; ++app) {
 			aos[app] = new aos_client();
-			aos[app]->set_slot_id(0);
-			aos[app]->set_app_id(app);
+			aos[app]->set_slot_id(app/4);
+			aos[app]->set_app_id(app%4);
 			aos[app]->connect();
-			aos[app]->aos_set_mode(fio_mode, coyote_config);
-			aos[app]->aos_set_mode(3, 1 << log_prefetch_size);
+			//aos[app]->aos_set_mode(fio_mode, coyote_config);
+			//aos[app]->aos_set_mode(3, 1 << log_prefetch_size);
 		}
 	}
 	

@@ -31,9 +31,9 @@ wire armf_rdreq;
 
 // r data FIFO signals
 wire rdf_wrreq;
-wire [531:0] rdf_data;
+wire [530:0] rdf_data;
 wire rdf_full;
-wire [531:0] rdf_q;
+wire [530:0] rdf_q;
 wire rdf_empty;
 wire rdf_rdreq;
 
@@ -55,9 +55,9 @@ wire awmf_rdreq;
 
 // w data FIFO signals
 wire wdf_wrreq;
-wire [577:0] wdf_data;
+wire [576:0] wdf_data;
 wire wdf_full;
-wire [577:0] wdf_q;
+wire [576:0] wdf_q;
 wire wdf_empty;
 wire wdf_rdreq;
 
@@ -83,9 +83,9 @@ assign axi_m.arvalid = !armf_empty;
 
 assign axi_m.rready = !rdf_full;
 assign rdf_wrreq = axi_m.rvalid;
-assign rdf_data = {axi_m.rid, axi_m.rdata, axi_m.rresp, axi_m.rlast, axi_m.ruser};
+assign rdf_data = {axi_m.rid, axi_m.rdata, axi_m.rresp, axi_m.rlast};
 assign rdf_rdreq = axi_s.rready;
-assign {axi_s.rid, axi_s.rdata, axi_s.rresp, axi_s.rlast, axi_s.ruser} = rdf_q;
+assign {axi_s.rid, axi_s.rdata, axi_s.rresp, axi_s.rlast} = rdf_q;
 assign axi_s.rvalid = !rdf_empty;
 
 assign axi_s.awready = !awsf_full;
@@ -101,9 +101,9 @@ assign axi_m.awvalid = !awmf_empty;
 
 assign axi_s.wready = !wdf_full;
 assign wdf_wrreq = axi_s.wvalid;
-assign wdf_data = {axi_s.wdata, axi_s.wstrb, axi_s.wlast, axi_s.wuser};
+assign wdf_data = {axi_s.wdata, axi_s.wstrb, axi_s.wlast};
 assign wdf_rdreq = axi_m.wready;
-assign {axi_m.wdata, axi_m.wstrb, axi_m.wlast, axi_m.wuser} = wdf_q;
+assign {axi_m.wdata, axi_m.wstrb, axi_m.wlast} = wdf_q;
 assign axi_m.wvalid = !wdf_empty;
 
 assign axi_m.bready = !bdf_full;
@@ -145,7 +145,7 @@ HullFIFO #(
 HullFIFO #(
 	.TYPE(3),
 	.TYPES("BRAM"),
-	.WIDTH(16+512+2+1+1),
+	.WIDTH(16+512+2+1),
 	.LOG_DEPTH(DATA_FIFO_LD)
 ) r_data_fifo (
 	.clock(clk),
@@ -188,7 +188,7 @@ HullFIFO #(
 HullFIFO #(
 	.TYPE(3),
 	.TYPES("BRAM"),
-	.WIDTH(512+64+1+1),
+	.WIDTH(512+64+1),
 	.LOG_DEPTH(DATA_FIFO_LD)
 ) w_data_fifo (
 	.clock(clk),

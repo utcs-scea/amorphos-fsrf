@@ -63,17 +63,18 @@ file copy -force $CL_DIR/design/aos/pcie_dma.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/rst_pipe.sv $TARGET_DIR
 # DRAM, DMA, TLB, AXI
 file copy -force $CL_DIR/design/aos/cl_dram_dma_pkg.sv $TARGET_DIR
-file copy -force $CL_DIR/design/aos/cl_dma_pcis_slv.sv $TARGET_DIR
-file copy -force $CL_DIR/design/aos/axi_tlb.sv $TARGET_DIR
-file copy -force $CL_DIR/design/aos/axi_rob.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/aos/axi_tlb.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/aos/axi_rob.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/axi_mux.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/axi_reg.sv $TARGET_DIR
-file copy -force $CL_DIR/design/aos/axi_buf.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/aos/axi_buf.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/axi_xbar.sv $TARGET_DIR
-file copy -force $CL_DIR/design/aos/cy_tlb.sv $TARGET_DIR
-file copy -force $CL_DIR/design/aos/cy_stripe.sv $TARGET_DIR
-file copy -force $CL_DIR/design/aos/aos_axi.sv $TARGET_DIR
-file copy -force $CL_DIR/design/aos/axi_strm.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/aos/cy_tlb.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/aos/cy_stripe.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/aos/aos_axi.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/aos/axi_strm.sv $TARGET_DIR
+file copy -force $CL_DIR/design/aos/axis_buf.sv $TARGET_DIR
+file copy -force $CL_DIR/design/aos/pcis_shim.sv $TARGET_DIR
 # F1 interfaces
 file copy -force $CL_DIR/design/aos/AXIL2SR.sv $TARGET_DIR
 # Parameterization
@@ -94,68 +95,68 @@ file copy -force $CL_DIR/design/sha/sha_top.v $TARGET_DIR
 file copy -force $CL_DIR/design/sha/sha256_transform.v $TARGET_DIR
 file copy -force $CL_DIR/design/sha/sha-256-functions.v $TARGET_DIR
 # DNNWeaver
-file copy -force $CL_DIR/design/dnn/dnn_wrapper.sv $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/include/dw_params.vh $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/include/common.vh $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/include/norm_lut.mif $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/include/rd_mem_controller.mif $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/include/wr_mem_controller.mif $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/include/pu_controller_bin.mif $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/axi_master/axi_master.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/axi_master_wrapper/axi_master_wrapper.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/axi_master/wburst_counter.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/primitives/FIFO/fifo.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/primitives/FIFO/fifo_fwft.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/primitives/FIFO/xilinx_bram_fifo.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/primitives/ROM/ROM.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/axi_slave/axi_slave.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/dnn_accelerator/dnn_accelerator.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/mem_controller/mem_controller.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/mem_controller/mem_controller_top.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/primitives/MACC/multiplier.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/primitives/MACC/macc.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/primitives/COUNTER/counter.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/PU/PU.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/PE/PE.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/primitives/REGISTER/register.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/normalization/normalization.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/primitives/PISO/piso.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/primitives/PISO/piso_norm.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/primitives/SIPO/sipo.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/pooling/pooling.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/primitives/COMPARATOR/comparator.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/primitives/MUX/mux_2x1.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/PE_buffer/PE_buffer.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/primitives/lfsr/lfsr.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/vectorgen/vectorgen.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/PU/PU_controller.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/weight_buffer/weight_buffer.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/primitives/RAM/ram.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/data_packer/data_packer.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/data_unpacker/data_unpacker.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/activation/activation.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/read_info/read_info.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/buffer_read_counter/buffer_read_counter.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/loopback/loopback_top.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/loopback/loopback.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/loopback_pu_controller/loopback_pu_controller_top.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/loopback_pu_controller/loopback_pu_controller.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/serdes/serdes.v $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/ami/dnn2ami_wrapper.sv $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/ami/mem_controller_top_ami.sv $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/ami/dnn_accelerator_ami.sv $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/ami/dnnweaver_ami_top.sv $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/ami/DNNDrive_SoftReg.sv $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/ami/DNN2AMI.sv $TARGET_DIR
-file copy -force $CL_DIR/design/dnn/source/ami/DNN2AMI_WRPath.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/dnn_wrapper.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/include/dw_params.vh $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/include/common.vh $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/include/norm_lut.mif $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/include/rd_mem_controller.mif $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/include/wr_mem_controller.mif $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/include/pu_controller_bin.mif $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/axi_master/axi_master.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/axi_master_wrapper/axi_master_wrapper.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/axi_master/wburst_counter.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/primitives/FIFO/fifo.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/primitives/FIFO/fifo_fwft.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/primitives/FIFO/xilinx_bram_fifo.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/primitives/ROM/ROM.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/axi_slave/axi_slave.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/dnn_accelerator/dnn_accelerator.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/mem_controller/mem_controller.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/mem_controller/mem_controller_top.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/primitives/MACC/multiplier.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/primitives/MACC/macc.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/primitives/COUNTER/counter.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/PU/PU.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/PE/PE.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/primitives/REGISTER/register.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/normalization/normalization.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/primitives/PISO/piso.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/primitives/PISO/piso_norm.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/primitives/SIPO/sipo.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/pooling/pooling.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/primitives/COMPARATOR/comparator.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/primitives/MUX/mux_2x1.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/PE_buffer/PE_buffer.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/primitives/lfsr/lfsr.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/vectorgen/vectorgen.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/PU/PU_controller.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/weight_buffer/weight_buffer.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/primitives/RAM/ram.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/data_packer/data_packer.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/data_unpacker/data_unpacker.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/activation/activation.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/read_info/read_info.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/buffer_read_counter/buffer_read_counter.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/loopback/loopback_top.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/loopback/loopback.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/loopback_pu_controller/loopback_pu_controller_top.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/loopback_pu_controller/loopback_pu_controller.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/serdes/serdes.v $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/ami/dnn2ami_wrapper.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/ami/mem_controller_top_ami.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/ami/dnn_accelerator_ami.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/ami/dnnweaver_ami_top.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/ami/DNNDrive_SoftReg.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/ami/DNN2AMI.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/dnn/source/ami/DNN2AMI_WRPath.sv $TARGET_DIR
 # NW
-file copy -force $CL_DIR/design/nw/nw_wrapper.sv $TARGET_DIR
-file copy -force $CL_DIR/design/nw/nw_top.v $TARGET_DIR
-file copy -force $CL_DIR/design/nw/nw.v $TARGET_DIR
+#file copy -force $CL_DIR/design/nw/nw_wrapper.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/nw/nw_top.v $TARGET_DIR
+#file copy -force $CL_DIR/design/nw/nw.v $TARGET_DIR
 # RNG
-file copy -force $CL_DIR/design/rng/rng_wrapper.sv $TARGET_DIR
-file copy -force $CL_DIR/design/rng/rng_top.v $TARGET_DIR
-file copy -force $CL_DIR/design/rng/rng.v $TARGET_DIR
+#file copy -force $CL_DIR/design/rng/rng_wrapper.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/rng/rng_top.v $TARGET_DIR
+#file copy -force $CL_DIR/design/rng/rng.v $TARGET_DIR
 # HLS SHA
 file copy -force $CL_DIR/design/hls_sha/hls_sha_wrapper.sv $TARGET_DIR
 file copy -force {*}[glob $CL_DIR/design/hls_sha/fpga/*.v] $TARGET_DIR
@@ -164,25 +165,26 @@ file copy -force $CL_DIR/design/hls_flow/hls_flow_wrapper.sv $TARGET_DIR
 file copy -force {*}[glob $CL_DIR/design/hls_flow/fpga/*.v] $TARGET_DIR
 file copy -force {*}[glob $CL_DIR/design/hls_flow/fpga/*.dat] $TARGET_DIR
 # GUPS
-file copy -force $CL_DIR/design/gups/random_access.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/gups/random_access.sv $TARGET_DIR
 # HyperLogLog
 file copy -force $CL_DIR/design/hls_hll/hls_hll_wrapper.sv $TARGET_DIR
 file copy -force {*}[glob $CL_DIR/design/hls_hll/fpga/*.v] $TARGET_DIR
 file copy -force {*}[glob $CL_DIR/design/hls_hll/fpga/*.dat] $TARGET_DIR
 # HLS Pagerank
-file copy -force $CL_DIR/design/hls_pgrnk/hls_pgrnk_wrapper.sv $TARGET_DIR
-file copy -force {*}[glob $CL_DIR/design/hls_pgrnk/fpga/*.v] $TARGET_DIR
+#file copy -force $CL_DIR/design/hls_pgrnk/hls_pgrnk_wrapper.sv $TARGET_DIR
+#file copy -force {*}[glob $CL_DIR/design/hls_pgrnk/fpga/*.v] $TARGET_DIR
 # HLS Tri
-file copy -force $CL_DIR/design/hls_tri/triangle_wrapper.sv $TARGET_DIR
-file copy -force $CL_DIR/design/hls_tri/triangle_memory.v $TARGET_DIR
-file copy -force {*}[glob $CL_DIR/design/hls_tri/fpga/*.v] $TARGET_DIR
+#file copy -force $CL_DIR/design/hls_tri/triangle_wrapper.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/hls_tri/triangle_memory.v $TARGET_DIR
+#file copy -force {*}[glob $CL_DIR/design/hls_tri/fpga/*.v] $TARGET_DIR
 # Conv
 file copy -force $CL_DIR/design/conv/conv_wrapper.sv $TARGET_DIR
 file copy -force $CL_DIR/design/conv/conv_constants.v $TARGET_DIR
 file copy -force $CL_DIR/design/conv/conv_top.v $TARGET_DIR
 file copy -force $CL_DIR/design/conv/conv.v $TARGET_DIR
 # Strm
-file copy -force $CL_DIR/design/strm/strm.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/strm/strm.sv $TARGET_DIR
+file copy -force $CL_DIR/design/strm/axis_strm.sv $TARGET_DIR
 
 # Top level module
 file copy -force $CL_DIR/design/cl_aos.sv $TARGET_DIR

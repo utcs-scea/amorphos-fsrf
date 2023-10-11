@@ -43,7 +43,6 @@ always_comb begin
 	phys_m.rdata = phys_s.rdata;
 	phys_m.rresp = phys_s.rresp;
 	phys_m.rlast = phys_s.rlast;
-	phys_m.ruser = phys_s.ruser;
 	phys_m.rvalid = phys_s.rvalid;
 	phys_s.rready = phys_m.rready;
 	
@@ -57,7 +56,6 @@ always_comb begin
 	phys_s.wdata = phys_m.wdata;
 	phys_s.wstrb = phys_m.wstrb;
 	phys_s.wlast = phys_m.wlast;
-	phys_s.wuser = phys_m.wuser;
 	phys_s.wvalid = phys_m.wvalid;
 	phys_m.wready = phys_s.wready;
 	

@@ -43,25 +43,44 @@ module cl_aos (
 `include "unused_cl_sda_template.inc"
 //`include "unused_sh_ocl_template.inc"
 //`include "unused_sh_bar1_template.inc"
+// Unused DDR
+`include "unused_ddr_a_b_d_template.inc"
 
+
+//------------------------------------
+// Globals
+//------------------------------------
+
+// Parameterization
 localparam F1_NUM_APPS = UserParams::NUM_APPS;
 localparam F1_CONFIG_APPS = UserParams::CONFIG_APPS;
 
 // Gen vars
 genvar i;
+genvar g;
 genvar app_num;
 
-// Global signals
+// Clock
 logic global_clk = clk_main_a0;
+
+// Reset synchronization
 logic rst_n [2:0];
 
-//------------------------------------
-// Reset Synchronization
-//------------------------------------
-// Reset synchronizer
-(* KEEP_HIERARCHY = "TRUE" *) rst_pipe slr2_rp (.clk(global_clk), .rst_n_in(rst_main_n), .rst_n(rst_n[2]));
-(* KEEP_HIERARCHY = "TRUE" *) rst_pipe slr1_rp (.clk(global_clk), .rst_n_in(rst_main_n), .rst_n(rst_n[1]));
-(* KEEP_HIERARCHY = "TRUE" *) rst_pipe slr0_rp (.clk(global_clk), .rst_n_in(rst_main_n), .rst_n(rst_n[0]));
+(* KEEP_HIERARCHY = "TRUE" *) rst_pipe slr2_rp (
+	.clk(global_clk),
+	.rst_n_in(rst_main_n),
+	.rst_n(rst_n[2])
+);
+(* KEEP_HIERARCHY = "TRUE" *) rst_pipe slr1_rp (
+	.clk(global_clk),
+	.rst_n_in(rst_main_n),
+	.rst_n(rst_n[1])
+);
+(* KEEP_HIERARCHY = "TRUE" *) rst_pipe slr0_rp (
+	.clk(global_clk),
+	.rst_n_in(rst_main_n),
+	.rst_n(rst_n[0])
+);
 
 
 //------------------------------------
@@ -79,13 +98,13 @@ logic rst_n [2:0];
 */
 
 // AXIL2SR to AmorphOS System
-SoftRegReq  sys_softreg_req[15:0];
-SoftRegReq  sys_softreg_req_[15:0];
+SoftRegReq  sys_softreg_req[3:0];
+SoftRegReq  sys_softreg_req_[3:0];
 SoftRegReq  sys_softreg_req_buf;
 logic       sys_softreg_req_grant;
 
-SoftRegResp sys_softreg_resp[15:0];
-SoftRegResp sys_softreg_resp_[15:0];
+SoftRegResp sys_softreg_resp[3:0];
+SoftRegResp sys_softreg_resp_[3:0];
 SoftRegResp sys_softreg_resp_buf;
 logic       sys_softreg_resp_grant;
 
@@ -131,7 +150,7 @@ AXIL2SR sys_axil2sr (
 );
 assign sys_softreg_req_grant = 1;
 
-AmorphOSSoftReg_RouteTree #(.SR_NUM_APPS(16))
+AmorphOSSoftReg_RouteTree #(.SR_NUM_APPS(4))
 sys_sr_tree
 (
 	// User clock and reset
@@ -145,342 +164,79 @@ sys_sr_tree
 	.app_softreg_resp(sys_softreg_resp_)
 );
 
-generate
-	for (i = 0; i < 15; i = i + 1) begin : sys_sr_pipe
-		lib_pipe #(.WIDTH(98), .STAGES(2)) PIPE_SYS_SR_REQ  (.clk(global_clk), .rst_n(rst_n[1]), .in_bus(sys_softreg_req_[i]), .out_bus(sys_softreg_req[i]));
-		lib_pipe #(.WIDTH(65), .STAGES(2)) PIPE_SYS_SR_RESP (.clk(global_clk), .rst_n(rst_n[1]), .in_bus(sys_softreg_resp[i]), .out_bus(sys_softreg_resp_[i]));
-	end
-endgenerate
+for (i = 0; i < 4; i = i + 1) begin : sys_sr_pipe
+	lib_pipe #(
+		.WIDTH(98),
+		.STAGES(2)
+	) PIPE_SYS_SR_REQ (
+		.clk(global_clk),
+		.rst_n(rst_n[1]),
+		.in_bus(sys_softreg_req_[i]),
+		.out_bus(sys_softreg_req[i])
+	);
+	lib_pipe #(
+		.WIDTH(65),
+		.STAGES(2)
+	) PIPE_SYS_SR_RESP (
+		.clk(global_clk),
+		.rst_n(rst_n[1]),
+		.in_bus(sys_softreg_resp[i]),
+		.out_bus(sys_softreg_resp_[i])
+	);
+end
 
 
 //------------------------------------
-// DDR
+// Interconnect
 //------------------------------------
 
-// DDR Ready
-logic [3:0] all_ddr_is_ready;
-logic [2:0] lcl_sh_cl_ddr_is_ready;
-logic sh_cl_ddr_is_ready_q;
-always_ff @(posedge global_clk) // or negedge global_rst_n)
-	if (!rst_n[1])
-	begin
-	sh_cl_ddr_is_ready_q <= 1'b0;
-	end
-	else
-	begin
-	sh_cl_ddr_is_ready_q <= sh_cl_ddr_is_ready;
-	end  
+axi_bus_t cl_axi_mstr_bus [4:0] ();
+axi_bus_t cl_axi_slv_bus [4:0] ();
+
+axi_bus_t ax_axi_m [4:0] ();
+axi_bus_t ax_axi_s [4:0] ();
+
+for (g = 0; g < 5; g = g + 1) begin: ax_ar
+	axi_bus_t ar_axi_m [4:0] ();
+	axi_bus_t ar_axi_s [4:0] ();
 	
-assign all_ddr_is_ready = {lcl_sh_cl_ddr_is_ready[2], sh_cl_ddr_is_ready_q, lcl_sh_cl_ddr_is_ready[1:0]};
+	axi_reg ar_m1 (
+		.clk(global_clk),
+		.rst_n(rst_n[1]),
+		
+		.axi_s(cl_axi_mstr_bus[g]),
+		.axi_m(ar_axi_m[g])
+	);
+	axi_reg ar_m0 (
+		.clk(global_clk),
+		.rst_n(rst_n[1]),
+		
+		.axi_s(ar_axi_m[g]),
+		.axi_m(ax_axi_m[g])
+	);
+	
+	axi_reg ar_s0 (
+		.clk(global_clk),
+		.rst_n(rst_n[1]),
+		
+		.axi_s(ax_axi_s[g]),
+		.axi_m(ar_axi_s[g])
+	);
+	axi_reg ar_s1 (
+		.clk(global_clk),
+		.rst_n(rst_n[1]),
+		
+		.axi_s(ar_axi_s[g]),
+		.axi_m(cl_axi_slv_bus[g])
+	);
+end
 
-
-// DDRC interface bridge
-axi_bus_t cl_sh_ddr_bus();
-assign cl_sh_ddr_awid = cl_sh_ddr_bus.awid;
-assign cl_sh_ddr_awaddr = cl_sh_ddr_bus.awaddr;
-assign cl_sh_ddr_awlen = cl_sh_ddr_bus.awlen;
-assign cl_sh_ddr_awsize = cl_sh_ddr_bus.awsize;
-assign cl_sh_ddr_awburst = 2'b01;
-assign cl_sh_ddr_awvalid = cl_sh_ddr_bus.awvalid;
-assign cl_sh_ddr_bus.awready = sh_cl_ddr_awready;
-assign cl_sh_ddr_wid = 16'b0;
-assign cl_sh_ddr_wdata = cl_sh_ddr_bus.wdata;
-assign cl_sh_ddr_wstrb = cl_sh_ddr_bus.wstrb;
-assign cl_sh_ddr_wlast = cl_sh_ddr_bus.wlast;
-assign cl_sh_ddr_wvalid = cl_sh_ddr_bus.wvalid;
-assign cl_sh_ddr_bus.wready = sh_cl_ddr_wready;
-assign cl_sh_ddr_bus.bid = sh_cl_ddr_bid;
-assign cl_sh_ddr_bus.bresp = sh_cl_ddr_bresp;
-assign cl_sh_ddr_bus.bvalid = sh_cl_ddr_bvalid;
-assign cl_sh_ddr_bready = cl_sh_ddr_bus.bready;
-assign cl_sh_ddr_arid = cl_sh_ddr_bus.arid;
-assign cl_sh_ddr_araddr = cl_sh_ddr_bus.araddr;
-assign cl_sh_ddr_arlen = cl_sh_ddr_bus.arlen;
-assign cl_sh_ddr_arsize = cl_sh_ddr_bus.arsize;
-assign cl_sh_ddr_arburst = 2'b01;
-assign cl_sh_ddr_arvalid = cl_sh_ddr_bus.arvalid;
-assign cl_sh_ddr_bus.arready = sh_cl_ddr_arready;
-assign cl_sh_ddr_bus.rid = sh_cl_ddr_rid;
-assign cl_sh_ddr_bus.rresp = sh_cl_ddr_rresp;
-assign cl_sh_ddr_bus.rvalid = sh_cl_ddr_rvalid;
-assign cl_sh_ddr_bus.rdata = sh_cl_ddr_rdata;
-assign cl_sh_ddr_bus.rlast = sh_cl_ddr_rlast;
-assign cl_sh_ddr_rready = cl_sh_ddr_bus.rready;
-
-
-// DDR Stats
-localparam NUM_CFG_STGS_CL_DDR_ATG = 2;
-
-logic[7:0] sh_ddr_stat_addr_q[2:0];
-logic[2:0] sh_ddr_stat_wr_q;
-logic[2:0] sh_ddr_stat_rd_q; 
-logic[31:0] sh_ddr_stat_wdata_q[2:0];
-logic[2:0] ddr_sh_stat_ack_q;
-logic[31:0] ddr_sh_stat_rdata_q[2:0];
-logic[7:0] ddr_sh_stat_int_q[2:0];
-logic[41:0] sh_ddr_stat_packed;
-logic[40:0] ddr_sh_stat_packed;
-
-lib_pipe #(.WIDTH(1+1+8+32), .STAGES(NUM_CFG_STGS_CL_DDR_ATG)) PIPE_DDR_STAT0 (
+axi_xbar ax (
 	.clk(global_clk),
-	.rst_n(rst_n[1]),
-	.in_bus({sh_ddr_stat_wr0, sh_ddr_stat_rd0, sh_ddr_stat_addr0, sh_ddr_stat_wdata0}),
-	.out_bus(sh_ddr_stat_packed)
-);
-lib_pipe #(.WIDTH(1+1+8+32), .STAGES(NUM_CFG_STGS_CL_DDR_ATG)) PIPE_DDR_STAT0_ (
-	.clk(global_clk),
-	.rst_n(rst_n[2]),
-	.in_bus(sh_ddr_stat_packed),
-	.out_bus({sh_ddr_stat_wr_q[0], sh_ddr_stat_rd_q[0], sh_ddr_stat_addr_q[0], sh_ddr_stat_wdata_q[0]})
-);
-
-lib_pipe #(.WIDTH(1+8+32), .STAGES(NUM_CFG_STGS_CL_DDR_ATG)) PIPE_DDR_STAT_ACK0_ (
-	.clk(global_clk),
-	.rst_n(rst_n[2]),
-	.in_bus({ddr_sh_stat_ack_q[0], ddr_sh_stat_int_q[0], ddr_sh_stat_rdata_q[0]}),
-	.out_bus(ddr_sh_stat_packed)
-);
-lib_pipe #(.WIDTH(1+8+32), .STAGES(NUM_CFG_STGS_CL_DDR_ATG)) PIPE_DDR_STAT_ACK0 (
-	.clk(global_clk),
-	.rst_n(rst_n[1]),
-	.in_bus(ddr_sh_stat_packed),
-	.out_bus({ddr_sh_stat_ack0, ddr_sh_stat_int0, ddr_sh_stat_rdata0})
-);
-
-lib_pipe #(.WIDTH(1+1+8+32), .STAGES(NUM_CFG_STGS_CL_DDR_ATG)) PIPE_DDR_STAT1 (
-	.clk(global_clk),
-	.rst_n(rst_n[1]),
-	.in_bus({sh_ddr_stat_wr1, sh_ddr_stat_rd1, sh_ddr_stat_addr1, sh_ddr_stat_wdata1}),
-	.out_bus({sh_ddr_stat_wr_q[1], sh_ddr_stat_rd_q[1], sh_ddr_stat_addr_q[1], sh_ddr_stat_wdata_q[1]})
-);
-
-lib_pipe #(.WIDTH(1+8+32), .STAGES(NUM_CFG_STGS_CL_DDR_ATG)) PIPE_DDR_STAT_ACK1 (
-	.clk(global_clk),
-	.rst_n(rst_n[1]),
-	.in_bus({ddr_sh_stat_ack_q[1], ddr_sh_stat_int_q[1], ddr_sh_stat_rdata_q[1]}),
-	.out_bus({ddr_sh_stat_ack1, ddr_sh_stat_int1, ddr_sh_stat_rdata1})
-);
-
-lib_pipe #(.WIDTH(1+1+8+32), .STAGES(NUM_CFG_STGS_CL_DDR_ATG)) PIPE_DDR_STAT2 (
-	.clk(global_clk),
-	.rst_n(rst_n[0]),
-	.in_bus({sh_ddr_stat_wr2, sh_ddr_stat_rd2, sh_ddr_stat_addr2, sh_ddr_stat_wdata2}),
-	.out_bus({sh_ddr_stat_wr_q[2], sh_ddr_stat_rd_q[2], sh_ddr_stat_addr_q[2], sh_ddr_stat_wdata_q[2]})
-);
-
-lib_pipe #(.WIDTH(1+8+32), .STAGES(NUM_CFG_STGS_CL_DDR_ATG)) PIPE_DDR_STAT_ACK2 (
-	.clk(global_clk),
-	.rst_n(rst_n[0]),
-	.in_bus({ddr_sh_stat_ack_q[2], ddr_sh_stat_int_q[2], ddr_sh_stat_rdata_q[2]}),
-	.out_bus({ddr_sh_stat_ack2, ddr_sh_stat_int2, ddr_sh_stat_rdata2})
-);
-
-
-// DDR interface bridge
-axi_bus_t lcl_cl_sh_ddra();
-axi_bus_t lcl_cl_sh_ddrb();
-axi_bus_t lcl_cl_sh_ddrd();
-
-logic[15:0] cl_sh_ddr_awid_2d[2:0];
-logic[63:0] cl_sh_ddr_awaddr_2d[2:0];
-logic[7:0] cl_sh_ddr_awlen_2d[2:0];
-logic[2:0] cl_sh_ddr_awsize_2d[2:0];
-logic[1:0] cl_sh_ddr_awburst_2d[2:0];
-logic cl_sh_ddr_awvalid_2d [2:0];
-logic[2:0] sh_cl_ddr_awready_2d;
-
-logic[15:0] cl_sh_ddr_wid_2d[2:0];
-logic[511:0] cl_sh_ddr_wdata_2d[2:0];
-logic[63:0] cl_sh_ddr_wstrb_2d[2:0];
-logic[2:0] cl_sh_ddr_wlast_2d;
-logic[2:0] cl_sh_ddr_wvalid_2d;
-logic[2:0] sh_cl_ddr_wready_2d;
-
-logic[15:0] sh_cl_ddr_bid_2d[2:0];
-logic[1:0] sh_cl_ddr_bresp_2d[2:0];
-logic[2:0] sh_cl_ddr_bvalid_2d;
-logic[2:0] cl_sh_ddr_bready_2d;
-
-logic[15:0] cl_sh_ddr_arid_2d[2:0];
-logic[63:0] cl_sh_ddr_araddr_2d[2:0];
-logic[7:0] cl_sh_ddr_arlen_2d[2:0];
-logic[2:0] cl_sh_ddr_arsize_2d[2:0];
-logic[1:0] cl_sh_ddr_arburst_2d[2:0];
-logic[2:0] cl_sh_ddr_arvalid_2d;
-logic[2:0] sh_cl_ddr_arready_2d;
-
-logic[15:0] sh_cl_ddr_rid_2d[2:0];
-logic[511:0] sh_cl_ddr_rdata_2d[2:0];
-logic[1:0] sh_cl_ddr_rresp_2d[2:0];
-logic[2:0] sh_cl_ddr_rlast_2d;
-logic[2:0] sh_cl_ddr_rvalid_2d;
-logic[2:0] cl_sh_ddr_rready_2d;
-
-assign cl_sh_ddr_awid_2d = '{lcl_cl_sh_ddrd.awid, lcl_cl_sh_ddrb.awid, lcl_cl_sh_ddra.awid};
-assign cl_sh_ddr_awaddr_2d = '{lcl_cl_sh_ddrd.awaddr, lcl_cl_sh_ddrb.awaddr, lcl_cl_sh_ddra.awaddr};
-assign cl_sh_ddr_awlen_2d = '{lcl_cl_sh_ddrd.awlen, lcl_cl_sh_ddrb.awlen, lcl_cl_sh_ddra.awlen};
-assign cl_sh_ddr_awsize_2d = '{lcl_cl_sh_ddrd.awsize, lcl_cl_sh_ddrb.awsize, lcl_cl_sh_ddra.awsize};
-assign cl_sh_ddr_awvalid_2d = '{lcl_cl_sh_ddrd.awvalid, lcl_cl_sh_ddrb.awvalid, lcl_cl_sh_ddra.awvalid};
-assign cl_sh_ddr_awburst_2d = {2'b01, 2'b01, 2'b01};
-assign {lcl_cl_sh_ddrd.awready, lcl_cl_sh_ddrb.awready, lcl_cl_sh_ddra.awready} = sh_cl_ddr_awready_2d;
-
-assign cl_sh_ddr_wid_2d = '{0, 0, 0};
-assign cl_sh_ddr_wdata_2d = '{lcl_cl_sh_ddrd.wdata, lcl_cl_sh_ddrb.wdata, lcl_cl_sh_ddra.wdata};
-assign cl_sh_ddr_wstrb_2d = '{lcl_cl_sh_ddrd.wstrb, lcl_cl_sh_ddrb.wstrb, lcl_cl_sh_ddra.wstrb};
-assign cl_sh_ddr_wlast_2d = {lcl_cl_sh_ddrd.wlast, lcl_cl_sh_ddrb.wlast, lcl_cl_sh_ddra.wlast};
-assign cl_sh_ddr_wvalid_2d = {lcl_cl_sh_ddrd.wvalid, lcl_cl_sh_ddrb.wvalid, lcl_cl_sh_ddra.wvalid};
-assign {lcl_cl_sh_ddrd.wready, lcl_cl_sh_ddrb.wready, lcl_cl_sh_ddra.wready} = sh_cl_ddr_wready_2d;
-
-assign {lcl_cl_sh_ddrd.bid, lcl_cl_sh_ddrb.bid, lcl_cl_sh_ddra.bid} = {sh_cl_ddr_bid_2d[2], sh_cl_ddr_bid_2d[1], sh_cl_ddr_bid_2d[0]};
-assign {lcl_cl_sh_ddrd.bresp, lcl_cl_sh_ddrb.bresp, lcl_cl_sh_ddra.bresp} = {sh_cl_ddr_bresp_2d[2], sh_cl_ddr_bresp_2d[1], sh_cl_ddr_bresp_2d[0]};
-assign {lcl_cl_sh_ddrd.bvalid, lcl_cl_sh_ddrb.bvalid, lcl_cl_sh_ddra.bvalid} = sh_cl_ddr_bvalid_2d;
-assign cl_sh_ddr_bready_2d = {lcl_cl_sh_ddrd.bready, lcl_cl_sh_ddrb.bready, lcl_cl_sh_ddra.bready};
-
-assign cl_sh_ddr_arid_2d = '{lcl_cl_sh_ddrd.arid, lcl_cl_sh_ddrb.arid, lcl_cl_sh_ddra.arid};
-assign cl_sh_ddr_araddr_2d = '{lcl_cl_sh_ddrd.araddr, lcl_cl_sh_ddrb.araddr, lcl_cl_sh_ddra.araddr};
-assign cl_sh_ddr_arlen_2d = '{lcl_cl_sh_ddrd.arlen, lcl_cl_sh_ddrb.arlen, lcl_cl_sh_ddra.arlen};
-assign cl_sh_ddr_arsize_2d = '{lcl_cl_sh_ddrd.arsize, lcl_cl_sh_ddrb.arsize, lcl_cl_sh_ddra.arsize};
-assign cl_sh_ddr_arvalid_2d = {lcl_cl_sh_ddrd.arvalid, lcl_cl_sh_ddrb.arvalid, lcl_cl_sh_ddra.arvalid};
-assign cl_sh_ddr_arburst_2d = {2'b01, 2'b01, 2'b01};
-assign {lcl_cl_sh_ddrd.arready, lcl_cl_sh_ddrb.arready, lcl_cl_sh_ddra.arready} = sh_cl_ddr_arready_2d;
-
-assign {lcl_cl_sh_ddrd.rid, lcl_cl_sh_ddrb.rid, lcl_cl_sh_ddra.rid} = {sh_cl_ddr_rid_2d[2], sh_cl_ddr_rid_2d[1], sh_cl_ddr_rid_2d[0]};
-assign {lcl_cl_sh_ddrd.rresp, lcl_cl_sh_ddrb.rresp, lcl_cl_sh_ddra.rresp} = {sh_cl_ddr_rresp_2d[2], sh_cl_ddr_rresp_2d[1], sh_cl_ddr_rresp_2d[0]};
-assign {lcl_cl_sh_ddrd.rdata, lcl_cl_sh_ddrb.rdata, lcl_cl_sh_ddra.rdata} = {sh_cl_ddr_rdata_2d[2], sh_cl_ddr_rdata_2d[1], sh_cl_ddr_rdata_2d[0]};
-assign {lcl_cl_sh_ddrd.rlast, lcl_cl_sh_ddrb.rlast, lcl_cl_sh_ddra.rlast} = sh_cl_ddr_rlast_2d;
-assign {lcl_cl_sh_ddrd.rvalid, lcl_cl_sh_ddrb.rvalid, lcl_cl_sh_ddra.rvalid} = sh_cl_ddr_rvalid_2d;
-assign cl_sh_ddr_rready_2d = {lcl_cl_sh_ddrd.rready, lcl_cl_sh_ddrb.rready, lcl_cl_sh_ddra.rready};
-
-
-// SH DDR
-sh_ddr #(
-	.DDR_A_PRESENT(0),
-	.DDR_B_PRESENT(0),
-	.DDR_D_PRESENT(0)
-) SH_DDR (
-	.clk(global_clk),
-	.rst_n(rst_n[1]),
+	.rst(!rst_n[1]),
 	
-	.stat_clk(global_clk),
-	.stat_rst_n(rst_n[1]),
-	
-	.CLK_300M_DIMM0_DP(CLK_300M_DIMM0_DP),
-	.CLK_300M_DIMM0_DN(CLK_300M_DIMM0_DN),
-	.M_A_ACT_N(M_A_ACT_N),
-	.M_A_MA(M_A_MA),
-	.M_A_BA(M_A_BA),
-	.M_A_BG(M_A_BG),
-	.M_A_CKE(M_A_CKE),
-	.M_A_ODT(M_A_ODT),
-	.M_A_CS_N(M_A_CS_N),
-	.M_A_CLK_DN(M_A_CLK_DN),
-	.M_A_CLK_DP(M_A_CLK_DP),
-	.M_A_PAR(M_A_PAR),
-	.M_A_DQ(M_A_DQ),
-	.M_A_ECC(M_A_ECC),
-	.M_A_DQS_DP(M_A_DQS_DP),
-	.M_A_DQS_DN(M_A_DQS_DN),
-	.cl_RST_DIMM_A_N(cl_RST_DIMM_A_N),
-	
-	.CLK_300M_DIMM1_DP(CLK_300M_DIMM1_DP),
-	.CLK_300M_DIMM1_DN(CLK_300M_DIMM1_DN),
-	.M_B_ACT_N(M_B_ACT_N),
-	.M_B_MA(M_B_MA),
-	.M_B_BA(M_B_BA),
-	.M_B_BG(M_B_BG),
-	.M_B_CKE(M_B_CKE),
-	.M_B_ODT(M_B_ODT),
-	.M_B_CS_N(M_B_CS_N),
-	.M_B_CLK_DN(M_B_CLK_DN),
-	.M_B_CLK_DP(M_B_CLK_DP),
-	.M_B_PAR(M_B_PAR),
-	.M_B_DQ(M_B_DQ),
-	.M_B_ECC(M_B_ECC),
-	.M_B_DQS_DP(M_B_DQS_DP),
-	.M_B_DQS_DN(M_B_DQS_DN),
-	.cl_RST_DIMM_B_N(cl_RST_DIMM_B_N),
-	
-	.CLK_300M_DIMM3_DP(CLK_300M_DIMM3_DP),
-	.CLK_300M_DIMM3_DN(CLK_300M_DIMM3_DN),
-	.M_D_ACT_N(M_D_ACT_N),
-	.M_D_MA(M_D_MA),
-	.M_D_BA(M_D_BA),
-	.M_D_BG(M_D_BG),
-	.M_D_CKE(M_D_CKE),
-	.M_D_ODT(M_D_ODT),
-	.M_D_CS_N(M_D_CS_N),
-	.M_D_CLK_DN(M_D_CLK_DN),
-	.M_D_CLK_DP(M_D_CLK_DP),
-	.M_D_PAR(M_D_PAR),
-	.M_D_DQ(M_D_DQ),
-	.M_D_ECC(M_D_ECC),
-	.M_D_DQS_DP(M_D_DQS_DP),
-	.M_D_DQS_DN(M_D_DQS_DN),
-	.cl_RST_DIMM_D_N(cl_RST_DIMM_D_N),
-	
-	//------------------------------------------------------
-	// DDR-4 Interface from CL (AXI-4)
-	//------------------------------------------------------
-	.cl_sh_ddr_awid(cl_sh_ddr_awid_2d),
-	.cl_sh_ddr_awaddr(cl_sh_ddr_awaddr_2d),
-	.cl_sh_ddr_awlen(cl_sh_ddr_awlen_2d),
-	.cl_sh_ddr_awsize(cl_sh_ddr_awsize_2d),
-	.cl_sh_ddr_awvalid(cl_sh_ddr_awvalid_2d),
-	.cl_sh_ddr_awburst(cl_sh_ddr_awburst_2d),
-	.sh_cl_ddr_awready(sh_cl_ddr_awready_2d),
-	
-	.cl_sh_ddr_wid(cl_sh_ddr_wid_2d),
-	.cl_sh_ddr_wdata(cl_sh_ddr_wdata_2d),
-	.cl_sh_ddr_wstrb(cl_sh_ddr_wstrb_2d),
-	.cl_sh_ddr_wlast(cl_sh_ddr_wlast_2d),
-	.cl_sh_ddr_wvalid(cl_sh_ddr_wvalid_2d),
-	.sh_cl_ddr_wready(sh_cl_ddr_wready_2d),
-	
-	.sh_cl_ddr_bid(sh_cl_ddr_bid_2d),
-	.sh_cl_ddr_bresp(sh_cl_ddr_bresp_2d),
-	.sh_cl_ddr_bvalid(sh_cl_ddr_bvalid_2d),
-	.cl_sh_ddr_bready(cl_sh_ddr_bready_2d),
-	
-	.cl_sh_ddr_arid(cl_sh_ddr_arid_2d),
-	.cl_sh_ddr_araddr(cl_sh_ddr_araddr_2d),
-	.cl_sh_ddr_arlen(cl_sh_ddr_arlen_2d),
-	.cl_sh_ddr_arsize(cl_sh_ddr_arsize_2d),
-	.cl_sh_ddr_arvalid(cl_sh_ddr_arvalid_2d),
-	.cl_sh_ddr_arburst(cl_sh_ddr_arburst_2d),
-	.sh_cl_ddr_arready(sh_cl_ddr_arready_2d),
-	
-	.sh_cl_ddr_rid(sh_cl_ddr_rid_2d),
-	.sh_cl_ddr_rdata(sh_cl_ddr_rdata_2d),
-	.sh_cl_ddr_rresp(sh_cl_ddr_rresp_2d),
-	.sh_cl_ddr_rlast(sh_cl_ddr_rlast_2d),
-	.sh_cl_ddr_rvalid(sh_cl_ddr_rvalid_2d),
-	.cl_sh_ddr_rready(cl_sh_ddr_rready_2d),
-	
-	.sh_cl_ddr_is_ready(lcl_sh_cl_ddr_is_ready),
-	
-	.sh_ddr_stat_addr0  (sh_ddr_stat_addr_q[0]),
-	.sh_ddr_stat_wr0    (sh_ddr_stat_wr_q[0]),
-	.sh_ddr_stat_rd0    (sh_ddr_stat_rd_q[0]),
-	.sh_ddr_stat_wdata0 (sh_ddr_stat_wdata_q[0]),
-	.ddr_sh_stat_ack0   (ddr_sh_stat_ack_q[0]),
-	.ddr_sh_stat_rdata0 (ddr_sh_stat_rdata_q[0]),
-	.ddr_sh_stat_int0   (ddr_sh_stat_int_q[0]),
-	
-	.sh_ddr_stat_addr1  (sh_ddr_stat_addr_q[1]),
-	.sh_ddr_stat_wr1    (sh_ddr_stat_wr_q[1]),
-	.sh_ddr_stat_rd1    (sh_ddr_stat_rd_q[1]),
-	.sh_ddr_stat_wdata1 (sh_ddr_stat_wdata_q[1]),
-	.ddr_sh_stat_ack1   (ddr_sh_stat_ack_q[1]),
-	.ddr_sh_stat_rdata1 (ddr_sh_stat_rdata_q[1]),
-	.ddr_sh_stat_int1   (ddr_sh_stat_int_q[1]),
-	
-	.sh_ddr_stat_addr2  (sh_ddr_stat_addr_q[2]),
-	.sh_ddr_stat_wr2    (sh_ddr_stat_wr_q[2]),
-	.sh_ddr_stat_rd2    (sh_ddr_stat_rd_q[2]),
-	.sh_ddr_stat_wdata2 (sh_ddr_stat_wdata_q[2]),
-	.ddr_sh_stat_ack2   (ddr_sh_stat_ack_q[2]),
-	.ddr_sh_stat_rdata2 (ddr_sh_stat_rdata_q[2]),
-	.ddr_sh_stat_int2   (ddr_sh_stat_int_q[2])
+	.axi_s(ax_axi_m),
+	.axi_m(ax_axi_s)
 );
 
 
@@ -490,6 +246,14 @@ sh_ddr #(
 
 // PCIM interface bridge
 axi_bus_t cl_sh_pcim ();
+
+axi_reg pcim_ar (
+	.clk(global_clk),
+	.rst_n(rst_n[1]),
+	
+	.axi_s(cl_axi_slv_bus[4]),
+	.axi_m(cl_sh_pcim)
+);
 
 always_comb begin
 	cl_sh_pcim_awid = cl_sh_pcim.awid;
@@ -531,6 +295,7 @@ end
 
 // PCIS interface bridge
 axi_bus_t sh_cl_pcis ();
+axi_bus_t pcis_axi_m ();
 
 always_comb begin
 	sh_cl_pcis.awid = sh_cl_dma_pcis_awid;
@@ -570,47 +335,19 @@ end
 assign cl_sh_dma_rd_full  = 1'b0;
 assign cl_sh_dma_wr_full  = 1'b0;
 
-
-//------------------------------------
-// DMA and Interconnect
-//------------------------------------
-
-// DMA module
-axi_bus_t cl_axi_dma_bus();
-
-pcie_dma dma (
+axi_reg pcis_ar_m0 (
 	.clk(global_clk),
-	.rst_n(rst_n),
+	.rst_n(rst_n[0]),
 	
-	.softreg_req(sys_softreg_req[9]),
-	.softreg_resp(sys_softreg_resp[9]),
-	
-	.sh_cl_pcis(sh_cl_pcis),
-	.dram_dma(cl_axi_dma_bus)
+	.axi_s(sh_cl_pcis),
+	.axi_m(pcis_axi_m)
 );
-
-
-// Interconnect
-axi_bus_t cl_axi_mstr_bus [3:0] ();
-
-cl_dma_pcis_slv CL_DMA_PCIS_SLV (
-	.aclk(global_clk),
-	.rst_n(rst_n),
+axi_reg pcis_ar_m1 (
+	.clk(global_clk),
+	.rst_n(rst_n[0]),
 	
-	.sys_softreg_req(sys_softreg_req[8:0]),
-	.sys_softreg_resp(sys_softreg_resp[8:0]),
-	
-	.aux_sys_softreg_req(sys_softreg_req[13:10]),
-	.aux_sys_softreg_resp(sys_softreg_resp[13:10]),
-	
-	.cl_axi_dma_bus(cl_axi_dma_bus),
-	.cl_axi_mstr_bus(cl_axi_mstr_bus),
-	
-	.lcl_cl_sh_ddra(lcl_cl_sh_ddra),
-	.lcl_cl_sh_ddrb(lcl_cl_sh_ddrb),
-	.cl_sh_ddr_bus(cl_sh_ddr_bus),
-	.lcl_cl_sh_ddrd(lcl_cl_sh_ddrd),
-	.cl_sh_pcim(cl_sh_pcim)
+	.axi_s(pcis_axi_m),
+	.axi_m(cl_axi_mstr_bus[4])
 );
 
 
@@ -675,21 +412,51 @@ AXIL2SR app_axil2sr (
 );
 assign app_softreg_req_grant = 1;
 
-
 // App SoftReg buffering
-lib_pipe #(.WIDTH(98), .STAGES(1)) PIPE_APP_SR_REQ0  (.clk(global_clk), .rst_n(rst_n[0]), .in_bus(app_softreg_req_buf[2]),  .out_bus(app_softreg_req_buf[1]));
-lib_pipe #(.WIDTH(98), .STAGES(2)) PIPE_APP_SR_REQ1  (.clk(global_clk), .rst_n(rst_n[1]), .in_bus(app_softreg_req_buf[1]),  .out_bus(app_softreg_req_buf[0]));
-lib_pipe #(.WIDTH(65), .STAGES(2)) PIPE_APP_SR_RESP1 (.clk(global_clk), .rst_n(rst_n[1]), .in_bus(app_softreg_resp_buf[0]), .out_bus(app_softreg_resp_buf[1]));
-lib_pipe #(.WIDTH(65), .STAGES(1)) PIPE_APP_SR_RESP0 (.clk(global_clk), .rst_n(rst_n[0]), .in_bus(app_softreg_resp_buf[1]), .out_bus(app_softreg_resp_buf[2]));
-
+lib_pipe #(
+	.WIDTH(98),
+	.STAGES(1)
+) PIPE_APP_SR_REQ0 (
+	.clk(global_clk),
+	.rst_n(rst_n[0]),
+	.in_bus(app_softreg_req_buf[2]),
+	.out_bus(app_softreg_req_buf[1])
+);
+lib_pipe #(
+	.WIDTH(98),
+	.STAGES(2)
+) PIPE_APP_SR_REQ1 (
+	.clk(global_clk),
+	.rst_n(rst_n[1]),
+	.in_bus(app_softreg_req_buf[1]),
+	.out_bus(app_softreg_req_buf[0])
+);
+lib_pipe #(
+	.WIDTH(65),
+	.STAGES(2)
+) PIPE_APP_SR_RESP1 (
+	.clk(global_clk),
+	.rst_n(rst_n[1]),
+	.in_bus(app_softreg_resp_buf[0]),
+	.out_bus(app_softreg_resp_buf[1])
+);
+lib_pipe #(
+	.WIDTH(65),
+	.STAGES(1)
+) PIPE_APP_SR_RESP0 (
+	.clk(global_clk),
+	.rst_n(rst_n[0]),
+	.in_bus(app_softreg_resp_buf[1]),
+	.out_bus(app_softreg_resp_buf[2])
+);
 
 // AmorphOS to apps
 SoftRegReq  app_softreg_req_  [F1_NUM_APPS-1:0];
 SoftRegResp app_softreg_resp_ [F1_NUM_APPS-1:0];
 
-AmorphOSSoftReg_RouteTree #(.SR_NUM_APPS(F1_NUM_APPS))
-app_softreg_inst
-(
+AmorphOSSoftReg_RouteTree #(
+	.SR_NUM_APPS(F1_NUM_APPS)
+) app_softreg_inst (
 	// User clock and reset
 	.clk(global_clk),
 	.rst(!rst_n[1]),
@@ -706,159 +473,245 @@ app_softreg_inst
 // Apps 
 //------------------------------------
 
-generate
-	for (app_num = 0; app_num < F1_NUM_APPS; app_num = app_num + 1) begin : app
-		// Use SLR reset that matches constraints
-		reg app_rst_n;
-		always @(*) begin
-			case (app_num)
-				0: app_rst_n = rst_n[1];
-				1: app_rst_n = rst_n[0];
-				2: app_rst_n = rst_n[2];
-				3: app_rst_n = rst_n[2];
-			endcase
-		end
-		wire app_rst = !app_rst_n;
+for (app_num = 0; app_num < F1_NUM_APPS; app_num = app_num + 1) begin : app
+	// Use SLR reset that matches constraints
+	reg app_rst_n;
+	always_comb begin
+		case (app_num)
+			0: app_rst_n = rst_n[1];
+			1: app_rst_n = rst_n[0];
+			2: app_rst_n = rst_n[2];
+			3: app_rst_n = rst_n[2];
+		endcase
+	end
+	wire app_rst = !app_rst_n;
+	
+	// Buffer app SoftReg
+	SoftRegReq  app_softreg_req_buf;
+	SoftRegReq  app_softreg_req;
+	SoftRegResp app_softreg_resp;
+	SoftRegResp app_softreg_resp_buf;
+	lib_pipe #(
+		.WIDTH(98),
+		.STAGES(2)
+	) PIPE_APP_SR_REQ0 (
+		.clk(global_clk),
+		.rst_n(rst_n[1]),
+		.in_bus(app_softreg_req_[app_num]),
+		.out_bus(app_softreg_req_buf)
+	);
+	lib_pipe #(
+		.WIDTH(98),
+		.STAGES(2)
+	) PIPE_APP_SR_REQ1 (
+		.clk(global_clk),
+		.rst_n(app_rst_n),
+		.in_bus(app_softreg_req_buf),
+		.out_bus(app_softreg_req)
+	);
+	lib_pipe #(
+		.WIDTH(65),
+		.STAGES(2)
+	) PIPE_APP_SR_RESP1 (
+		.clk(global_clk),
+		.rst_n(app_rst_n),
+		.in_bus(app_softreg_resp),
+		.out_bus(app_softreg_resp_buf)
+	);
+	lib_pipe #(
+		.WIDTH(65),
+		.STAGES(2)
+	) PIPE_APP_SR_RESP0 (
+		.clk(global_clk),
+		.rst_n(rst_n[1]),
+		.in_bus(app_softreg_resp_buf),
+		.out_bus(app_softreg_resp_[app_num])
+	);
+	
+	// Buffer sys SoftReg
+	SoftRegReq  ab_softreg_req;
+	SoftRegResp ab_softreg_resp;
+	lib_pipe #(
+		.WIDTH(98),
+		.STAGES(2)
+	) PIPE_SYS_SR_REQ (
+		.clk(global_clk),
+		.rst_n(app_rst_n),
+		.in_bus(sys_softreg_req[app_num]),
+		.out_bus(ab_softreg_req)
+	);
+	lib_pipe #(
+		.WIDTH(65),
+		.STAGES(2)
+	) PIPE_SYS_SR_RESP (
+		.clk(global_clk),
+		.rst_n(app_rst_n),
+		.in_bus(ab_softreg_resp),
+		.out_bus(sys_softreg_resp[app_num])
+	);
+	
+	// Buffer app AXI_M
+	axi_bus_t app_axi_m1 ();
+	axi_bus_t app_axi_m ();
+	axi_reg app_ar_m1 (
+		.clk(global_clk),
+		.rst_n(app_rst_n),
 		
-		// Buffer app SoftReg
-		SoftRegReq  app_softreg_req_buf;
-		SoftRegReq  app_softreg_req;
-		SoftRegResp app_softreg_resp;
-		SoftRegResp app_softreg_resp_buf;
-		lib_pipe #(.WIDTH(98), .STAGES(2)) PIPE_APP_SR_REQ0 (.clk(global_clk), .rst_n(rst_n[1]), .in_bus(app_softreg_req_[app_num]), .out_bus(app_softreg_req_buf));
-		lib_pipe #(.WIDTH(98), .STAGES(2)) PIPE_APP_SR_REQ1 (.clk(global_clk), .rst_n(app_rst_n), .in_bus(app_softreg_req_buf), .out_bus(app_softreg_req));
-		lib_pipe #(.WIDTH(65), .STAGES(2)) PIPE_APP_SR_RESP1 (.clk(global_clk), .rst_n(app_rst_n), .in_bus(app_softreg_resp), .out_bus(app_softreg_resp_buf));
-		lib_pipe #(.WIDTH(65), .STAGES(2)) PIPE_APP_SR_RESP0 (.clk(global_clk), .rst_n(rst_n[1]), .in_bus(app_softreg_resp_buf), .out_bus(app_softreg_resp_[app_num]));
+		.axi_m(cl_axi_mstr_bus[app_num]),
+		.axi_s(app_axi_m1)
+	);
+	axi_reg app_ar_m0 (
+		.clk(global_clk),
+		.rst_n(app_rst_n),
 		
-		// Buffer app AXI
-		axi_bus_t app_axi_bus ();
-		axi_reg app_ar (
+		.axi_m(app_axi_m1),
+		.axi_s(app_axi_m)
+	);
+
+	// Buffer app AXI_S
+	axi_bus_t app_axi_s1 ();
+	axi_bus_t app_axi_s ();
+	axi_reg app_ar_s1 (
+		.clk(global_clk),
+		.rst_n(app_rst_n),
+		
+		.axi_s(cl_axi_slv_bus[app_num]),
+		.axi_m(app_axi_s1)
+	);
+	axi_reg app_ar_s0 (
+		.clk(global_clk),
+		.rst_n(app_rst_n),
+		
+		.axi_s(app_axi_s1),
+		.axi_m(app_axi_s)
+	);
+	
+	// Convert AXI to AXIS
+	axi_stream_t app_axis_m ();
+	axi_stream_t app_axis_s ();
+	axis_buf app_axis_buf (
+		.clk(global_clk),
+		.rst(app_rst),
+		
+		.softreg_req(ab_softreg_req),
+		.softreg_resp(ab_softreg_resp),
+		
+		.axi_m(app_axi_m),
+		.axi_s(app_axi_s),
+		
+		.axis_s(app_axis_m),
+		.axis_m(app_axis_s)
+	);
+	
+	// Instantiate app
+	AXIS_Strm strm_inst (
+		// General signals
+		.clk(global_clk),
+		.rst(app_rst),
+		
+		// SoftReg control interface
+		.softreg_req(app_softreg_req),
+		.softreg_resp(app_softreg_resp),
+		
+		// Virtual stream interface
+		.axis_m(app_axis_m),
+		.axis_s(app_axis_s)
+	);
+	
+	/*
+	if (F1_CONFIG_APPS == 1) begin : aes
+		AESWrapper aes_inst (
+			// General signals
 			.clk(global_clk),
-			.rst_n(app_rst_n),
+			.rst(app_rst),
 			
-			.axi_s(app_axi_bus),
-			.axi_m(cl_axi_mstr_bus[app_num])
+			// Virtual memory interface
+			.axi_m(app_axi_bus),
+			
+			// SoftReg control interface
+			.softreg_req(app_softreg_req),
+			.softreg_resp(app_softreg_resp)
 		);
-		
-		// Instantiate app
-		if (F1_CONFIG_APPS == 1) begin : aes
-			AESWrapper aes_inst (
-				// General signals
-				.clk(global_clk),
-				.rst(app_rst),
-				
-				// Virtual memory interface
-				.axi_m(app_axi_bus),
-				
-				// SoftReg control interface
-				.softreg_req(app_softreg_req),
-				.softreg_resp(app_softreg_resp)
-			);
-		end else if (F1_CONFIG_APPS == 2) begin : conv
-			ConvWrapper conv_inst (
-				// General signals
-				.clk(global_clk),
-				.rst(app_rst),
-				
-				// Virtual memory interface
-				.axi_m(app_axi_bus),
-				
-				// SoftReg control interface
-				.softreg_req(app_softreg_req),
-				.softreg_resp(app_softreg_resp)
-			);
-		end else if (F1_CONFIG_APPS == 3) begin : dnn
-			DNNWrapper dnn_inst (
-				// General signals
-				.clk(global_clk),
-				.rst(app_rst),
-				
-				// Virtual memory interface
-				.axi_m(app_axi_bus),
-				
-				// SoftReg control interface
-				.softreg_req(app_softreg_req),
-				.softreg_resp(app_softreg_resp)
-			);
-		end else if (F1_CONFIG_APPS == 4) begin : hls_flow
-			HLSFlowWrapper hls_flow_inst (
-				// General signals
-				.clk(global_clk),
-				.rst(app_rst),
-				
-				// Virtual memory interface
-				.axi_m(app_axi_bus),
-				
-				// SoftReg control interface
-				.softreg_req(app_softreg_req),
-				.softreg_resp(app_softreg_resp)
-			);
-		end else if (F1_CONFIG_APPS == 5) begin : gups
-			RandomAccess gups_inst (
-				// General signals
-				.clk(global_clk),
-				.rst(app_rst),
-				
-				// Virtual memory interface
-				.axi_m(app_axi_bus),
-				
-				// SoftReg control interface
-				.softreg_req(app_softreg_req),
-				.softreg_resp(app_softreg_resp)
-			);
-		end else if (F1_CONFIG_APPS == 6) begin : hls_hll
-			HLSHLLWrapper hls_hll_inst (
-				// General signals
-				.clk(global_clk),
-				.rst(app_rst),
-				
-				// Virtual memory interface
-				.axi_m(app_axi_bus),
-				
-				// SoftReg control interface
-				.softreg_req(app_softreg_req),
-				.softreg_resp(app_softreg_resp)
-			);
-		end else if (F1_CONFIG_APPS == 7) begin : md5
-			MD5Wrapper md5_inst (
-				// General signals
-				.clk(global_clk),
-				.rst(app_rst),
-				
-				// Virtual memory interface
-				.axi_m(app_axi_bus),
-				
-				// SoftReg control interface
-				.softreg_req(app_softreg_req),
-				.softreg_resp(app_softreg_resp)
-			);
-		end else if (F1_CONFIG_APPS == 8) begin : nw
-			NWWrapper nw_inst (
-				// General signals
-				.clk(global_clk),
-				.rst(app_rst),
-				
-				// Virtual memory interface
-				.axi_m(app_axi_bus),
-				
-				// SoftReg control interface
-				.softreg_req(app_softreg_req),
-				.softreg_resp(app_softreg_resp)
-			);
-		end else if (F1_CONFIG_APPS == 9) begin : hls_pgrnk
-			HLSPgRnkWrapper hls_pgrnk_inst (
-				// General signals
-				.clk(global_clk),
-				.rst(app_rst),
-				
-				// Virtual memory interface
-				.axi_m(app_axi_bus),
-				
-				// SoftReg control interface
-				.softreg_req(app_softreg_req),
-				.softreg_resp(app_softreg_resp)
-			);
-		end else if (F1_CONFIG_APPS == 10) begin : rng
+	end else if (F1_CONFIG_APPS == 2) begin : conv
+		ConvWrapper conv_inst (
+			// General signals
+			.clk(global_clk),
+			.rst(app_rst),
+			
+			// Virtual memory interface
+			.axi_m(app_axi_bus),
+			
+			// SoftReg control interface
+			.softreg_req(app_softreg_req),
+			.softreg_resp(app_softreg_resp)
+		);
+	end else if (F1_CONFIG_APPS == 4) begin : hls_flow
+		HLSFlowWrapper hls_flow_inst (
+			// General signals
+			.clk(global_clk),
+			.rst(app_rst),
+			
+			// Virtual memory interface
+			.axi_m(app_axi_bus),
+			
+			// SoftReg control interface
+			.softreg_req(app_softreg_req),
+			.softreg_resp(app_softreg_resp)
+		);
+	end else if (F1_CONFIG_APPS == 6) begin : hls_hll
+		HLSHLLWrapper hls_hll_inst (
+			// General signals
+			.clk(global_clk),
+			.rst(app_rst),
+			
+			// Virtual memory interface
+			.axi_m(app_axi_bus),
+			
+			// SoftReg control interface
+			.softreg_req(app_softreg_req),
+			.softreg_resp(app_softreg_resp)
+		);
+	end else if (F1_CONFIG_APPS == 7) begin : md5
+		MD5Wrapper md5_inst (
+			// General signals
+			.clk(global_clk),
+			.rst(app_rst),
+			
+			// Virtual memory interface
+			.axi_m(app_axi_bus),
+			
+			// SoftReg control interface
+			.softreg_req(app_softreg_req),
+			.softreg_resp(app_softreg_resp)
+		);
+	end else if (F1_CONFIG_APPS == 11) begin : sha
+		SHAWrapper sha_inst (
+			// General signals
+			.clk(global_clk),
+			.rst(app_rst),
+			
+			// Virtual memory interface
+			.axi_m(app_axi_bus),
+			
+			// SoftReg control interface
+			.softreg_req(app_softreg_req),
+			.softreg_resp(app_softreg_resp)
+		);
+	end else if (F1_CONFIG_APPS == 12) begin : hls_sha
+		HLSSHAWrapper hls_sha_inst (
+			// General signals
+			.clk(global_clk),
+			.rst(app_rst),
+			
+			// Virtual memory interface
+			.axi_m(app_axi_bus),
+			
+			// SoftReg control interface
+			.softreg_req(app_softreg_req),
+			.softreg_resp(app_softreg_resp)
+		);
+	end else if (F1_CONFIG_APPS == 14) begin : multi
+		if (app_num == 0) begin
 			RNGWrapper rng_inst (
 				// General signals
 				.clk(global_clk),
@@ -871,20 +724,7 @@ generate
 				.softreg_req(app_softreg_req),
 				.softreg_resp(app_softreg_resp)
 			);
-		end else if (F1_CONFIG_APPS == 11) begin : sha
-			SHAWrapper sha_inst (
-				// General signals
-				.clk(global_clk),
-				.rst(app_rst),
-				
-				// Virtual memory interface
-				.axi_m(app_axi_bus),
-				
-				// SoftReg control interface
-				.softreg_req(app_softreg_req),
-				.softreg_resp(app_softreg_resp)
-			);
-		end else if (F1_CONFIG_APPS == 12) begin : hls_sha
+		end else if (app_num == 1) begin
 			HLSSHAWrapper hls_sha_inst (
 				// General signals
 				.clk(global_clk),
@@ -897,8 +737,8 @@ generate
 				.softreg_req(app_softreg_req),
 				.softreg_resp(app_softreg_resp)
 			);
-		end else if (F1_CONFIG_APPS == 13) begin : hls_tri
-			HLSTriWrapper hls_tri_inst (
+		end else if (app_num == 2) begin
+			HLSPgRnkWrapper hls_pgrnk_inst (
 				// General signals
 				.clk(global_clk),
 				.rst(app_rst),
@@ -910,62 +750,8 @@ generate
 				.softreg_req(app_softreg_req),
 				.softreg_resp(app_softreg_resp)
 			);
-		end else if (F1_CONFIG_APPS == 14) begin : multi
-			if (app_num == 0) begin
-				RNGWrapper rng_inst (
-					// General signals
-					.clk(global_clk),
-					.rst(app_rst),
-					
-					// Virtual memory interface
-					.axi_m(app_axi_bus),
-					
-					// SoftReg control interface
-					.softreg_req(app_softreg_req),
-					.softreg_resp(app_softreg_resp)
-				);
-			end else if (app_num == 1) begin
-				HLSSHAWrapper hls_sha_inst (
-					// General signals
-					.clk(global_clk),
-					.rst(app_rst),
-					
-					// Virtual memory interface
-					.axi_m(app_axi_bus),
-					
-					// SoftReg control interface
-					.softreg_req(app_softreg_req),
-					.softreg_resp(app_softreg_resp)
-				);
-			end else if (app_num == 2) begin
-				HLSPgRnkWrapper hls_pgrnk_inst (
-					// General signals
-					.clk(global_clk),
-					.rst(app_rst),
-					
-					// Virtual memory interface
-					.axi_m(app_axi_bus),
-					
-					// SoftReg control interface
-					.softreg_req(app_softreg_req),
-					.softreg_resp(app_softreg_resp)
-				);
-			end else if (app_num == 3) begin
-				AESWrapper aes_inst (
-					// General signals
-					.clk(global_clk),
-					.rst(app_rst),
-					
-					// Virtual memory interface
-					.axi_m(app_axi_bus),
-					
-					// SoftReg control interface
-					.softreg_req(app_softreg_req),
-					.softreg_resp(app_softreg_resp)
-				);
-			end
-		end else if (F1_CONFIG_APPS == 15) begin : strm
-			Strm strm_inst (
+		end else if (app_num == 3) begin
+			AESWrapper aes_inst (
 				// General signals
 				.clk(global_clk),
 				.rst(app_rst),
@@ -978,8 +764,22 @@ generate
 				.softreg_resp(app_softreg_resp)
 			);
 		end
+	end else if (F1_CONFIG_APPS == 15) begin : strm
+		Strm strm_inst (
+			// General signals
+			.clk(global_clk),
+			.rst(app_rst),
+			
+			// Virtual memory interface
+			.axi_m(app_axi_bus),
+			
+			// SoftReg control interface
+			.softreg_req(app_softreg_req),
+			.softreg_resp(app_softreg_resp)
+		);
 	end
-endgenerate
+	*/
+end
 
 
 //------------------------------------

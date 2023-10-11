@@ -29,7 +29,6 @@ interface axi_bus_t;
    logic[511:0] wdata;
    logic[63:0] wstrb;
    logic wlast;
-   logic wuser;
    logic wvalid;
    logic wready;
    
@@ -48,22 +47,33 @@ interface axi_bus_t;
    logic[15:0] rid;
    logic[511:0] rdata;
    logic[1:0] rresp;
-   logic ruser;
    logic rlast;
    logic rvalid;
    logic rready;
 
    modport master (input awid, awaddr, awlen, awsize, awvalid, output awready,
-                  input wdata, wstrb, wlast, wuser, wvalid, output wready,
+                  input wdata, wstrb, wlast, wvalid, output wready,
                   output bid, bresp, bvalid, input bready,
                   input arid, araddr, arlen, arsize, arvalid, output arready,
-                  output rid, rdata, rresp, rlast, ruser, rvalid, input rready);
+                  output rid, rdata, rresp, rlast, rvalid, input rready);
 
    modport slave (output awid, awaddr, awlen, awsize, awvalid, input awready,
-                  output wdata, wstrb, wlast, wuser, wvalid, input wready,
+                  output wdata, wstrb, wlast, wvalid, input wready,
                   input bid, bresp, bvalid, output bready,
                   output arid, araddr, arlen, arsize, arvalid, input arready,
-                  input rid, rdata, rresp, rlast, ruser, rvalid, output rready);
+                  input rid, rdata, rresp, rlast, rvalid, output rready);
+endinterface
+
+interface axi_stream_t;
+   logic[4:0] tdest;
+   logic[4:0] tid;
+   logic[511:0] tdata;
+   logic tlast;
+   logic tvalid;
+   logic tready;
+   
+   modport master (input tdest, tid, tdata, tlast, tvalid, output tready);
+   modport slave (output tdest, tid, tdata, tlast, tvalid, input tready);
 endinterface
 
 `endif //CL_DRAM_DMA_PKG

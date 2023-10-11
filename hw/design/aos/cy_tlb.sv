@@ -230,15 +230,15 @@ HullFIFO #(
 
 // read data FIFO
 reg rdf_wrreq;
-reg [531:0] rdf_data;
+reg [530:0] rdf_data;
 wire rdf_full;
-wire [531:0] rdf_q;
+wire [530:0] rdf_q;
 wire rdf_empty;
 reg rdf_rdreq;
 
 HullFIFO #(
 	.TYPE(0),
-	.WIDTH(16+512+2+1+1),
+	.WIDTH(16+512+2+1),
 	.LOG_DEPTH(1)
 ) r_data_fifo (
 	.clock(clk),
@@ -399,10 +399,10 @@ always_comb begin
 	// read data buffered in FIFO
 	phys_o.rready = !rdf_full;
 	rdf_wrreq = phys_o.rvalid;
-	rdf_data = {phys_o.rid, phys_o.rdata, phys_o.rresp, phys_o.rlast, phys_o.ruser};
+	rdf_data = {phys_o.rid, phys_o.rdata, phys_o.rresp, phys_o.rlast};
 	virt_m.rvalid = !rdf_empty;
 	rdf_rdreq = virt_m.rready;
-	{virt_m.rid, virt_m.rdata, virt_m.rresp, virt_m.rlast, virt_m.ruser} = rdf_q;
+	{virt_m.rid, virt_m.rdata, virt_m.rresp, virt_m.rlast} = rdf_q;
 	
 	// write requests buffered in FIFO
 	virt_m.awready = !virt_read && (state == 7);
@@ -415,10 +415,10 @@ always_comb begin
 	// write data buffered in FIFO
 	virt_m.wready = !wdf_full;
 	wdf_wrreq = virt_m.wvalid;
-	wdf_data = {virt_m.wdata, virt_m.wstrb, virt_m.wlast, virt_m.wuser};
+	wdf_data = {virt_m.wdata, virt_m.wstrb, virt_m.wlast};
 	phys_o.wvalid = !wdf_empty;
 	wdf_rdreq = phys_o.wready;
-	{phys_o.wdata, phys_o.wstrb, phys_o.wlast, phys_o.wuser} = wdf_q;
+	{phys_o.wdata, phys_o.wstrb, phys_o.wlast} = wdf_q;
 	
 	// write response pass through
 	phys_o.bready = !wrf_full;

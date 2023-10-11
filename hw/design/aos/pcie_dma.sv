@@ -134,7 +134,6 @@ assign dram_dma.rready = !df_full;
 assign df_wrreq = dram_dma.rvalid;
 assign df_data = {dram_dma.rdata, dram_dma.rlast};
 assign {dram_dma.wdata, dram_dma.wlast} = df_q;
-assign dram_dma.wuser = 0;   // TODO: packetize?
 assign dram_dma.wstrb = 64'hFFFFFFFFFFFFFFFF;
 assign df_rdreq = dram_dma.wready;
 assign dram_dma.wvalid = !df_empty;
@@ -315,13 +314,11 @@ always_comb begin
 	axi_m0.rdata = arb_r ? 0 : axi_s.rdata;
 	axi_m0.rresp = arb_r ? 0 : axi_s.rresp;
 	axi_m0.rlast = arb_r ? 0 : axi_s.rlast;
-	axi_m0.ruser = arb_r ? 0 : axi_s.ruser;
 	axi_m0.rvalid = arb_r ? 0 : axi_s.rvalid;
 	axi_m1.rid = arb_r ? axi_s.rid[15:1] : 0;
 	axi_m1.rdata = arb_r ? axi_s.rdata : 0;
 	axi_m1.rresp = arb_r ? axi_s.rresp : 0;
 	axi_m1.rlast = arb_r ? axi_s.rlast : 0;
-	axi_m1.ruser = arb_r ? axi_s.ruser : 0;
 	axi_m1.rvalid = arb_r ? axi_s.rvalid : 0;
 	axi_s.rready = arb_r ? axi_m1.rready : axi_m0.rready;
 	

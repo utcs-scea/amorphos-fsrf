@@ -473,6 +473,24 @@ public:
 				else if (data == 2) phys_bound = base_addrs[app_id] + (1024<<8);
 				else phys_bound = base_addrs[app_id] + (16<<20)/max_apps;
 				return;
+			case 6:
+				for (uint64_t addr = 0x00; addr <= 0x38; addr += 0x8) {
+					uint64_t reg;
+					fpga->read_sys_reg(app_id, addr, reg);
+					printf("0x%lx ", reg);
+				}
+				for (uint64_t addr = 0x100; addr <= 0x138; addr += 0x8) {
+					uint64_t reg;
+					fpga->read_sys_reg(app_id, addr, reg);
+					printf("0x%lx ", reg);
+				}
+				for (uint64_t addr = 0x200; addr <= 0x258; addr += 0x8) {
+					uint64_t reg;
+					fpga->read_sys_reg(app_id, addr, reg);
+					printf("0x%lx ", reg);
+				}
+				printf("\n");
+				return;
 			default:
 				return;
 		}
