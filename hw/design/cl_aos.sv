@@ -246,12 +246,20 @@ axi_xbar ax (
 
 // PCIM interface bridge
 axi_bus_t cl_sh_pcim ();
+axi_bus_t pcim_axi_s ();
 
-axi_reg pcim_ar (
+axi_reg pcim_ar1 (
 	.clk(global_clk),
-	.rst_n(rst_n[1]),
+	.rst_n(rst_n[0]),
 	
 	.axi_s(cl_axi_slv_bus[4]),
+	.axi_m(pcim_axi_s)
+);
+axi_reg pcim_ar0 (
+	.clk(global_clk),
+	.rst_n(rst_n[0]),
+	
+	.axi_s(pcim_axi_s),
 	.axi_m(cl_sh_pcim)
 );
 
@@ -295,7 +303,6 @@ end
 
 // PCIS interface bridge
 axi_bus_t sh_cl_pcis ();
-axi_bus_t pcis_axi_m ();
 
 always_comb begin
 	sh_cl_pcis.awid = sh_cl_dma_pcis_awid;
@@ -335,18 +342,11 @@ end
 assign cl_sh_dma_rd_full  = 1'b0;
 assign cl_sh_dma_wr_full  = 1'b0;
 
-axi_reg pcis_ar_m0 (
+axi_reg pcis_ar_m (
 	.clk(global_clk),
-	.rst_n(rst_n[0]),
+	.rst_n(rst_n[1]),
 	
 	.axi_s(sh_cl_pcis),
-	.axi_m(pcis_axi_m)
-);
-axi_reg pcis_ar_m1 (
-	.clk(global_clk),
-	.rst_n(rst_n[0]),
-	
-	.axi_s(pcis_axi_m),
 	.axi_m(cl_axi_mstr_bus[4])
 );
 
@@ -364,16 +364,16 @@ axi_reg pcis_ar_m1 (
 */
 
 // AXIL2SR to AmorphOS
-SoftRegReq  app_softreg_req_buf [2:0];
+SoftRegReq  app_softreg_req_buf;
 logic       app_softreg_req_grant;
 
-SoftRegResp app_softreg_resp_buf [2:0];
+SoftRegResp app_softreg_resp_buf;
 logic       app_softreg_resp_grant;
 
 AXIL2SR app_axil2sr (
 	// General Signals
 	.clk(global_clk),
-	.rst(!rst_n[0]), // expects active high
+	.rst(!rst_n[1]), // expects active high
 
 	// Write Address
 	.sh_awvalid(sh_ocl_awvalid),
@@ -404,51 +404,13 @@ AXIL2SR app_axil2sr (
 
 	// Interface to SoftReg
 	// Requests
-	.softreg_req(app_softreg_req_buf[2]),
+	.softreg_req(app_softreg_req_buf),
 	.softreg_req_grant(app_softreg_req_grant),
 	// Responses
-	.softreg_resp(app_softreg_resp_buf[2]),
+	.softreg_resp(app_softreg_resp_buf),
 	.softreg_resp_grant(app_softreg_resp_grant)
 );
 assign app_softreg_req_grant = 1;
-
-// App SoftReg buffering
-lib_pipe #(
-	.WIDTH(98),
-	.STAGES(1)
-) PIPE_APP_SR_REQ0 (
-	.clk(global_clk),
-	.rst_n(rst_n[0]),
-	.in_bus(app_softreg_req_buf[2]),
-	.out_bus(app_softreg_req_buf[1])
-);
-lib_pipe #(
-	.WIDTH(98),
-	.STAGES(2)
-) PIPE_APP_SR_REQ1 (
-	.clk(global_clk),
-	.rst_n(rst_n[1]),
-	.in_bus(app_softreg_req_buf[1]),
-	.out_bus(app_softreg_req_buf[0])
-);
-lib_pipe #(
-	.WIDTH(65),
-	.STAGES(2)
-) PIPE_APP_SR_RESP1 (
-	.clk(global_clk),
-	.rst_n(rst_n[1]),
-	.in_bus(app_softreg_resp_buf[0]),
-	.out_bus(app_softreg_resp_buf[1])
-);
-lib_pipe #(
-	.WIDTH(65),
-	.STAGES(1)
-) PIPE_APP_SR_RESP0 (
-	.clk(global_clk),
-	.rst_n(rst_n[0]),
-	.in_bus(app_softreg_resp_buf[1]),
-	.out_bus(app_softreg_resp_buf[2])
-);
 
 // AmorphOS to apps
 SoftRegReq  app_softreg_req_  [F1_NUM_APPS-1:0];
@@ -461,8 +423,8 @@ AmorphOSSoftReg_RouteTree #(
 	.clk(global_clk),
 	.rst(!rst_n[1]),
 	// Interface to Host
-	.softreg_req(app_softreg_req_buf[0]),
-	.softreg_resp(app_softreg_resp_buf[0]),
+	.softreg_req(app_softreg_req_buf),
+	.softreg_resp(app_softreg_resp_buf),
 	// Virtualized interface each app
 	.app_softreg_req(app_softreg_req_),
 	.app_softreg_resp(app_softreg_resp_)
