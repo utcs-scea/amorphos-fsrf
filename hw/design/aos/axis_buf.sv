@@ -165,7 +165,7 @@ HullFIFO #(
 );
 
 // Receive response FIFO
-// Length, tdest, and tlast
+// Length, tdest, tlast, and pointer
 logic rpf_wrreq;
 logic [17:0] rpf_data;
 logic rpf_full;
@@ -421,7 +421,7 @@ begin: TX
 			tx_next[1:0] = 2'd1;
 			sqf_rdreq = axi_m.awready && axi_m.awvalid;
 		end else if (!spf_empty) begin
-			axi_m.awaddr = data_addr[spf_q[4:0]] + data_addr_off;
+			axi_m.awaddr = data_addr[spf_q[4:0]] | data_addr_off;
 			axi_m.awlen = spf_q[10:5];
 			axi_m.awvalid = tx_ready;
 			
@@ -429,7 +429,7 @@ begin: TX
 			tx_next[1:0] = 2'd2;
 			spf_rdreq = axi_m.awready && axi_m.awvalid;
 		end else begin
-			axi_m.awaddr = data_addr[spf_q[4:0]] + data_addr_off;
+			axi_m.awaddr = data_addr[spf_q[4:0]] | data_addr_off;
 			axi_m.awlen = spf_q[10:5];
 			axi_m.awvalid = 0;
 			
@@ -491,7 +491,6 @@ begin: TX
 end
 
 //// RX interface
-// Configuration
 // Credit responses (spf)
 // Credit requests (rqf)
 // Data payloads (rdf)
@@ -515,25 +514,14 @@ begin: RX
 		
 		if (axi_s.awvalid && axi_s.wvalid && !rbf_full) begin
 			if (axi_s.awaddr[18]) begin
-				// Configuration
-				if (axi_s.awaddr[12]) begin
-					if (axi_s.awaddr[11]) begin
-						// Credit overrides
-						axi_s.wready = 1;
-					end else begin
-						if (axi_s.wdata[13]) begin
-							// Response
-							axi_s.wready = !spf_full;
-							spf_wrreq = 1;
-						end else begin
-							// Request
-							axi_s.wready = !rqf_full;
-							rqf_wrreq = 1;
-						end
-					end
+				if (axi_s.wdata[13]) begin
+					// Response
+					axi_s.wready = !spf_full;
+					spf_wrreq = 1;
 				end else begin
-					// Stream config
-					axi_s.wready = 1;
+					// Request
+					axi_s.wready = !rqf_full;
+					rqf_wrreq = 1;
 				end
 			end else begin
 				// Data
@@ -584,10 +572,11 @@ always_ff @(posedge clk) begin
 				5: softreg_resp.data <= {rqf_q, rqf_full, rqf_empty};
 				6: softreg_resp.data <= {rpf_q, rpf_full, rpf_empty};
 				7: softreg_resp.data <= {rbf_q, rbf_full, rbf_empty};
-				8: softreg_resp.data <= {TX.tx_data, TX.tx_valid};
+				8: softreg_resp.data <= {TX.len, TX.tx_data, TX.tx_valid};
 				9: softreg_resp.data <= axi_m.awaddr;
 				10: softreg_resp.data <= {axi_m.awlen, axi_m.awready, axi_m.awvalid};
 				11: softreg_resp.data <= {axi_m.wdata[61:0], axi_m.wready, axi_m.wvalid};
+				12: softreg_resp.data <= {SEND_BUF.done, SEND_BUF.dest, SEND_BUF.len, SEND_BUF.last, SEND_BUF.valid};
 				default: softreg_resp.data <= 0;
 			endcase
 		end else begin
@@ -602,4 +591,3 @@ always_ff @(posedge clk) begin
 end
 
 endmodule
-					

@@ -39,7 +39,7 @@ public:
 		
 		// Allocate huge pages
 		fd = open("/proc/sys/vm/nr_hugepages", O_WRONLY);
-		pwrite(fd, "8\n", 3, 0);
+		pwrite(fd, "16\n", 3, 0);
 		close(fd);
 		
 		// Open XDMA device files
@@ -99,14 +99,14 @@ public:
 			++pcie_addr_p;
 		}
 		
-		// Set up streams
+		// Set up app streams
 		for (uint64_t app_id = 0; app_id < 4; ++app_id) {
 			const uint64_t src = 4*slot_id + app_id;
 			for (uint64_t dst = 0; dst < 8; ++dst) {
 				const uint64_t dm4 = dst % 4;
 				
 				// Local addrs
-				uint64_t cntrl_addr = (dm4<<34) + (1<<18) + (1<<12) + (src<<6);
+				uint64_t cntrl_addr = (dm4<<34) + (1<<18) + (src<<6);
 				uint64_t data_addr = (dm4<<34) + (src<<13);
 				if (slot_id != dst/4) {
 					// Use pcie addr
@@ -117,15 +117,19 @@ public:
 					data_addr += uint64_t{1}<<48;
 				}
 				
+				// Host FIFO
+				if (src == dst) {
+					cntrl_addr = (uint64_t{1}<<36) + (1<<15) + (src<<6);
+					data_addr = (uint64_t{1}<<36) + (src<<13);
+				}
+				
 				// Stream enable on data addr write
 				data_addr += (uint64_t{1}<<49);
 				
 				uint64_t cfg_addr = 8 * dst;
 				write_sys_reg(app_id, cfg_addr, cntrl_addr);
-				//printf("%lu %lu 0x%lx 0x%lx\n", src, dst, cfg_addr, cntrl_addr);
 				cfg_addr += (1 << 8);
 				write_sys_reg(app_id, cfg_addr, data_addr);
-				//printf("%lu %lu 0x%lx 0x%lx\n", src, dst, cfg_addr, data_addr);
 			}
 		}
 		

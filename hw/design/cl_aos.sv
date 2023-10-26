@@ -98,13 +98,13 @@ logic rst_n [2:0];
 */
 
 // AXIL2SR to AmorphOS System
-SoftRegReq  sys_softreg_req[3:0];
-SoftRegReq  sys_softreg_req_[3:0];
+SoftRegReq  sys_softreg_req[7:0];
+SoftRegReq  sys_softreg_req_[7:0];
 SoftRegReq  sys_softreg_req_buf;
 logic       sys_softreg_req_grant;
 
-SoftRegResp sys_softreg_resp[3:0];
-SoftRegResp sys_softreg_resp_[3:0];
+SoftRegResp sys_softreg_resp[7:0];
+SoftRegResp sys_softreg_resp_[7:0];
 SoftRegResp sys_softreg_resp_buf;
 logic       sys_softreg_resp_grant;
 
@@ -150,7 +150,7 @@ AXIL2SR sys_axil2sr (
 );
 assign sys_softreg_req_grant = 1;
 
-AmorphOSSoftReg_RouteTree #(.SR_NUM_APPS(4))
+AmorphOSSoftReg_RouteTree #(.SR_NUM_APPS(8))
 sys_sr_tree
 (
 	// User clock and reset
@@ -164,7 +164,7 @@ sys_sr_tree
 	.app_softreg_resp(sys_softreg_resp_)
 );
 
-for (i = 0; i < 4; i = i + 1) begin : sys_sr_pipe
+for (i = 0; i < 8; i = i + 1) begin : sys_sr_pipe
 	lib_pipe #(
 		.WIDTH(98),
 		.STAGES(2)
@@ -245,21 +245,26 @@ axi_xbar ax (
 //------------------------------------
 
 // PCIM interface bridge
-axi_bus_t cl_sh_pcim ();
 axi_bus_t pcim_axi_s ();
+axi_bus_t pcim_axi_ar ();
+axi_bus_t cl_sh_pcim ();
 
-axi_reg pcim_ar1 (
-	.clk(global_clk),
-	.rst_n(rst_n[0]),
-	
-	.axi_s(cl_axi_slv_bus[4]),
-	.axi_m(pcim_axi_s)
-);
-axi_reg pcim_ar0 (
+axi_reg #(
+	.EN_RD(1)
+) pcim_ar1 (
 	.clk(global_clk),
 	.rst_n(rst_n[0]),
 	
 	.axi_s(pcim_axi_s),
+	.axi_m(pcim_axi_ar)
+);
+axi_reg #(
+	.EN_RD(1)
+) pcim_ar0 (
+	.clk(global_clk),
+	.rst_n(rst_n[0]),
+	
+	.axi_s(pcim_axi_ar),
 	.axi_m(cl_sh_pcim)
 );
 
@@ -303,6 +308,7 @@ end
 
 // PCIS interface bridge
 axi_bus_t sh_cl_pcis ();
+axi_bus_t pcis_ax_axi ();
 
 always_comb begin
 	sh_cl_pcis.awid = sh_cl_dma_pcis_awid;
@@ -347,7 +353,84 @@ axi_reg pcis_ar_m (
 	.rst_n(rst_n[1]),
 	
 	.axi_s(sh_cl_pcis),
+	.axi_m(pcis_ax_axi)
+);
+
+
+//------------------------------------
+// Host FIFO
+//------------------------------------
+axi_bus_t ax_host_axi ();
+axi_bus_t host_ax_axi ();
+axi_bus_t host_pcim_axi ();
+axi_bus_t ax_pcim_axi ();
+axi_bus_t ax_pcim_axi_ar ();
+axi_bus_t pcim_axi_ar2 ();
+
+// AX to HF / PCIM
+axi_split #(
+	.THE_BIT(48)
+) ax_splitter (
+	.clk(global_clk),
+	.rst_n(rst_n[1]),
+	
+	.axi_s(cl_axi_slv_bus[4]),
+	.axi_m0(ax_host_axi),
+	.axi_m1(ax_pcim_axi_ar)
+);
+
+axi_reg pcim_ar3 (
+	.clk(global_clk),
+	.rst_n(rst_n[1]),
+	
+	.axi_s(ax_pcim_axi_ar),
+	.axi_m(ax_pcim_axi)
+);
+
+host_fifo host_inst (
+	.clk(global_clk),
+	.rst(!rst_n[1]),
+	
+	.softreg_req(sys_softreg_req[7:4]),
+	.softreg_resp(sys_softreg_resp[7:4]),
+	
+	.ax_s(ax_host_axi),
+	.ax_m(host_ax_axi),
+	
+	.pcim(host_pcim_axi)
+);
+
+// PCIS / HF to AX
+axi_merge ax_merger (
+	.clk(global_clk),
+	.rst_n(rst_n[1]),
+	
+	.axi_s0(pcis_ax_axi),
+	.axi_s1(host_ax_axi),
 	.axi_m(cl_axi_mstr_bus[4])
+);
+
+// AX / HF to PCIM
+// HF must be in S1 slot
+axi_merge #(
+	.EN_RD(1)
+) pcim_merger (
+	.clk(global_clk),
+	.rst_n(rst_n[1]),
+	
+	.axi_s0(ax_pcim_axi),
+	.axi_s1(host_pcim_axi),
+	.axi_m(pcim_axi_ar2)
+);
+
+axi_reg #(
+	.EN_RD(1)
+) pcim_ar2_wr (
+	.clk(global_clk),
+	.rst_n(rst_n[1]),
+	
+	.axi_s(pcim_axi_ar2),
+	.axi_m(pcim_axi_s)
 );
 
 

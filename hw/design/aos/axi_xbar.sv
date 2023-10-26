@@ -5,6 +5,7 @@ module axi_xbar_arb (
 	input clk,
 	input rst,
 	
+	input ready,
 	input [4:0] reqs,
 	output reg [4:0] grant_b,
 	output reg [2:0] grant_i
@@ -14,7 +15,7 @@ integer i;
 
 reg [1:0] prio = 0;
 always @(posedge clk) begin
-	prio <= prio + 1;
+	if (ready) prio <= prio + 1;
 end
 
 //always @(posedge clk) begin
@@ -61,7 +62,7 @@ genvar m, s;
 generate if (EN_WR) begin
 	//// Shared interface
 	// Slave signals
-	logic [47:0] si_awaddr [NUM_SI-1:0];
+	logic [48:0] si_awaddr [NUM_SI-1:0];
 	logic [7:0] si_awlen [NUM_SI-1:0];
 	logic [2:0] si_awsize [NUM_SI-1:0];
 	logic [NUM_MI-1:0] si_awvalid [NUM_SI-1:0];
@@ -144,9 +145,10 @@ generate if (EN_WR) begin
 
 		//// Logic
 		// AW channel
-		wire [MI_BITS-1:0] aw_mi_sel = si_reg.awaddr[48] ? 4 : si_reg.awaddr[35:34];
+		wire four_sel = si_reg.awaddr[48] || si_reg.awaddr[36];
+		wire [MI_BITS-1:0] aw_mi_sel = four_sel ? 4 : si_reg.awaddr[35:34];
 		
-		assign si_awaddr[s] = si_reg.awaddr[48] ? si_reg.awaddr[47:0] : {14'h0000, si_reg.awaddr[33:0]};
+		assign si_awaddr[s] = four_sel ? si_reg.awaddr[48:0] : {15'h00000, si_reg.awaddr[33:0]};
 		assign si_awlen[s] = si_reg.awlen;
 		assign si_awsize[s] = si_reg.awsize;
 		for (m = 0; m < NUM_MI; m = m + 1) begin
@@ -253,7 +255,7 @@ generate if (EN_WR) begin
 		wire [SI_BITS-1:0] aw_si_sel;
 		
 		assign mi_reg.awid = 0;
-		assign mi_reg.awaddr = {16'h0000, si_awaddr[aw_si_sel]};
+		assign mi_reg.awaddr = {15'h0000, si_awaddr[aw_si_sel]};
 		assign mi_reg.awlen = si_awlen[aw_si_sel];
 		assign mi_reg.awsize = si_awsize[aw_si_sel];
 		assign mi_reg.awvalid = si_awvalid[aw_si_sel][m] && !bmf_full;
@@ -268,10 +270,12 @@ generate if (EN_WR) begin
 		assign wmf_data = aw_si_sel;
 		assign bmf_data = aw_si_sel;
 		
+		wire aw_si_ready = mi_reg.awready && !bmf_full;
 		axi_xbar_arb aw_arb (
 			.clk(clk),
 			.rst(rst),
 			
+			.ready(aw_si_ready),
 			.reqs(aw_si_reqs),
 			.grant_b(aw_si_sel_b),
 			.grant_i(aw_si_sel)
@@ -306,7 +310,7 @@ end endgenerate
 generate if (EN_RD) begin
 	//// Shared interface
 	// Slave signals
-	logic [47:0] si_araddr [NUM_SI-1:0];
+	logic [48:0] si_araddr [NUM_SI-1:0];
 	logic [7:0] si_arlen [NUM_SI-1:0];
 	logic [2:0] si_arsize [NUM_SI-1:0];
 	logic [NUM_MI-1:0] si_arvalid [NUM_SI-1:0];
@@ -361,9 +365,10 @@ generate if (EN_RD) begin
 
 		//// Logic
 		// AR channel
-		wire [MI_BITS-1:0] ar_mi_sel = si_reg.araddr[48] ? 4 : si_reg.araddr[35:34];
+		wire four_sel = si_reg.araddr[48] || si_reg.araddr[36];
+		wire [MI_BITS-1:0] ar_mi_sel = four_sel ? 4 : si_reg.araddr[35:34];
 		
-		assign si_araddr[s] = si_reg.araddr[48] ? si_reg.araddr[47:0] : {14'h0000, si_reg.araddr[33:0]};
+		assign si_araddr[s] = four_sel ? si_reg.araddr[48:0] : {15'h00000, si_reg.araddr[33:0]};
 		assign si_arlen[s] = si_reg.arlen;
 		assign si_arsize[s] = si_reg.arsize;
 		for (m = 0; m < NUM_MI; m = m + 1) begin
@@ -434,7 +439,7 @@ generate if (EN_RD) begin
 		wire [SI_BITS-1:0] ar_si_sel;
 		
 		assign mi_reg.arid = 0;
-		assign mi_reg.araddr = {16'h0000, si_araddr[ar_si_sel]};
+		assign mi_reg.araddr = {15'h0000, si_araddr[ar_si_sel]};
 		assign mi_reg.arlen = si_arlen[ar_si_sel];
 		assign mi_reg.arsize = si_arsize[ar_si_sel];
 		assign mi_reg.arvalid = si_arvalid[ar_si_sel][m] && !rmf_full;
@@ -447,10 +452,12 @@ generate if (EN_RD) begin
 		assign rmf_wrreq = mi_reg.arready && mi_reg.arvalid;
 		assign rmf_data = ar_si_sel;
 		
+		wire ar_si_ready = mi_reg.arready && !rmf_full;
 		axi_xbar_arb ar_arb (
 			.clk(clk),
 			.rst(rst),
 			
+			.ready(ar_si_ready),
 			.reqs(ar_si_reqs),
 			.grant_b(ar_si_sel_b),
 			.grant_i(ar_si_sel)

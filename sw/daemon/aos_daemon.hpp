@@ -7,6 +7,7 @@
 #include "aos.hpp"
 #include "aos_fpga.hpp"
 #include "aos_fio.hpp"
+#include "aos_stream.hpp"
 
 void printError(std::string errStr) {
     printf("%s\n", errStr.c_str());
@@ -235,6 +236,7 @@ restartTransaction:
                 return handleFileCloseRequest(cfd);
             }
             break;
+            /*
             case aos_socket_command::MMAP_REQUEST : {
                 return handleMmapRequest(cfd);
             }
@@ -246,6 +248,7 @@ restartTransaction:
             case aos_socket_command::MSYNC_REQUEST : {
                 return handleMsyncRequest(cfd);
             }
+            */
             break;
             case aos_socket_command::SET_MODE_REQUEST : {
                 return handleSetModeRequest(cfd);
@@ -317,8 +320,7 @@ restartTransaction:
         }
         
         if (file_io[{slot_id_, app_id_}] == nullptr) {
-            file_io[{slot_id_, app_id_}] = new aos_fio(fpga[slot_id_], app_id_);
-            file_io[{slot_id_, app_id_}]->set_mode(0, 0);
+            file_io[{slot_id_, app_id_}] = new aos_stream(fpga[slot_id_], app_id_);
         }
         
         aos_pkt.file_open_resp.fd = file_io[{slot_id_, app_id_}]->file_open(file_path);
@@ -337,7 +339,7 @@ restartTransaction:
         int app_fd_ = aos_pkt.file_close_req.fd;
         aos_errcode errco = aos_errcode::SUCCESS;
         
-        aos_fio *file_io_ptr = file_io[{slot_id_, app_id_}];
+        aos_stream *file_io_ptr = file_io[{slot_id_, app_id_}];
         assert(file_io_ptr != nullptr);
         
         int fd = file_io_ptr->file_close(app_fd_);
@@ -350,6 +352,7 @@ restartTransaction:
         return (errco != aos_errcode::SUCCESS);
     }
     
+    /*
     int handleMmapRequest(int cfd) {
         uint64_t slot_id_ = aos_pkt.mmap_req.slot_id;
         uint64_t app_id_ = aos_pkt.mmap_req.app_id;
@@ -413,7 +416,7 @@ restartTransaction:
         writeResponse(cfd, errco, aos_socket_command::MSYNC_RESPONSE);
         
         return (errco != aos_errcode::SUCCESS);
-    }
+    }*/
     
     int handleSetModeRequest(int cfd) {
         uint64_t slot_id_ = aos_pkt.msync_req.slot_id;
@@ -427,7 +430,7 @@ restartTransaction:
         }
         
         if (file_io[{slot_id_, app_id_}] == nullptr) {
-            file_io[{slot_id_, app_id_}] = new aos_fio(fpga[slot_id_], app_id_);
+            file_io[{slot_id_, app_id_}] = new aos_stream(fpga[slot_id_], app_id_);
         }
         
         file_io[{slot_id_, app_id_}]->set_mode(mode_, data_);
@@ -470,7 +473,7 @@ private:
     aos_fpga *fpga[8];
     
     // File / VM management
-    std::map<std::pair<uint64_t,uint64_t>, aos_fio*> file_io;
+    std::map<std::pair<uint64_t,uint64_t>, aos_stream*> file_io;
 };
 
 #endif  // AOS_DAEMON_

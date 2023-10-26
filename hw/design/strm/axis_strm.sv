@@ -25,7 +25,7 @@ reg [34:0] packet_len;
 reg [4:0] dest_write, read_id;
 reg read_last;
 reg [34:0] curr_len;
-reg [47:0] write_cyc;
+reg [47:0] write_cyc, read_cyc;
 reg [511:0] read_data;
 reg [34:0] last_count;
 
@@ -53,6 +53,7 @@ always @(posedge clk) begin
 	end
 	
 	if (to_write != 0) write_cyc <= write_cyc + 1;
+	if (to_read != 0) read_cyc <= read_cyc + 1;
 	
 	softreg_resp.valid <= softreg_read;
 	if (softreg_read) begin
@@ -74,6 +75,7 @@ always @(posedge clk) begin
 			32'h70: softreg_resp.data <= read_data[384+:64];
 			32'h78: softreg_resp.data <= read_data[448+:64];
 			32'h80: softreg_resp.data <= last_count;
+			32'h88: softreg_resp.data <= read_cyc;
 		endcase
 	end
 	
@@ -87,6 +89,7 @@ always @(posedge clk) begin
 			32'h08: begin
 				to_read <= softreg_req.data;
 				last_count <= 0;
+				read_cyc <= 0;
 			end
 			32'h10: dest_write <= softreg_req.data;
 			32'h18: packet_len <= softreg_req.data;

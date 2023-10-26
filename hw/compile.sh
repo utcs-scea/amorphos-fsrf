@@ -40,9 +40,7 @@ do
 	date
 	echo "Attempting ${freqs[$i]} build..."
 	echo ${freqs[$i]} >freq.txt
-	#./aws_build_dcp_from_cl.sh -clock_recipe_a ${recipes[$i]} -strategy CONGESTION -foreground >log.txt 2>&1
-	#./aws_build_dcp_from_cl.sh -clock_recipe_a ${recipes[$i]} -strategy BASIC -foreground >log.txt 2>&1
-	./aws_build_dcp_from_cl.sh -clock_recipe_a ${recipes[$i]} -foreground >log.txt 2>&1 &
+	./aws_build_dcp_from_cl.sh -clock_recipe_a ${recipes[$i]} -foreground -ignore_memory_requirement >log.txt 2>&1 &
 	VPID=$!
 	wait $VPID
 	RC=$?

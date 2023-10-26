@@ -17,7 +17,7 @@ SRC = ${SDK_DIR}/userspace/utils/sh_dpi_tasks.c
 
 all: daemon
 
-daemon: aos_daemon.cpp aos_daemon.hpp aos_fpga.hpp aos_fio.hpp aos.hpp
+daemon: aos_daemon.cpp aos_daemon.hpp aos_fpga.hpp aos_stream.hpp aos_fio.hpp aos.hpp
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LDLIBS) $(SRC) aos_daemon.cpp -o daemon
 
 clean:
