@@ -7,7 +7,6 @@ module axi_xbar_arb (
 	
 	input ready,
 	input [4:0] reqs,
-	output reg [4:0] grant_b,
 	output reg [2:0] grant_i
 );
 
@@ -22,13 +21,11 @@ end
 always_comb begin
 	reg [1:0] idx;
 	
-	grant_b = 5'b10000;
 	grant_i = 4;
 	if (!reqs[4]) begin
 		for (i = 0; i < 4; i = i + 1) begin
 			idx = (prio + i) % 4;
 			if (reqs[idx]) begin
-				grant_b = 1 << idx;
 				grant_i = idx;
 			end
 		end
@@ -251,7 +248,7 @@ generate if (EN_WR) begin
 
 		//// Logic
 		// AW channel
-		wire [NUM_SI-1:0] aw_si_reqs, aw_si_sel_b;
+		wire [NUM_SI-1:0] aw_si_reqs;
 		wire [SI_BITS-1:0] aw_si_sel;
 		
 		assign mi_reg.awid = 0;
@@ -277,7 +274,6 @@ generate if (EN_WR) begin
 			
 			.ready(aw_si_ready),
 			.reqs(aw_si_reqs),
-			.grant_b(aw_si_sel_b),
 			.grant_i(aw_si_sel)
 		);
 
@@ -435,7 +431,7 @@ generate if (EN_RD) begin
 
 		//// Logic
 		// AR channel
-		wire [NUM_SI-1:0] ar_si_reqs, ar_si_sel_b;
+		wire [NUM_SI-1:0] ar_si_reqs;
 		wire [SI_BITS-1:0] ar_si_sel;
 		
 		assign mi_reg.arid = 0;
@@ -459,7 +455,6 @@ generate if (EN_RD) begin
 			
 			.ready(ar_si_ready),
 			.reqs(ar_si_reqs),
-			.grant_b(ar_si_sel_b),
 			.grant_i(ar_si_sel)
 		);
 

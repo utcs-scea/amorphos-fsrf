@@ -48,8 +48,10 @@ module host_fifo (
 	// PCIe access
 	axi_bus_t.slave pcim
 );
+// Per-app send/recv limits
 localparam SEND_LD = 4;
 localparam RECV_LD = 3;
+localparam RECV_DATA_LD = 7;
 
 
 //// AXI register slices
@@ -97,7 +99,7 @@ logic rmf_rdreq;
 HullFIFO #(
 	.TYPE(0),
 	.WIDTH(2+6+1),
-	.LOG_DEPTH(6)
+	.LOG_DEPTH(SEND_LD+2)
 ) read_meta_fifo (
 	.clock(clk),
 	.reset_n(~rst),
@@ -144,7 +146,7 @@ logic wmf_rdreq;
 HullFIFO #(
 	.TYPE(0),
 	.WIDTH(2+6+1),
-	.LOG_DEPTH(1)
+	.LOG_DEPTH(RECV_LD+2)
 ) write_meta_fifo (
 	.clock(clk),
 	.reset_n(~rst),
@@ -165,9 +167,9 @@ logic wdf_empty;
 logic wdf_rdreq;
 
 HullFIFO #(
-	.TYPE(0),
+	.TYPE(3),
 	.WIDTH(512),
-	.LOG_DEPTH(6)
+	.LOG_DEPTH(RECV_DATA_LD+2)
 ) write_data_fifo (
 	.clock(clk),
 	.reset_n(~rst),
@@ -363,8 +365,6 @@ reg [14:0] recv_idx [3:0];
 reg [10:0] meta_idx [3:0];
 reg [5:0] s_creds [3:0];
 reg [15:0] s_data_creds [3:0];
-reg [15:0] r_creds [3:0];
-reg [10:0] r_meta_creds [3:0];
 
 // Signals
 logic rst_send [3:0];
@@ -377,6 +377,7 @@ logic [15:0] add_r_creds [3:0];
 logic [10:0] add_r_meta_creds [3:0];
 logic send_done [3:0];
 logic recv_done [3:0];
+logic recv_data_done [3:0];
 
 
 //// Per-app FIFO implementation
@@ -473,25 +474,17 @@ for (genvar i = 0; i < 4; i = i + 1) begin : FIFO
 	);
 	
 	
-	// Throttling
+	// Send throttling
 	reg [SEND_LD:0] send_limit;
-	reg [RECV_LD:0] recv_limit;
-	wire send_space = send_limit > 0;
-	wire recv_space = recv_limit > 0;
 	logic send_req;
-	logic recv_req;
+	wire send_space = send_limit > 0;
 	
 	always @(posedge clk) begin
 		send_limit <= send_limit + send_done[i] - (send_req && send_space);
-		recv_limit <= recv_limit + recv_done[i] - (recv_req && recv_space);
 		
 		if (rst_send[i]) send_limit <= 1<<SEND_LD;
-		if (rst_recv[i]) recv_limit <= 1<<RECV_LD;
 		
-		if (rst) begin
-			send_limit <= 1<<SEND_LD;
-			recv_limit <= 1<<RECV_LD;
-		end
+		if (rst) send_limit <= 1<<SEND_LD;
 	end
 	
 	
@@ -572,27 +565,41 @@ for (genvar i = 0; i < 4; i = i + 1) begin : FIFO
 	end
 	
 	
-	//// Receive credits
+	//// Receive throttling
+	// FPGA limit and host credits
 	// Data and metadata
-	logic [5:0] req_r_creds;
-	logic req_r_cred;
+	reg [RECV_LD:0] r_limit;
+	reg [RECV_DATA_LD:0] r_data_limit;
+	reg [15:0] r_creds;
+	reg [10:0] r_meta_creds;
 	
-	wire have_r_cred = recv_space && (r_meta_creds[i] > 0) && (r_creds[i] > req_r_creds);
-	wire use_r_cred = req_r_cred && have_r_cred;
-	wire [6:0] use_r_creds = use_r_cred ? (req_r_creds + 1) : 0;
+	logic [5:0] recv_req_len;
+	logic recv_req;
+	
+	wire fr_space = (r_limit > 0) && (r_data_limit > recv_req_len);
+	wire hr_space = (r_meta_creds > 0) && (r_creds > recv_req_len);
+	wire have_r_space = fr_space && hr_space;
+	wire use_r_space = recv_req && have_r_space;
+	wire [6:0] use_r_spaces = use_r_space ? (recv_req_len + 1) : 0;
 	
 	always_ff @(posedge clk) begin
-		r_creds[i] <= r_creds[i] + add_r_creds[i] - use_r_creds;
-		r_meta_creds[i] <= r_meta_creds[i] + add_r_meta_creds[i] - use_r_cred;
+		r_limit <= r_limit + recv_done[i] - use_r_space;
+		r_data_limit <= r_data_limit + recv_data_done[i] - use_r_spaces;
+		r_creds <= r_creds + add_r_creds[i] - use_r_spaces;
+		r_meta_creds <= r_meta_creds + add_r_meta_creds[i] - use_r_space;
 		
 		if (rst_recv[i]) begin
-			r_creds[i] <= 0;
-			r_meta_creds[i] <= 0;
+			r_limit <= 1 << RECV_LD;
+			r_data_limit <= 1 << RECV_DATA_LD;
+			r_creds <= 0;
+			r_meta_creds <= 0;
 		end
 		
 		if (rst) begin
-			r_creds[i] <= 0;
-			r_meta_creds[i] <= 0;
+			r_limit <= 1 << RECV_LD;
+			r_data_limit <= 1 << RECV_DATA_LD;
+			r_creds <= 0;
+			r_meta_creds <= 0;
 		end
 	end
 	
@@ -600,13 +607,12 @@ for (genvar i = 0; i < 4; i = i + 1) begin : FIFO
 	// Credit requests (rqf)
 	// Credit responses (rpf)
 	always_comb begin
-		req_r_cred = !rqf_empty[i] && !rpf_full[i];
-		req_r_creds = rqf_q[i][5:0];
+		recv_req = !rqf_empty[i] && !rpf_full[i];
+		recv_req_len = rqf_q[i][5:0];
 		
 		rpf_data[i] = rqf_q[i];
-		rqf_rdreq[i] = req_r_cred && have_r_cred;
-		rpf_wrreq[i] = req_r_cred && have_r_cred;
-		recv_req = req_r_cred && have_r_cred;
+		rqf_rdreq[i] = recv_req && have_r_space;
+		rpf_wrreq[i] = recv_req && have_r_space;
 	end
 end
 
@@ -628,7 +634,7 @@ begin: CONV
 	assign pmf_data = {idx, sel, len, last};
 	assign pmf_wrreq = accept;
 	
-	assign pmdf_data = {sel, len, wmf_q[0]};
+	assign pmdf_data = wmf_q;
 	assign pmdf_wrreq = accept && last;
 	
 	assign wmf_rdreq = accept && last;
@@ -691,7 +697,7 @@ begin: WRITE
 			pcie_m.awlen = pmf_q[6:1];
 			pcie_m.awvalid = tx_ready;
 			
-			tx_next[20:7] = 0;
+			tx_next[20:7] = sel;
 			tx_next[0] = 1'd1;
 			pmf_rdreq = pcie_m.awready && pcie_m.awvalid;
 			pmdf_next = pmf_q[0];
@@ -701,7 +707,7 @@ begin: WRITE
 			pcie_m.awlen = pmf_q[6:1];
 			pcie_m.awvalid = 0;
 			
-			tx_next[20:7] = 0;
+			tx_next[20:7] = sel;
 			tx_next[0] = 1'd1;
 		end
 		
@@ -718,6 +724,7 @@ begin: WRITE
 		
 		for (integer i = 0; i < 4; i = i + 1) begin
 			recv_done[i] = 0;
+			recv_data_done[i] = 0;
 		end
 		
 		case (tx_data[0])
@@ -734,6 +741,7 @@ begin: WRITE
 				pcie_m.wvalid = tx_valid && !wdf_empty;
 				
 				wdf_rdreq = tx_valid && pcie_m.wready;
+				recv_data_done[tx_data[8:7]] = pcie_m.wready && pcie_m.wvalid;
 			end
 		endcase
 	end
@@ -759,35 +767,44 @@ end
 
 //// PCIe read
 begin: READ
+	logic arb_ready;
+	logic [3:0] arb_reqs;
+	logic [1:0] arb_sel;
+	
+	fifo_arb read_arb (
+		.clk(clk),
+		.rst(rst),
+		
+		.ready(arb_ready),
+		.reqs(arb_reqs),
+		.sel(arb_sel)
+	);
+	
 	//// AR logic
-	reg [1:0] sel = 0;
-	wire valid = !saf_empty[sel] && !spf_empty[sel];
+	wire valid = !saf_empty[arb_sel] && !spf_empty[arb_sel];
 	wire ready = pcie_m.arready && !rmf_full;
 	wire accept = ready && valid;
+	assign arb_ready = ready;
 	
 	assign pcie_m.arid = 0;
-	assign pcie_m.araddr = saf_q[sel];
-	assign pcie_m.arlen = spf_q[sel][6:1];
+	assign pcie_m.araddr = saf_q[arb_sel];
+	assign pcie_m.arlen = spf_q[arb_sel][6:1];
 	assign pcie_m.arsize = 3'b110;
 	assign pcie_m.arvalid = valid && !rmf_full;
 	
-	assign rmf_data = {sel, spf_q[sel]};
+	assign rmf_data = {arb_sel, spf_q[arb_sel]};
 	assign rmf_wrreq = accept;
 	
 	always_comb begin
 		for (integer i = 0; i < 4; i = i + 1) begin
 			saf_rdreq[i] = 0;
 			spf_rdreq[i] = 0;
+			arb_reqs[i] = !saf_empty[i] && !spf_empty[i];
 		end
 		if (accept) begin
-			saf_rdreq[sel] = 1;
-			spf_rdreq[sel] = 1;
+			saf_rdreq[arb_sel] = 1;
+			spf_rdreq[arb_sel] = 1;
 		end
-	end
-	
-	// Hold valid data until accepted
-	always_ff @(posedge clk) begin
-		if (ready || !valid) sel <= sel + 1;
 	end
 	
 	
@@ -1086,7 +1103,7 @@ for (genvar i = 0; i < 4; i = i + 1) begin : SR
 				32'h18: softreg_resp[i].data <= {s_creds[i], s_data_creds[i]};
 				32'h20: softreg_resp[i].data <= host_recv_addr[i];
 				32'h28: softreg_resp[i].data <= host_meta_addr[i];
-				32'h30: softreg_resp[i].data <= {r_meta_creds[i], r_creds[i]};
+				32'h30: softreg_resp[i].data <= {FIFO[i].r_meta_creds, FIFO[i].r_creds};
 				32'h38: softreg_resp[i].data <= {meta_idx[i], recv_idx[i]};
 				
 				32'h40: softreg_resp[i].data <= {shf_q[i], shf_full[i], shf_empty[i]};
@@ -1106,11 +1123,11 @@ for (genvar i = 0; i < 4; i = i + 1) begin : SR
 				32'h100: softreg_resp[i].data <= {FIFO[i].SEND.idx, FIFO[i].SEND.len_done};
 				32'h108: softreg_resp[i].data <= {CONV.len_done};
 				32'h110: softreg_resp[i].data <= {WRITE.len, WRITE.tx_data, WRITE.tx_valid};
-				32'h118: softreg_resp[i].data <= {READ.sel};
+				32'h118: softreg_resp[i].data <= {READ.arb_sel};
 				32'h120: softreg_resp[i].data <= {TX.len, TX.tx_data, TX.tx_valid};
 				32'h128: softreg_resp[i].data <= {rbf_q, rbf_full, rbf_empty};
 				32'h130: softreg_resp[i].data <= {recv_done[i], send_done[i], rst_recv[i], add_meta_idx[i], use_s_creds[i], add_s_data_cred[i], rst_send[i], add_recv_idx[i], add_r_meta_creds[i], add_r_creds[i]};
-				32'h138: softreg_resp[i].data <= {FIFO[i].recv_limit, FIFO[i].send_limit};
+				32'h138: softreg_resp[i].data <= {FIFO[i].r_data_limit, FIFO[i].r_limit, FIFO[i].send_limit};
 				
 				32'h140: softreg_resp[i].data <= {axi_s.awaddr[48:0], axi_s.awlen, axi_s.awvalid, axi_s.awready};
 				32'h148: softreg_resp[i].data <= {axi_s.wdata[60:0], axi_s.wlast, axi_s.wvalid, axi_s.wready};

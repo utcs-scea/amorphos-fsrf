@@ -8,6 +8,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/mman.h>
+#include <pthread.h>
 #include <cstdlib>
 #include <atomic>
 #include <chrono>
@@ -238,23 +239,31 @@ private:
 	uint64_t recv_metric;
 	uint64_t recv_data_metric;
 	static void stream_handler(aos_stream *t) {
-		volatile char *begin_send_addr, *curr_send_addr, *end_send_addr;
-		volatile char *begin_recv_addr, *curr_recv_addr, *end_recv_addr;
-		volatile char *begin_meta_addr, *curr_meta_addr, *end_meta_addr;
+		if (t->fpga->get_slot_id() == 0) {
+			cpu_set_t cpu_set;
+			CPU_ZERO(&cpu_set);
+			const uint64_t tid[] = {0, 1, 4, 5};
+			CPU_SET(tid[t->app_id], &cpu_set);
+			pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
+		}
+		
+		volatile uint8_t *begin_send_addr, *curr_send_addr, *end_send_addr;
+		volatile uint8_t *begin_recv_addr, *curr_recv_addr, *end_recv_addr;
+		volatile uint8_t *begin_meta_addr, *curr_meta_addr, *end_meta_addr;
 		uint64_t send_size, recv_size, meta_size;
 		
 		send_size = 2<<20;
-		begin_send_addr = (volatile char *)t->send_addr;
+		begin_send_addr = (volatile uint8_t *)t->send_addr;
 		curr_send_addr = begin_send_addr;
 		end_send_addr = curr_send_addr + send_size;
 		
 		recv_size = 2<<20;
-		begin_recv_addr = (volatile char *)t->recv_addr;
+		begin_recv_addr = (volatile uint8_t *)t->recv_addr;
 		curr_recv_addr = begin_recv_addr;
 		end_recv_addr = curr_recv_addr + recv_size;
 		
 		meta_size = 4<<10;
-		begin_meta_addr = (volatile char *)t->meta_addr;
+		begin_meta_addr = (volatile uint8_t *)t->meta_addr;
 		curr_meta_addr = begin_meta_addr;
 		end_meta_addr = curr_meta_addr + meta_size;
 		
