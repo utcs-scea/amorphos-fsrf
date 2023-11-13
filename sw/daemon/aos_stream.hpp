@@ -30,121 +30,104 @@ public:
 		global_app_id = 4*fpga->get_slot_id() + app_id;
 		
 		// Reserve host buffers
-		send_addr = ::mmap(NULL, 2<<20, PROT_READ|PROT_WRITE,
-			MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
-		if (send_addr == MAP_FAILED) {
-			perror("send_addr allocation error");
-			printf("errno: %d\n", errno);
-			exit(EXIT_FAILURE);
-		}
-		if (mlock(send_addr, 2<<20)) {
-			perror("mlock error");
-		}
-		send_phys = virt_to_phys((uint64_t)send_addr);
-		printf("send_phys: 0x%lx\n", send_phys);
-		
-		recv_addr = ::mmap(NULL, 2<<20, PROT_READ|PROT_WRITE,
-			MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB, -1, 0);
-		if (recv_addr == MAP_FAILED) {
-			perror("recv_addr allocation error");
-			printf("errno: %d\n", errno);
-			exit(EXIT_FAILURE);
-		}
-		if (mlock(recv_addr, 2<<20)) {
-			perror("mlock error");
-		}
-		recv_phys = virt_to_phys((uint64_t)recv_addr);
-		printf("recv_phys: 0x%lx\n", recv_phys);
-		
-		meta_addr = aligned_alloc(4<<10, 4<<10);
-		if (meta_addr == MAP_FAILED) {
-			perror("meta_addr allocation error");
-			printf("errno: %d\n", errno);
-			exit(EXIT_FAILURE);
-		}
-		if (mlock(meta_addr, 4<<10)) {
+		const uint64_t key = 0x0FEE0000;
+		meta_shmid = shmget(key+global_app_id*3+0, (1<<12),
+			IPC_CREAT | SHM_R | SHM_W);
+		assert(meta_shmid != -1);
+		meta_addr = shmat(meta_shmid, nullptr, 0);
+		assert(meta_addr != (void*)-1);
+		if (mlock(meta_addr, 1<<12)) {
 			perror("mlock error");
 		}
 		meta_phys = virt_to_phys((uint64_t)meta_addr);
-		printf("meta_phys: 0x%lx\n", meta_phys);
+		printf("meta: %d 0x%lx\n", meta_shmid, meta_phys);
 		
-		thread_writing = true;
-		thread_reading = true;
-		send_size = 1024;
+		recv_shmid = shmget(key+global_app_id*3+1, (1<<21),
+			SHM_HUGETLB | IPC_CREAT | SHM_R | SHM_W);
+		assert(recv_shmid != -1);
+		recv_addr = shmat(recv_shmid, nullptr, 0);
+		assert(recv_addr != (void*)-1);
+		if (mlock(recv_addr, 1<<21)) {
+			perror("mlock error");
+		}
+		recv_phys = virt_to_phys((uint64_t)recv_addr);
+		printf("recv: %d 0x%lx\n", recv_shmid, recv_phys);
+		
+		send_shmid = shmget(key+global_app_id*3+2, (1<<21),
+			SHM_HUGETLB | IPC_CREAT | SHM_R | SHM_W);
+		assert(send_shmid != -1);
+		send_addr = shmat(send_shmid, nullptr, 0);
+		assert(send_addr != (void*)-1);
+		if (mlock(send_addr, 1<<21)) {
+			perror("mlock error");
+		}
+		send_phys = virt_to_phys((uint64_t)send_addr);
+		printf("send: %d 0x%lx\n", send_shmid, send_phys);
 	}
 	
 	~aos_stream() {
-		munlock(send_addr, 2<<20);
-		munmap(send_addr, 2<<20);
-		munlock(recv_addr, 2<<20);
-		munmap(recv_addr, 2<<20);
 		munlock(meta_addr, 4<<10);
-		free(meta_addr);
+		shmdt(meta_addr);
+		shmctl(meta_shmid, IPC_RMID, NULL);
+		
+		munlock(recv_addr, 2<<20);
+		shmdt(recv_addr);
+		shmctl(recv_shmid, IPC_RMID, NULL);
+		
+		munlock(send_addr, 2<<20);
+		shmdt(send_addr);
+		shmctl(send_shmid, IPC_RMID, NULL);
 	}
 	
-	int file_open(const char* file_path) {
-		int true_fd = open(file_path, O_RDWR);
-		if (true_fd == -1) {
-			printf("Unable to open file: %s\n", file_path);
-			return -1;
-		}
+	int stream_open(int &sd, int &meta_shmid, int &read_shmid, int &write_shmid) {
+		const uint64_t src = global_app_id;
+		const uint64_t dm4 = app_id;
+		const uint64_t cntrl_addr = (dm4<<34) + (1<<18) + (src<<6);
+		const uint64_t data_addr = (dm4<<34) + (src<<13);
 		
-		if (!thread_running) start();
+		fpga->write_sys_reg(4+app_id, 0x00, cntrl_addr);
+		fpga->write_sys_reg(4+app_id, 0x08, data_addr);
+		fpga->write_sys_reg(4+app_id, 0x10, send_phys);
+		fpga->write_sys_reg(4+app_id, 0x20, recv_phys);
+		fpga->write_sys_reg(4+app_id, 0x28, meta_phys);
 		
-		fd_map[next_fd] = true_fd;
-		return next_fd++;
+		sd = global_app_id;
+		meta_shmid = this->meta_shmid;
+		read_shmid = this->recv_shmid;
+		write_shmid = this->send_shmid;
+		
+		return 0;
 	}
 	
-	int file_close(int fd) {
-		int rc = 0;
-		
-		int true_fd = fd_map[fd];
-		if (true_fd == 0) {
-			printf("Bad fd for close(): %d\n", fd);
-			rc = -1;
-		} else {
-			rc = close(true_fd);
-		}
-		
-		fd_map.erase(fd);
-		
-		if (fd_map.empty()) stop();
-		
-		return rc;
+	int stream_close(int sd) {
+		return 0;
 	}
 	
-	int sread(int fd, uint64_t length, uint64_t offset) {
-		int true_fd = fd_map[fd];
-		if (true_fd == 0) {
-			printf("Bad fd: %d\n", fd);
-			fd_map.erase(fd);
-			return -1;
-		}
-		
-		// TODO: add request
-		// TODO: P2P support
-		
-		return global_app_id;
+	void stream_read(uint64_t meta_credits, uint64_t data_credits) {
+		const uint64_t msg = (meta_credits << 16) | data_credits;
+		fpga->write_sys_reg(4 + app_id, 0x30, msg);
 	}
 	
-	int swrite(int fd, uint64_t length, uint64_t offset) {
-		int true_fd = fd_map[fd];
-		if (true_fd == 0) {
-			printf("Bad fd: %d\n", fd);
-			fd_map.erase(fd);
-			return -1;
+	void stream_write(uint64_t len, bool last, bool req,
+	uint64_t &meta_credits, uint64_t &data_credits) {
+		assert(len <= ((1<<21) / 64));
+		
+		if (len) {
+			const uint64_t msg = ((len - 1) << 1) | (last ? 0x1 : 0x0);
+			fpga->write_sys_reg(4 + app_id, 0x18, msg);
 		}
 		
-		// TODO: add request
-		// TODO: P2P support
-		
-		return global_app_id;
+		if (req) {
+			uint64_t val;
+			fpga->read_sys_reg(4 + app_id, 0x18, val);
+			meta_credits = val >> 16;
+			data_credits = val & 0xFFFF;
+		}
 	}
 	
 	void set_mode(uint64_t mode, uint64_t data) {
 		switch (mode) {
 			case 6:
-				fpga_mutex.lock();
 				for (uint64_t addr = 0x00; addr <= 0x38; addr += 0x8) {
 					uint64_t reg;
 					fpga->read_sys_reg(app_id, addr, reg);
@@ -163,16 +146,8 @@ public:
 					printf("0x%lx ", reg);
 				}
 				printf("\n\n");
-				fpga_mutex.unlock();
-				return;
-			case 7:
-				if (!thread_running) start();
-				return;
-			case 8:
-				if (thread_running) stop();
 				return;
 			case 9:
-				fpga_mutex.lock();
 				for (uint64_t addr = 0x00; addr <= 0x38; addr += 0x8) {
 					uint64_t reg;
 					fpga->read_sys_reg(4+app_id, addr, reg);
@@ -203,16 +178,6 @@ public:
 					printf("0x%lx ", reg);
 				}
 				printf("\n");
-				printf("%lu %lu", recv_metric, recv_data_metric);
-				printf("\n\n");
-				fpga_mutex.unlock();
-				return;
-			case 10:
-				send_size = data;
-				return;
-			case 11:
-				thread_writing = data & 0x1;
-				thread_reading = data & 0x2;
 				return;
 			default:
 				return;
@@ -224,152 +189,17 @@ private:
 	uint64_t app_id;
 	uint64_t global_app_id;
 	aos_fpga* fpga;
-	std::recursive_mutex fpga_mutex;
-	std::recursive_mutex stream_mutex;
-	
-	// fd management
-	int next_fd;
-	std::unordered_map<int, int> fd_map;
-	
-	// fault handler
-	bool thread_running;
-	bool thread_reading;
-	bool thread_writing;
-	uint64_t send_size;
-	uint64_t recv_metric;
-	uint64_t recv_data_metric;
-	static void stream_handler(aos_stream *t) {
-		if (t->fpga->get_slot_id() == 0) {
-			cpu_set_t cpu_set;
-			CPU_ZERO(&cpu_set);
-			const uint64_t tid[] = {0, 1, 4, 5};
-			CPU_SET(tid[t->app_id], &cpu_set);
-			pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
-		}
-		
-		volatile uint8_t *begin_send_addr, *curr_send_addr, *end_send_addr;
-		volatile uint8_t *begin_recv_addr, *curr_recv_addr, *end_recv_addr;
-		volatile uint8_t *begin_meta_addr, *curr_meta_addr, *end_meta_addr;
-		uint64_t send_size, recv_size, meta_size;
-		
-		send_size = 2<<20;
-		begin_send_addr = (volatile uint8_t *)t->send_addr;
-		curr_send_addr = begin_send_addr;
-		end_send_addr = curr_send_addr + send_size;
-		
-		recv_size = 2<<20;
-		begin_recv_addr = (volatile uint8_t *)t->recv_addr;
-		curr_recv_addr = begin_recv_addr;
-		end_recv_addr = curr_recv_addr + recv_size;
-		
-		meta_size = 4<<10;
-		begin_meta_addr = (volatile uint8_t *)t->meta_addr;
-		curr_meta_addr = begin_meta_addr;
-		end_meta_addr = curr_meta_addr + meta_size;
-		
-		uint64_t meta_valid = 1;
-		
-		uint64_t send_creds = 32;
-		uint64_t send_data_creds = send_size/64;
-		uint64_t recv_creds = meta_size/4;
-		uint64_t recv_data_creds = recv_size/64;
-		
-		while (t->thread_running) {
-			t->fpga_mutex.lock();
-			
-			// HtD path
-			if (t->thread_writing) {
-				uint64_t val;
-				t->fpga->read_sys_reg(4+t->app_id, 0x18, val);
-				uint64_t data_creds = val & 0xFFFF;
-				uint64_t meta_creds = val >> 16;
-				
-				send_data_creds += data_creds;
-				send_creds += meta_creds;
-				
-				const uint64_t send_size = t->send_size;
-				while (send_creds && (send_data_creds >= send_size)) {
-					t->fpga->write_sys_reg(4+t->app_id, 0x18, (send_size-1)<<1);
-					
-					send_data_creds -= send_size;
-					send_creds -= 1;
-				}
-			}
-			
-			// DtH path
-			if (t->thread_reading) {
-				//std::atomic_thread_fence(std::memory_order_seq_cst);
-				uint64_t val = *curr_meta_addr;
-				while (((val >> 7) & 0x1) == meta_valid) {
-					//const uint64_t last = val & 0x1;
-					const uint64_t len = ((val >> 1) & 0x3F) + 1;
-					
-					curr_meta_addr += 4;
-					if (curr_meta_addr >= end_meta_addr) {
-						curr_meta_addr -= meta_size;
-						meta_valid ^= 0x1;
-					}
-					
-					curr_recv_addr += 64*len;
-					if (curr_recv_addr >= end_recv_addr) {
-						curr_recv_addr -= recv_size;
-					}
-					
-					recv_creds += 1;
-					recv_data_creds += len;
-					
-					t->recv_metric += 1;
-					t->recv_data_metric += len;
-					
-					val = *curr_meta_addr;
-				}
-				
-				if (recv_creds >= 512) {
-					uint64_t msg = (recv_creds << 16) | recv_data_creds;
-					t->fpga->write_sys_reg(4+t->app_id, 0x30, msg);
-					recv_creds = 0;
-					recv_data_creds = 0;
-				}
-			}
-			
-			t->fpga_mutex.unlock();
-		}
-	}
 	
 	// stream management
-	void *send_addr;
-	void *recv_addr;
+	int meta_shmid;
+	int recv_shmid;
+	int send_shmid;
 	void *meta_addr;
-	uint64_t send_phys;
-	uint64_t recv_phys;
+	void *recv_addr;
+	void *send_addr;
 	uint64_t meta_phys;
-	
-	// thread management
-	std::thread the_thread;
-
-	void start() {
-		next_fd = 3;
-		// TODO: reset next stream ID
-		
-		const uint64_t src = global_app_id;
-		const uint64_t dm4 = app_id;
-		const uint64_t cntrl_addr = (dm4<<34) + (1<<18) + (src<<6);
-		const uint64_t data_addr = (dm4<<34) + (src<<13);
-		
-		fpga->write_sys_reg(4+app_id, 0x00, cntrl_addr);
-		fpga->write_sys_reg(4+app_id, 0x08, data_addr);
-		fpga->write_sys_reg(4+app_id, 0x10, send_phys);
-		fpga->write_sys_reg(4+app_id, 0x20, recv_phys);
-		fpga->write_sys_reg(4+app_id, 0x28, meta_phys);
-		
-		thread_running = true;
-		the_thread = std::thread(stream_handler, this);
-	}
-	
-	void stop() {
-		thread_running = false;
-		the_thread.join();
-	}
+	uint64_t recv_phys;
+	uint64_t send_phys;
 	
 	uint64_t virt_to_phys(uint64_t virt_addr) {
 		int fd = open("/proc/self/pagemap", O_RDONLY);

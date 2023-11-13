@@ -80,11 +80,10 @@ public:
         return 0;
     }
 
-    void startTransaction(int & cfd) {
+    void startTransaction(fd_set &temp_set) {
 restartTransaction:
-        fd_set temp_set = read_set; 
-
         // Select fd with data
+        temp_set = read_set;
         if (select(maxFd+1, &temp_set, nullptr, nullptr, nullptr) < 1) {
             perror("select error");
             goto restartTransaction;
@@ -92,7 +91,7 @@ restartTransaction:
 
         // Add new connections to read set
         if (FD_ISSET(passive_socket, &temp_set)) {
-            cfd = accept(passive_socket, NULL, NULL);
+            int cfd = accept(passive_socket, NULL, NULL);
             if (cfd == -1) {
                 perror("accept error");
             }
@@ -101,19 +100,9 @@ restartTransaction:
             open_fds.insert(cfd);
             goto restartTransaction;
         }
-
-        // Identify source of command
-        cfd = -1;
-        for (int fd : open_fds) {
-            if (FD_ISSET(fd, &temp_set)) cfd = fd;
-        }
-        if (cfd == -1) {
-            perror("selected fd not found\n");
-            goto restartTransaction;
-        }
     }
 
-    int readCommand(int cfd, aos_socket_command* cmd) {
+    int readCommand(int cfd, aos_socket_command *cmd) {
         if (read(cfd, cmd, sizeof(aos_socket_command)) < (int)sizeof(aos_socket_command)) {
             //perror("Unable to read cmd");
             close(cfd);
@@ -130,6 +119,7 @@ restartTransaction:
             case aos_socket_command::CNTRLREG_WRITE_REQUEST:
                 numBytes = sizeof(aos_cntrlreg_write_request_packet);
                 break;
+            /*
             case aos_socket_command::FILE_OPEN_REQUEST:
                 numBytes = sizeof(aos_file_open_request_packet);
                 break;
@@ -145,8 +135,21 @@ restartTransaction:
             case aos_socket_command::MSYNC_REQUEST:
                 numBytes = sizeof(aos_msync_request_packet);
                 break;
+            */
             case aos_socket_command::SET_MODE_REQUEST:
                 numBytes = sizeof(aos_set_mode_request_packet);
+                break;
+            case aos_socket_command::STREAM_OPEN_REQUEST:
+                numBytes = sizeof(aos_stream_open_request_packet);
+                break;
+            case aos_socket_command::STREAM_CLOSE_REQUEST:
+                numBytes = sizeof(aos_stream_close_request_packet);
+                break;
+            case aos_socket_command::STREAM_READ_REQUEST:
+                numBytes = sizeof(aos_stream_read_request_packet);
+                break;
+            case aos_socket_command::STREAM_WRITE_REQUEST:
+                numBytes = sizeof(aos_stream_write_request_packet);
                 break;
             default:
                 printf("Error: not a request\n");
@@ -186,11 +189,17 @@ restartTransaction:
                 numBytes = sizeof(aos_file_open_response_packet);
                 break;
             case aos_socket_command::FILE_CLOSE_RESPONSE:
-		// block so all data is flushed	out
-		numBytes = sizeof(aos_file_open_response_packet);
+                // block so all data is flushed	out
+                numBytes = sizeof(aos_file_open_response_packet);
                 break;
             case aos_socket_command::MMAP_RESPONSE:
                 numBytes = sizeof(aos_mmap_response_packet);
+                break;
+            case aos_socket_command::STREAM_OPEN_RESPONSE:
+                numBytes = sizeof(aos_stream_open_response_packet);
+                break;
+            case aos_socket_command::STREAM_WRITE_RESPONSE2:
+                numBytes = sizeof(aos_stream_write_response_packet);
                 break;
             default:
                 numBytes = 0;
@@ -207,14 +216,17 @@ restartTransaction:
     }
 
     void listen_loop() {
-        int cfd;
+        fd_set fds;
         aos_socket_command cmd;
 
         while (1) {
-            startTransaction(cfd);
-            if (readCommand(cfd, &cmd)) continue;
-            handleTransaction(cfd, cmd);
-            //closeTransaction(cfd);
+            startTransaction(fds);
+            for (int fd : open_fds) {
+                if (FD_ISSET(fd, &fds)) {
+                    if (readCommand(fd, &cmd)) continue;
+                    handleTransaction(fd, cmd);
+                }
+            }
         }
     }
 
@@ -228,6 +240,7 @@ restartTransaction:
                 return handleCntrlRegWriteRequest(cfd);
             }
             break;
+            /*
             case aos_socket_command::FILE_OPEN_REQUEST : {
                 return handleFileOpenRequest(cfd);
             }
@@ -236,7 +249,6 @@ restartTransaction:
                 return handleFileCloseRequest(cfd);
             }
             break;
-            /*
             case aos_socket_command::MMAP_REQUEST : {
                 return handleMmapRequest(cfd);
             }
@@ -248,10 +260,26 @@ restartTransaction:
             case aos_socket_command::MSYNC_REQUEST : {
                 return handleMsyncRequest(cfd);
             }
-            */
             break;
+            */
             case aos_socket_command::SET_MODE_REQUEST : {
                 return handleSetModeRequest(cfd);
+            }
+            break;
+            case aos_socket_command::STREAM_OPEN_REQUEST : {
+                return handleStreamOpenRequest(cfd);
+            }
+            break;
+            case aos_socket_command::STREAM_CLOSE_REQUEST : {
+                return handleStreamCloseRequest(cfd);
+            }
+            break;
+            case aos_socket_command::STREAM_READ_REQUEST : {
+                return handleStreamReadRequest(cfd);
+            }
+            break;
+            case aos_socket_command::STREAM_WRITE_REQUEST : {
+                return handleStreamWriteRequest(cfd);
             }
             break;
             default: {
@@ -278,7 +306,6 @@ restartTransaction:
             errco = aos_errcode::UNKNOWN_FAILURE;
             perror("Read pci bar failed");
         }
-        //printf("(%lu,%lu) read %lu at %lu\n", slot_id_, app_id_, data64_, addr64_);
         
         aos_pkt.cntrl_read_resp.data64 = data64_;
         writeResponse(cfd, errco, aos_socket_command::CNTRLREG_READ_RESPONSE);
@@ -302,13 +329,13 @@ restartTransaction:
             errco = aos_errcode::UNKNOWN_FAILURE;
             perror("Write pci bar failed");
         }
-        //printf("(%lu,%lu) wrote %lu at %lu\n", slot_id_, app_id_, data64_, addr64_);
         
         writeResponse(cfd, errco, aos_socket_command::CNTRLREG_WRITE_RESPONSE);
         
         return (errco != aos_errcode::SUCCESS);
     }
     
+    /*
     int handleFileOpenRequest(int cfd) {
         uint64_t slot_id_ = aos_pkt.file_open_req.slot_id;
         uint64_t app_id_ = aos_pkt.file_open_req.app_id;
@@ -352,7 +379,6 @@ restartTransaction:
         return (errco != aos_errcode::SUCCESS);
     }
     
-    /*
     int handleMmapRequest(int cfd) {
         uint64_t slot_id_ = aos_pkt.mmap_req.slot_id;
         uint64_t app_id_ = aos_pkt.mmap_req.app_id;
@@ -419,8 +445,8 @@ restartTransaction:
     }*/
     
     int handleSetModeRequest(int cfd) {
-        uint64_t slot_id_ = aos_pkt.msync_req.slot_id;
-        uint64_t app_id_ = aos_pkt.msync_req.app_id;
+        uint64_t slot_id_ = aos_pkt.set_mode_req.slot_id;
+        uint64_t app_id_ = aos_pkt.set_mode_req.app_id;
         uint64_t mode_ = aos_pkt.set_mode_req.mode;
         uint64_t data_ = aos_pkt.set_mode_req.data;
         aos_errcode errco = aos_errcode::SUCCESS;
@@ -429,13 +455,114 @@ restartTransaction:
             fpga[slot_id_] = new aos_fpga(slot_id_);
         }
         
-        if (file_io[{slot_id_, app_id_}] == nullptr) {
-            file_io[{slot_id_, app_id_}] = new aos_stream(fpga[slot_id_], app_id_);
+        if (stream_io[{slot_id_, app_id_}] == nullptr) {
+            stream_io[{slot_id_, app_id_}] = new aos_stream(fpga[slot_id_], app_id_);
         }
         
-        file_io[{slot_id_, app_id_}]->set_mode(mode_, data_);
+        stream_io[{slot_id_, app_id_}]->set_mode(mode_, data_);
         
         writeResponse(cfd, errco, aos_socket_command::SET_MODE_RESPONSE);
+        
+        return (errco != aos_errcode::SUCCESS);
+    }
+    
+    int handleStreamOpenRequest(int cfd) {
+        uint64_t slot_id_ = aos_pkt.stream_open_req.slot_id;
+        uint64_t app_id_ = aos_pkt.stream_open_req.app_id;
+        //bool read_ = aos_pkt.stream_open_req.read;
+        //bool write_ = aos_pkt.stream_open_req.read;
+        aos_errcode errco = aos_errcode::SUCCESS;
+        
+        if (fpga[slot_id_] == nullptr) {
+            fpga[slot_id_] = new aos_fpga(slot_id_);
+        }
+        
+        if (stream_io[{slot_id_, app_id_}] == nullptr) {
+            stream_io[{slot_id_, app_id_}] = new aos_stream(fpga[slot_id_], app_id_);
+        }
+        
+        stream_io[{slot_id_, app_id_}]->stream_open(
+            aos_pkt.stream_open_resp.sd,
+            aos_pkt.stream_open_resp.meta_shmid,
+            aos_pkt.stream_open_resp.read_shmid,
+            aos_pkt.stream_open_resp.write_shmid
+        );
+        
+        writeResponse(cfd, errco, aos_socket_command::STREAM_OPEN_RESPONSE);
+        
+        return (errco != aos_errcode::SUCCESS);
+    }
+    
+    int handleStreamCloseRequest(int cfd) {
+        uint64_t slot_id_ = aos_pkt.stream_close_req.slot_id;
+        uint64_t app_id_ = aos_pkt.stream_close_req.app_id;
+        uint64_t sd_ = aos_pkt.stream_close_req.sd;
+        aos_errcode errco = aos_errcode::SUCCESS;
+        
+        if (fpga[slot_id_] == nullptr) {
+            fpga[slot_id_] = new aos_fpga(slot_id_);
+        }
+        
+        if (stream_io[{slot_id_, app_id_}] == nullptr) {
+            stream_io[{slot_id_, app_id_}] = new aos_stream(fpga[slot_id_], app_id_);
+        }
+        
+        stream_io[{slot_id_, app_id_}]->stream_close(sd_);
+        
+        writeResponse(cfd, errco, aos_socket_command::STREAM_CLOSE_RESPONSE);
+        
+        return (errco != aos_errcode::SUCCESS);
+    }
+    
+    int handleStreamReadRequest(int cfd) {
+        uint64_t slot_id_ = aos_pkt.stream_read_req.slot_id;
+        uint64_t app_id_ = aos_pkt.stream_read_req.app_id;
+        uint64_t meta_credits_ = aos_pkt.stream_read_req.meta_credits;
+        uint64_t data_credits_ = aos_pkt.stream_read_req.data_credits;
+        aos_errcode errco = aos_errcode::SUCCESS;
+        
+        if (fpga[slot_id_] == nullptr) {
+            fpga[slot_id_] = new aos_fpga(slot_id_);
+        }
+        
+        if (stream_io[{slot_id_, app_id_}] == nullptr) {
+            stream_io[{slot_id_, app_id_}] = new aos_stream(fpga[slot_id_], app_id_);
+        }
+        
+        stream_io[{slot_id_, app_id_}]->stream_read(meta_credits_, data_credits_);
+        
+        writeResponse(cfd, errco, aos_socket_command::STREAM_READ_RESPONSE);
+        
+        return (errco != aos_errcode::SUCCESS);
+    }
+    
+    int handleStreamWriteRequest(int cfd) {
+        uint64_t slot_id_ = aos_pkt.stream_write_req.slot_id;
+        uint64_t app_id_ = aos_pkt.stream_write_req.app_id;
+        uint64_t len_ = aos_pkt.stream_write_req.len;
+        bool last_ = aos_pkt.stream_write_req.last;
+        bool credit_req_ = aos_pkt.stream_write_req.credit_req;
+        aos_errcode errco = aos_errcode::SUCCESS;
+        
+        if (fpga[slot_id_] == nullptr) {
+            fpga[slot_id_] = new aos_fpga(slot_id_);
+        }
+        
+        if (stream_io[{slot_id_, app_id_}] == nullptr) {
+            stream_io[{slot_id_, app_id_}] = new aos_stream(fpga[slot_id_], app_id_);
+        }
+        
+        stream_io[{slot_id_, app_id_}]->stream_write(
+            len_, last_, credit_req_,
+            aos_pkt.stream_write_resp.meta_credits,
+            aos_pkt.stream_write_resp.data_credits
+        );
+        
+        if (credit_req_) {
+            writeResponse(cfd, errco, aos_socket_command::STREAM_WRITE_RESPONSE2);
+        } else {
+            writeResponse(cfd, errco, aos_socket_command::STREAM_WRITE_RESPONSE1);
+        }
         
         return (errco != aos_errcode::SUCCESS);
     }
@@ -467,13 +594,19 @@ private:
         aos_munmap_request_packet munmap_req;
         aos_msync_request_packet msync_req;
         aos_set_mode_request_packet set_mode_req;
+        aos_stream_open_request_packet stream_open_req;
+        aos_stream_open_response_packet stream_open_resp;
+        aos_stream_close_request_packet stream_close_req;
+        aos_stream_read_request_packet stream_read_req;
+        aos_stream_write_request_packet stream_write_req;
+        aos_stream_write_response_packet stream_write_resp;
     } aos_pkt;
     
     // FPGA management
     aos_fpga *fpga[8];
     
     // File / VM management
-    std::map<std::pair<uint64_t,uint64_t>, aos_stream*> file_io;
+    std::map<std::pair<uint64_t,uint64_t>, aos_stream*> stream_io;
 };
 
 #endif  // AOS_DAEMON_
