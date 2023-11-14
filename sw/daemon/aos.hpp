@@ -450,7 +450,8 @@ public:
         assert(stream_read_addr != nullptr);
         // process metadata entries
         uint64_t len = 0;
-        end = false;
+        const bool check_last = end;
+        if (check_last) end = false;
         while (true) {
             // check for valid metadata entry
             const uint8_t val = *stream_meta_addr;
@@ -466,8 +467,8 @@ public:
             }
             stream_read_meta_credits += 1;
             // return immediately if end of packet
-            bool last = val & 0x1;
-            if (last) {
+            const bool last = val & 0x1;
+            if (check_last && last) {
                 end = true;
                 break;
             }

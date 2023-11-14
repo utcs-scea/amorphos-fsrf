@@ -81,6 +81,7 @@ file copy -force $CL_DIR/design/aos/AXIL2SR.sv $TARGET_DIR
 # Parameterization
 file copy -force $CL_DIR/design/UserParams.sv $TARGET_DIR
 # AES
+file copy -force $CL_DIR/design/aes/aes_strm.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aes/aes_wrapper.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aes/aes_top.v $TARGET_DIR
 file copy -force $CL_DIR/design/aes/aes_256.v $TARGET_DIR

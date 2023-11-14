@@ -1,16 +1,21 @@
 # Binaries
 aes
+aes_strm
 conv
 dnn
 hls_flow
 gups
 hls_hll
 md5
+multi
 nw
 hls_pgrnk
 rng
 sha
 hls_sha
 strm
+strm_host
+strm_p2p
+strm_p2p2
 hls_tri
 cpu_rng
