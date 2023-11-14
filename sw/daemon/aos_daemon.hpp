@@ -223,7 +223,7 @@ restartTransaction:
             startTransaction(fds);
             for (int fd : open_fds) {
                 if (FD_ISSET(fd, &fds)) {
-                    if (readCommand(fd, &cmd)) continue;
+                    if (readCommand(fd, &cmd)) break;
                     handleTransaction(fd, cmd);
                 }
             }
