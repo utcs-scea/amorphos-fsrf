@@ -1,6 +1,6 @@
 import ShellTypes::*;
 
-module AES_Strm (
+module MD5_Strm (
 	// User clock and reset
 	input  clk,
 	input  rst,
@@ -17,107 +17,8 @@ wire softreg_read = softreg_req.valid && !softreg_req.isWrite;
 wire softreg_write = softreg_req.valid && softreg_req.isWrite;
 
 
-//// AES stream
-// state and signals
-reg [33:0] aes_words;
-reg [6:0] aes_credit;
-reg [30:0] aes_valid;
-reg [31:0] aes_seq;
-reg [255:0] aes_key;
-reg [511:0] aes_out_reg;
-wire [511:0] aes_out;
-wire aes_consume;
-
-// FIFO signals
-wire aef_wrreq = aes_valid[0];
-wire [511:0] aef_din = aes_out_reg;
-wire aef_full;  // unused
-wire aef_rdreq;
-wire [511:0] aef_dout;
-wire aef_empty;
-
-// logic
-always @(posedge clk) begin
-	aes_valid <= (aes_valid >> 1);
-	if ((aes_words > 0) && (aes_credit > 0)) begin
-		aes_words <= aes_words - 1;
-		aes_valid[30] <= 1;
-		aes_seq <= aes_seq + 1;
-	end
-	if (((aes_words > 0) && (aes_credit > 0)) && aes_consume) begin
-		// do nothing
-	end else if ((aes_words > 0) && (aes_credit > 0)) begin
-		aes_credit <= aes_credit - 1;
-	end else if (aes_consume) begin
-		aes_credit <= aes_credit + 1;
-	end else begin
-		// do nothing
-	end
-	aes_out_reg <= aes_out;
-	if (softreg_write) begin
-		case (softreg_req.addr[6:0])
-			32'h00: aes_key[63:0] <= softreg_req.data;
-			32'h08: aes_key[127:64] <= softreg_req.data;
-			32'h10: aes_key[191:128] <= softreg_req.data;
-			32'h18: aes_key[255:192] <= softreg_req.data;
-			32'h20: begin
-				aes_words <= softreg_req.data;
-				aes_seq <= 0;
-			end
-			default: begin end
-		endcase
-	end
-	
-	if (rst) begin
-		aes_words <= 0;
-		aes_credit <= 32;
-		aes_valid <= 0;
-		aes_key <= 0;
-	end
-end
-
-// instantiations
-aes_256 aes0 (
-	.clk(clk),
-	.state({64'h0000000000000000, 30'h00000000, aes_seq, 2'h0}),
-	.key(aes_key),
-	.out(aes_out[127:0])
-);
-aes_256 aes1 (
-	.clk(clk),
-	.state({64'h0000000000000000, 30'h00000000, aes_seq, 2'h1}),
-	.key(aes_key),
-	.out(aes_out[255:128])
-);
-aes_256 aes2 (
-	.clk(clk),
-	.state({64'h0000000000000000, 30'h00000000, aes_seq, 2'h2}),
-	.key(aes_key),
-	.out(aes_out[383:256])
-);
-aes_256 aes3 (
-	.clk(clk),
-	.state({64'h0000000000000000, 30'h00000000, aes_seq, 2'h3}),
-	.key(aes_key),
-	.out(aes_out[511:384])
-);
-HullFIFO #(
-	.TYPE(0),
-	.WIDTH(512),
-	.LOG_DEPTH(5)
-) aes_fifo (
-	.clock(clk),
-	.reset_n(~rst),
-	.wrreq(aef_wrreq),
-	.data(aef_din),
-	.full(aef_full),
-	.rdreq(aef_rdreq),
-	.q(aef_dout),
-	.empty(aef_empty)
-);
-
-
 //// Input data stream
+// state
 reg [33:0] id_words;
 reg [47:0] id_cyc;
 
@@ -130,8 +31,9 @@ wire [517:0] idf_dout;
 wire idf_empty;
 assign axis_s.tready = !idf_full && (id_words > 0);
 
+// logic
 always @(posedge clk) begin
-	if (axis_s.tvalid && axis_s.tready) begin
+	if (axis_s.tready && axis_s.tvalid) begin
 		id_words <= id_words - 1;
 	end
 	
@@ -139,7 +41,7 @@ always @(posedge clk) begin
 		id_cyc <= id_cyc + 1;
 	end
 	
-	if (softreg_write && (softreg_req.addr[6:0] == 32'h20)) begin
+	if (softreg_write && (softreg_req.addr == 32'h20)) begin
 		id_words <= softreg_req.data;
 		id_cyc <= 0;
 	end
@@ -183,6 +85,7 @@ end
 // state
 reg [33:0] od_words;
 reg [47:0] od_cyc;
+reg passthru;
 
 // FIFO signals
 wire odf_wrreq;
@@ -192,15 +95,11 @@ wire odf_rdreq;
 wire [517:0] odf_dout;
 wire odf_empty;
 
+assign idf_rdreq = !odf_full;
 assign odf_din[0] = idf_dout[0];
 assign odf_din[5:1] = id_map[idf_dout[5:1]];
-assign odf_din[517:6] = aef_dout ^ idf_dout[517:6];
-
-// misc signals
-assign aes_consume = !aef_empty && !idf_empty && !odf_full;
-assign aef_rdreq = !idf_empty && !odf_full;
-assign idf_rdreq = !aef_empty && !odf_full;
-assign odf_wrreq = !idf_empty && !aef_empty;
+assign odf_din[517:6] = idf_dout[517:6];
+assign odf_wrreq = passthru && !idf_empty;
 
 // logic
 assign odf_rdreq = axis_m.tready;
@@ -219,13 +118,20 @@ always @(posedge clk) begin
 	end
 	
 	if (softreg_write && (softreg_req.addr[6:0] == 32'h20)) begin
-		od_words <= softreg_req.data;
-		od_cyc <= 0;
+		if (passthru) begin
+			od_words <= softreg_req.data;
+			od_cyc <= 0;
+		end
+	end
+	
+	if (softreg_write && (softreg_req.addr[6:0] == 32'h30)) begin
+		passthru <= softreg_req.data;
 	end
 	
 	if (rst) begin
 		od_words <= 0;
 		od_cyc <= 0;
+		passthru <= 1;
 	end
 end
 
@@ -246,14 +152,74 @@ HullFIFO #(
 );
 
 
+//// MD5 core
+// state and signals
+reg [63:0] md5_valid;
+reg [63:0] md5_words;
+wire md5_in_valid = !idf_empty && !odf_full;
+wire md5_out_valid = md5_valid[63];
+
+reg [31:0] md5_a_reg;
+reg [31:0] md5_b_reg;
+reg [31:0] md5_c_reg;
+reg [31:0] md5_d_reg;
+wire [31:0] md5_a;
+wire [31:0] md5_b;
+wire [31:0] md5_c;
+wire [31:0] md5_d;
+wire [511:0] md5_chunk = idf_dout[517:6];
+
+// logic
+always @(posedge clk) begin
+	md5_valid <= {md5_valid[62:0], md5_in_valid};
+	
+	if (md5_out_valid) begin
+		md5_a_reg <= md5_a_reg + md5_a;
+		md5_b_reg <= md5_b_reg + md5_b;
+		md5_c_reg <= md5_c_reg + md5_c;
+		md5_d_reg <= md5_d_reg + md5_d;
+		md5_words <= md5_words + 1;
+	end
+	
+	if (softreg_write && (softreg_req.addr == 32'h20)) begin
+		md5_a_reg <= 0;
+		md5_b_reg <= 0;
+		md5_c_reg <= 0;
+		md5_d_reg <= 0;
+		md5_words <= 0;
+	end
+	
+	if (rst) begin
+		md5_valid <= 0;
+	end
+end
+
+// instantiation
+Md5Core m (
+	.clk(clk),
+	.wb(md5_chunk),
+	.a0('h67452301),
+	.b0('hefcdab89),
+	.c0('h98badcfe),
+	.d0('h10325476),
+	.a64(md5_a),
+	.b64(md5_b),
+	.c64(md5_c),
+	.d64(md5_d)
+);
+
+
 //// SoftReg output
 always @(posedge clk) begin
 	softreg_resp.valid <= softreg_read;
 	case (softreg_req.addr)
+		32'h00: softreg_resp.data <= {md5_b_reg, md5_a_reg};
+		32'h08: softreg_resp.data <= {md5_d_reg, md5_c_reg};
 		32'h20: softreg_resp.data <= od_words;
-		32'h28: softreg_resp.data <= od_cyc;
-		32'h30: softreg_resp.data <= id_words;
-		32'h38: softreg_resp.data <= id_cyc;
+		32'h28: softreg_resp.data <= id_words;
+		32'h30: softreg_resp.data <= md5_words;
+		32'h40: softreg_resp.data <= od_cyc;
+		32'h48: softreg_resp.data <= id_cyc;
 		default: begin end
 	endcase
 	
@@ -262,6 +228,5 @@ always @(posedge clk) begin
 		softreg_resp.data <= 0;
 	end
 end
-
 
 endmodule

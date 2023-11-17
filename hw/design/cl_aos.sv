@@ -677,6 +677,20 @@ for (app_num = 0; app_num < F1_NUM_APPS; app_num = app_num + 1) begin : app
 			.axis_m(app_axis_m),
 			.axis_s(app_axis_s)
 		);
+	end else if (F1_CONFIG_APPS == 3) begin : md5
+		MD5_Strm md5_inst (
+			// General signals
+			.clk(global_clk),
+			.rst(app_rst),
+			
+			// SoftReg control interface
+			.softreg_req(app_softreg_req),
+			.softreg_resp(app_softreg_resp),
+			
+			// Virtual stream interface
+			.axis_m(app_axis_m),
+			.axis_s(app_axis_s)
+		);
 	end
 	
 	/*

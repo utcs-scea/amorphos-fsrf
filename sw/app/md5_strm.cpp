@@ -9,10 +9,12 @@
 using namespace std::chrono;
 
 struct config {
-	uint64_t key[4];
+	uint32_t md5[4];
 	uint64_t out_words;
-	uint64_t out_cyc;
 	uint64_t in_words;
+	uint64_t md5_words;
+	uint64_t reserved;
+	uint64_t out_cyc;
 	uint64_t in_cyc;
 };
 
@@ -105,6 +107,7 @@ int main(int argc, char *argv[]) {
 		const bool host = app == (num_apps - 1);
 		const uint64_t dest = host ? sd[app] : app + 1;
 		aos[app]->aos_cntrlreg_write(addr, dest);
+		aos[app]->aos_cntrlreg_write(0x30, 0x1);
 	}
 	
 	high_resolution_clock::time_point start, end[8];
@@ -137,18 +140,18 @@ int main(int argc, char *argv[]) {
 	
 	// print stats
 	uint64_t app_bytes = 2 * (uint64_t{64} << length) / num_apps;
-	util.print_stats("aes_strm", app_bytes, start, end);
+	util.print_stats("md5_strm", app_bytes, start, end);
 	
 	// print cycle-based stats
 	const uint64_t total_bytes = num_apps * app_bytes;
-	printf("%lu %s cyc %lu ", num_apps, "aes_strm", total_bytes);
+	printf("%lu %s cyc %lu ", num_apps, "md5_strm", total_bytes);
 	
 	uint64_t sum_cycles = 0, max_cycles = 0;
 	for (uint64_t app = 0; app < num_apps; ++app) {
 		uint64_t app_cyc = 0;
 		
-		aos[app]->aos_cntrlreg_read(0x38, configs[app].in_cyc);
-		aos[app]->aos_cntrlreg_read(0x28, configs[app].out_cyc);
+		aos[app]->aos_cntrlreg_read(0x48, configs[app].in_cyc);
+		aos[app]->aos_cntrlreg_read(0x40, configs[app].out_cyc);
 		app_cyc = std::max(configs[app].in_cyc, configs[app].out_cyc);
 		
 		sum_cycles += app_cyc;

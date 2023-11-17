@@ -142,6 +142,7 @@ set_msg_config -id {Constraints 18-619}  -suppress
 set_msg_config -id {DRC CKLD-2}          -suppress
 set_msg_config -id {DRC REQP-1853}       -suppress
 set_msg_config -id {Timing 38-436}       -suppress
+set_msg_config -id {Synth 8-6155}        -suppress
 
 set_msg_config -severity "CRITICAL WARNING" -string "WRAPPER_INST/SH" -suppress
 set_msg_config -severity "WARNING"          -string "WRAPPER_INST/SH" -suppress
