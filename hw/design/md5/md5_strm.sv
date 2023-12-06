@@ -21,6 +21,8 @@ wire softreg_write = softreg_req.valid && softreg_req.isWrite;
 // state
 reg [33:0] id_words;
 reg [47:0] id_cyc;
+reg [47:0] id_rnv;
+reg [47:0] id_vnr;
 
 // FIFO signals
 wire idf_wrreq = axis_s.tvalid && (id_words > 0);
@@ -41,14 +43,23 @@ always @(posedge clk) begin
 		id_cyc <= id_cyc + 1;
 	end
 	
+	if (axis_s.tready && !axis_s.tvalid) begin
+		id_rnv <= id_rnv + 1;
+	end
+	
+	if (axis_s.tvalid && !axis_s.tready) begin
+		id_vnr <= id_vnr + 1;
+	end
+	
 	if (softreg_write && (softreg_req.addr == 32'h20)) begin
 		id_words <= softreg_req.data;
 		id_cyc <= 0;
+		id_rnv <= 0;
+		id_vnr <= 0;
 	end
 	
 	if (rst) begin
 		id_words <= 0;
-		id_cyc <= 0;
 	end
 end
 
@@ -85,6 +96,8 @@ end
 // state
 reg [33:0] od_words;
 reg [47:0] od_cyc;
+reg [47:0] od_rnv;
+reg [47:0] od_vnr;
 reg passthru;
 
 // FIFO signals
@@ -117,20 +130,29 @@ always @(posedge clk) begin
 		od_cyc <= od_cyc + 1;
 	end
 	
-	if (softreg_write && (softreg_req.addr[6:0] == 32'h20)) begin
+	if (axis_m.tready && !axis_m.tvalid) begin
+		od_rnv <= od_rnv + 1;
+	end
+	
+	if (axis_m.tvalid && !axis_m.tready) begin
+		od_vnr <= od_vnr + 1;
+	end
+	
+	if (softreg_write && (softreg_req.addr == 32'h20)) begin
 		if (passthru) begin
 			od_words <= softreg_req.data;
 			od_cyc <= 0;
+			od_rnv <= 0;
+			od_vnr <= 0;
 		end
 	end
 	
-	if (softreg_write && (softreg_req.addr[6:0] == 32'h30)) begin
+	if (softreg_write && (softreg_req.addr == 32'h30)) begin
 		passthru <= softreg_req.data;
 	end
 	
 	if (rst) begin
 		od_words <= 0;
-		od_cyc <= 0;
 		passthru <= 1;
 	end
 end
@@ -215,11 +237,16 @@ always @(posedge clk) begin
 	case (softreg_req.addr)
 		32'h00: softreg_resp.data <= {md5_b_reg, md5_a_reg};
 		32'h08: softreg_resp.data <= {md5_d_reg, md5_c_reg};
+		32'h10: softreg_resp.data <= md5_words;
+		// 32'h18: passthru?
 		32'h20: softreg_resp.data <= od_words;
 		32'h28: softreg_resp.data <= id_words;
-		32'h30: softreg_resp.data <= md5_words;
-		32'h40: softreg_resp.data <= od_cyc;
-		32'h48: softreg_resp.data <= id_cyc;
+		32'h30: softreg_resp.data <= od_cyc;
+		32'h38: softreg_resp.data <= id_cyc;
+		32'h40: softreg_resp.data <= od_rnv;
+		32'h48: softreg_resp.data <= id_rnv;
+		32'h50: softreg_resp.data <= od_vnr;
+		32'h58: softreg_resp.data <= id_vnr;
 		default: begin end
 	endcase
 	

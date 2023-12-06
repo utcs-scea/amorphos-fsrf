@@ -8,13 +8,12 @@
 using namespace std::chrono;
 
 class utils {
-private:
-	uint64_t num_apps;
-	uint64_t fio_mode;
-	uint64_t coyote_config;
-	uint64_t log_prefetch_size;
-
 public:
+	uint64_t num_apps = 1;
+	uint64_t fio_mode = 0;
+	uint64_t coyote_config = 0;
+	uint64_t log_prefetch_size = 9;
+	
 	void parse_std_args (
 		int argc,
 		char *argv[],
@@ -32,17 +31,14 @@ public:
 		if (argi < argc) populate = atoi(argv[argi]);
 		++argi;
 		
-		fio_mode = 0;
 		if (argi < argc) fio_mode = atol(argv[argi]);
 		assert(fio_mode <= 2 || fio_mode == 4);
 		++argi;
 		
-		coyote_config = 0;
 		if (argi < argc) coyote_config = atol(argv[argi]);
 		assert(coyote_config <= 2);
 		++argi;
 		
-		log_prefetch_size = 9;
 		if (argi < argc) log_prefetch_size = atol(argv[argi]);
 		assert(log_prefetch_size <= 9);
 		++argi;
@@ -118,8 +114,8 @@ public:
 		}
 		
 		const double avg_sec = sum_sec / num_apps;
-		const double avg_tput = ((double)total_bytes)/avg_sec/(1<<20);
-		const double min_tput = ((double)total_bytes)/max_sec/(1<<20);
+		const double avg_tput = ((double)total_bytes)/avg_sec/(1<<30);
+		const double min_tput = ((double)total_bytes)/max_sec/(1<<30);
 		printf("%g %g\n", avg_tput, min_tput);
 	}
 };
