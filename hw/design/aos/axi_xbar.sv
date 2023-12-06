@@ -10,29 +10,35 @@ module axi_xbar_arb (
 	output reg [2:0] grant_i
 );
 
-integer i;
-
-reg [1:0] prio = 0;
-always @(posedge clk) begin
-	if (ready) prio <= prio + 1;
-end
-
-//always @(posedge clk) begin
+reg [4:0] granted, next;
 always_comb begin
-	reg [1:0] idx;
-	
+	next = granted;
 	grant_i = 4;
-	if (!reqs[4]) begin
-		for (i = 0; i < 4; i = i + 1) begin
-			idx = (prio + i) % 4;
-			if (reqs[idx]) begin
-				grant_i = idx;
+	//if (!reqs[4]) begin
+		for (integer i = 0; i < 5; i = i + 1) begin
+			if (reqs[i]) begin
+				grant_i = i;
+				if (granted[i]) begin
+					next = 0;
+					next[i] = 1;
+				end else begin
+					next = granted;
+					next[i] = 1;
+					break;
+				end
 			end
 		end
-	end
+	//end
+end
+
+always @(posedge clk) begin
+	if (ready) granted <= next;
+	
+	if (rst) granted <= 0;
 end
 
 endmodule
+
 
 
 // MxN AXI4 Interconnect
@@ -105,7 +111,7 @@ generate if (EN_WR) begin
 		HullFIFO #(
 			.TYPE(0),
 			.WIDTH(MI_BITS),
-			.LOG_DEPTH(FIFO_LD)
+			.LOG_DEPTH(1)
 		) w_meta_fifo (
 			.clock(clk),
 			.reset_n(~rst),
@@ -139,20 +145,35 @@ generate if (EN_WR) begin
 			.empty(bmf_empty),
 			.rdreq(bmf_rdreq)
 		);
-
+		
+		//// Credits
+		reg creds;
+		wire have_cred;
+		wire add_cred;
+		wire use_cred;
+		
+		assign have_cred = (creds != 0) || add_cred;
+		always @(posedge clk) begin
+			creds <= creds + add_cred - use_cred;
+			
+			if (rst) creds <= 1;
+		end
+		
 		//// Logic
 		// AW channel
 		wire four_sel = si_reg.awaddr[48] || si_reg.awaddr[36];
 		wire [MI_BITS-1:0] aw_mi_sel = four_sel ? 4 : si_reg.awaddr[35:34];
+		wire aw_mi_ready = !wmf_full && !bmf_full && have_cred;
 		
 		assign si_awaddr[s] = four_sel ? si_reg.awaddr[48:0] : {15'h00000, si_reg.awaddr[33:0]};
 		assign si_awlen[s] = si_reg.awlen;
 		assign si_awsize[s] = si_reg.awsize;
 		for (m = 0; m < NUM_MI; m = m + 1) begin
-			assign si_awvalid[s][m] = si_reg.awvalid && !bmf_full && (m == aw_mi_sel);
+			assign si_awvalid[s][m] = si_reg.awvalid && aw_mi_ready && (m == aw_mi_sel);
 		end
-		assign si_reg.awready = si_awready[s][aw_mi_sel] && !bmf_full;
+		assign si_reg.awready = si_awready[s][aw_mi_sel] && aw_mi_ready;
 		
+		assign use_cred = si_reg.awready && si_reg.awvalid;
 		assign wmf_wrreq = si_reg.awready && si_reg.awvalid;
 		assign bmf_wrreq = si_reg.awready && si_reg.awvalid;
 		assign wmf_data = aw_mi_sel;
@@ -169,6 +190,7 @@ generate if (EN_WR) begin
 		end
 		assign si_reg.wready = si_wready[s][w_mi_sel] && !wmf_empty;
 		
+		assign add_cred = si_reg.wready && si_reg.wvalid && si_reg.wlast;
 		assign wmf_rdreq = si_reg.wready && si_reg.wvalid && si_reg.wlast;
 		
 		// B channel
@@ -211,7 +233,7 @@ generate if (EN_WR) begin
 		HullFIFO #(
 			.TYPE(0),
 			.WIDTH(SI_BITS),
-			.LOG_DEPTH(FIFO_LD)
+			.LOG_DEPTH(1)
 		) w_meta_fifo (
 			.clock(clk),
 			.reset_n(~rst),
@@ -245,34 +267,49 @@ generate if (EN_WR) begin
 			.empty(bmf_empty),
 			.rdreq(bmf_rdreq)
 		);
-
+		
+		//// Credits
+		reg creds;
+		wire have_cred;
+		wire add_cred;
+		wire use_cred;
+		
+		assign have_cred = (creds != 0) || add_cred;
+		always @(posedge clk) begin
+			creds <= creds + add_cred - use_cred;
+			
+			if (rst) creds <= 1;
+		end
+		
 		//// Logic
 		// AW channel
 		wire [NUM_SI-1:0] aw_si_reqs;
 		wire [SI_BITS-1:0] aw_si_sel;
+		wire aw_si_ready = !wmf_full && !bmf_full && have_cred;
 		
 		assign mi_reg.awid = 0;
 		assign mi_reg.awaddr = {15'h0000, si_awaddr[aw_si_sel]};
 		assign mi_reg.awlen = si_awlen[aw_si_sel];
 		assign mi_reg.awsize = si_awsize[aw_si_sel];
-		assign mi_reg.awvalid = si_awvalid[aw_si_sel][m] && !bmf_full;
+		assign mi_reg.awvalid = si_awvalid[aw_si_sel][m] && aw_si_ready;
 		for (s = 0; s < NUM_SI; s = s + 1) begin
 			assign aw_si_reqs[s] = si_awvalid[s][m];
 			
-			assign si_awready[s][m] = mi_reg.awready && !bmf_full && (s == aw_si_sel);
+			assign si_awready[s][m] = mi_reg.awready && aw_si_ready && (s == aw_si_sel);
 		end
 		
+		assign use_cred = mi_reg.awready && mi_reg.awvalid;
 		assign wmf_wrreq = mi_reg.awready && mi_reg.awvalid;
 		assign bmf_wrreq = mi_reg.awready && mi_reg.awvalid;
 		assign wmf_data = aw_si_sel;
 		assign bmf_data = aw_si_sel;
 		
-		wire aw_si_ready = mi_reg.awready && !bmf_full;
+		wire aw_si_arb_ready = mi_reg.awready && aw_si_ready;
 		axi_xbar_arb aw_arb (
 			.clk(clk),
 			.rst(rst),
 			
-			.ready(aw_si_ready),
+			.ready(aw_si_arb_ready),
 			.reqs(aw_si_reqs),
 			.grant_i(aw_si_sel)
 		);
@@ -288,6 +325,7 @@ generate if (EN_WR) begin
 			assign si_wready[s][m] = mi_reg.wready && !wmf_empty && (s == w_si_sel);
 		end
 		
+		assign add_cred = mi_reg.wready && mi_reg.wvalid && mi_reg.wlast;
 		assign wmf_rdreq = mi_reg.wready && mi_reg.wvalid && mi_reg.wlast;
 		
 		// B channel

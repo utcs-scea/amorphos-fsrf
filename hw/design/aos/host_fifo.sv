@@ -14,24 +14,33 @@ module fifo_arb (
 	output logic [1:0] sel
 );
 
-reg [1:0] prio = 0;
-always @(posedge clk) begin
-	if (ready) prio <= prio + 1;
-end
-
+reg [3:0] granted, next;
 always_comb begin
-	logic [1:0] idx;
-	
 	sel = 0;
+	next = granted;
 	for (integer i = 0; i < 4; i = i + 1) begin
-		idx = (prio + i) % 4;
-		if (reqs[idx]) begin
-			sel = idx;
+		if (reqs[i]) begin
+			sel = i;
+			if (granted[i]) begin
+				next = 0;
+				next[i] = 1;
+			end else begin
+				next = granted;
+				next[i] = 1;
+				break;
+			end
 		end
 	end
 end
 
+always @(posedge clk) begin
+	if (ready) granted <= next;
+	
+	if (rst) granted <= 0;
+end
+
 endmodule
+
 
 
 module host_fifo (
@@ -51,7 +60,8 @@ module host_fifo (
 // Per-app send/recv limits
 localparam SEND_LD = 4;
 localparam RECV_LD = 3;
-localparam RECV_DATA_LD = 7;
+localparam SEND_DATA_LD = 10;
+localparam RECV_DATA_LD = 10;
 
 
 //// AXI register slices
@@ -120,9 +130,9 @@ logic rdf_empty;
 logic rdf_rdreq;
 
 HullFIFO #(
-	.TYPE(0),
+	.TYPE(3),
 	.WIDTH(512),
-	.LOG_DEPTH(6)
+	.LOG_DEPTH(SEND_DATA_LD+2)
 ) read_data_fifo (
 	.clock(clk),
 	.reset_n(~rst),
@@ -368,7 +378,6 @@ reg [15:0] s_data_creds [3:0];
 
 // Signals
 logic rst_send [3:0];
-logic add_s_data_cred [3:0];
 logic use_s_creds [3:0];
 logic [6:0] add_recv_idx [3:0];
 logic add_meta_idx [3:0];
@@ -376,8 +385,11 @@ logic rst_recv [3:0];
 logic [15:0] add_r_creds [3:0];
 logic [10:0] add_r_meta_creds [3:0];
 logic send_done [3:0];
+logic send_data_done [3:0];
 logic recv_done [3:0];
 logic recv_data_done [3:0];
+logic send_data_start;
+logic send_data_ready;
 
 
 //// Per-app FIFO implementation
@@ -473,27 +485,34 @@ for (genvar i = 0; i < 4; i = i + 1) begin : FIFO
 		.rdreq(rpf_rdreq[i])
 	);
 	
+	//// Send throttling
+	// Data and metadata
+	reg [SEND_LD:0] s_limit;
+	reg [SEND_DATA_LD:0] s_data_limit;
 	
-	// Send throttling
-	reg [SEND_LD:0] send_limit;
+	logic [5:0] send_req_len;
 	logic send_req;
-	wire send_space = send_limit > 0;
 	
-	always @(posedge clk) begin
-		send_limit <= send_limit + send_done[i] - (send_req && send_space);
+	wire send_space = (s_limit > 0) && (s_data_limit > send_req_len);
+	wire use_s_space = send_req && send_space;
+	wire [6:0] use_s_spaces = use_s_space ? (send_req_len + 1) : 0;
+	
+	always_ff @(posedge clk) begin
+		s_limit <= s_limit + send_done[i] - use_s_space;
+		s_data_limit <= s_data_limit + send_data_done[i] - use_s_spaces;
 		
-		if (rst_send[i]) send_limit <= 1<<SEND_LD;
-		
-		if (rst) send_limit <= 1<<SEND_LD;
+		if (rst || rst_send[i]) begin
+			s_limit <= 1 << SEND_LD;
+			s_data_limit <= 1 << SEND_DATA_LD;
+		end
 	end
 	
-	
-	//// Send credits
+	//// Send host credits
 	logic add_s_cred;
 	
 	always_ff @(posedge clk) begin
 		s_creds[i] <= (use_s_creds[i] ? 0 : s_creds[i]) + add_s_cred;
-		s_data_creds[i] <= (use_s_creds[i] ? 0 : s_data_creds[i]) + add_s_data_cred[i];
+		s_data_creds[i] <= (use_s_creds[i] ? 0 : s_data_creds[i]) + send_data_done[i];
 		
 		if (rst_send[i]) begin
 			s_creds[i] <= 0;
@@ -519,6 +538,7 @@ for (genvar i = 0; i < 4; i = i + 1) begin : FIFO
 		wire accept = send_space && !shf_empty[i] && !saf_full[i] && !sqf_full[i];
 		
 		assign send_req = accept;
+		assign send_req_len = len;
 		
 		assign saf_data[i] = {host_send_addr[i][48:21], idx, 6'h00};
 		assign saf_wrreq[i] = accept;
@@ -535,12 +555,7 @@ for (genvar i = 0; i < 4; i = i + 1) begin : FIFO
 				len_done <= last ? 0 : (len_done + len + 1);
 			end
 			
-			if (rst_send[i]) begin
-				idx <= 0;
-				len_done <= 0;
-			end
-			
-			if (rst) begin
+			if (rst || rst_send[i]) begin
 				idx <= 0;
 				len_done <= 0;
 			end
@@ -553,12 +568,7 @@ for (genvar i = 0; i < 4; i = i + 1) begin : FIFO
 		recv_idx[i] <= recv_idx[i] + add_recv_idx[i];
 		meta_idx[i] <= meta_idx[i] + add_meta_idx[i];
 		
-		if (rst_recv[i]) begin
-			recv_idx[i] <= 0;
-			meta_idx[i] <= 0;
-		end
-		
-		if (rst) begin
+		if (rst || rst_recv[i]) begin
 			recv_idx[i] <= 0;
 			meta_idx[i] <= 0;
 		end
@@ -588,14 +598,7 @@ for (genvar i = 0; i < 4; i = i + 1) begin : FIFO
 		r_creds <= r_creds + add_r_creds[i] - use_r_spaces;
 		r_meta_creds <= r_meta_creds + add_r_meta_creds[i] - use_r_space;
 		
-		if (rst_recv[i]) begin
-			r_limit <= 1 << RECV_LD;
-			r_data_limit <= 1 << RECV_DATA_LD;
-			r_creds <= 0;
-			r_meta_creds <= 0;
-		end
-		
-		if (rst) begin
+		if (rst || rst_recv[i]) begin
 			r_limit <= 1 << RECV_LD;
 			r_data_limit <= 1 << RECV_DATA_LD;
 			r_creds <= 0;
@@ -812,6 +815,17 @@ begin: READ
 	assign rdf_data = pcie_m.rdata;
 	assign rdf_wrreq = pcie_m.rvalid;
 	assign pcie_m.rready = !rdf_full;
+	
+	// R last credits
+	reg [SEND_LD:0] last_creds;
+	wire add_last = pcie_m.rready && pcie_m.rvalid && pcie_m.rlast;
+	
+	assign send_data_ready = (last_creds > 0);
+	always_ff @(posedge clk) begin
+		last_creds <= last_creds + add_last - send_data_start;
+		
+		if (rst) last_creds <= 0;
+	end
 end
 
 
@@ -886,6 +900,8 @@ end
 // Send request (gsqf)
 // Data payloads (rmf, rdf)
 begin: TX
+	reg [6:0] cyc;
+	
 	reg [20:0] tx_data;
 	reg tx_valid;
 	wire tx_rd = axi_m.wready && axi_m.wvalid && axi_m.wlast;
@@ -902,10 +918,11 @@ begin: TX
 		grpf_rdreq = 0;
 		gsqf_rdreq = 0;
 		rmf_rdreq = 0;
+		send_data_start = 0;
 		
 		data_addr_off = rmf_q[0] ? (4096 + 64*(63-rmf_q[6:1])) : 0;
 		
-		 if (!grpf_empty) begin
+		if ((cyc == 0) && !grpf_empty) begin
 			axi_m.awaddr = cntrl_addr[grpf_q[14:13]];
 			axi_m.awlen = 0;
 			axi_m.awvalid = tx_ready;
@@ -913,7 +930,7 @@ begin: TX
 			tx_next[20:8] = grpf_q[12:0];
 			tx_next[1:0] = 2'd0;
 			grpf_rdreq = axi_m.awready && axi_m.awvalid;
-		end else if (!gsqf_empty) begin
+		end else if ((cyc == 1) && !gsqf_empty) begin
 			axi_m.awaddr = cntrl_addr[gsqf_q[8:7]];
 			axi_m.awlen = 0;
 			axi_m.awvalid = tx_ready;
@@ -921,7 +938,7 @@ begin: TX
 			tx_next[20:8] = {gsqf_q[0], gsqf_q[6:1]};
 			tx_next[1:0] = 2'd1;
 			gsqf_rdreq = axi_m.awready && axi_m.awvalid;
-		end else if (!rmf_empty && !rdf_empty) begin
+		end else if ((cyc == 2) && !rmf_empty && send_data_ready) begin
 			axi_m.awaddr = data_addr[rmf_q[8:7]] | data_addr_off;
 			axi_m.awlen = rmf_q[6:1];
 			axi_m.awvalid = tx_ready;
@@ -929,6 +946,7 @@ begin: TX
 			tx_next[20:8] = rmf_q[8:7];
 			tx_next[1:0] = 2'd2;
 			rmf_rdreq = axi_m.awready && axi_m.awvalid;
+			send_data_start = axi_m.awready && axi_m.awvalid;
 		end else begin
 			axi_m.awaddr = data_addr[rmf_q[8:7]] | data_addr_off;
 			axi_m.awlen = rmf_q[6:1];
@@ -950,7 +968,7 @@ begin: TX
 		rdf_rdreq = 0;
 		
 		for (integer i = 0; i < 4; i = i + 1) begin
-			add_s_data_cred[i] = 0;
+			send_data_done[i] = 0;
 			send_done[i] = 0;
 		end
 		
@@ -971,7 +989,7 @@ begin: TX
 				axi_m.wvalid = tx_valid && !rdf_empty;
 				
 				rdf_rdreq = tx_valid && axi_m.wready;
-				add_s_data_cred[tx_data[9:8]] = axi_m.wready && axi_m.wvalid;
+				send_data_done[tx_data[9:8]] = axi_m.wready && axi_m.wvalid;
 				send_done[tx_data[9:8]] = axi_m.wready && axi_m.wvalid && axi_m.wlast;
 			end
 			default: begin
@@ -983,12 +1001,15 @@ begin: TX
 	end
 	
 	always_ff @(posedge clk) begin
+		cyc <= (cyc + 1) % 67;
+		
 		tx_valid <= tx_wr || (tx_valid && !tx_rd);
 		if (tx_wr && (!tx_valid || tx_rd)) tx_data <= tx_next;
 		
 		if (axi_m.wready && axi_m.wvalid) len <= axi_m.wlast ? 0 : (len + 1);
 		
 		if (rst) begin
+			cyc <= 0;
 			tx_valid <= 0;
 			len <= 0;
 		end
@@ -1126,8 +1147,8 @@ for (genvar i = 0; i < 4; i = i + 1) begin : SR
 				32'h118: softreg_resp[i].data <= {READ.arb_sel};
 				32'h120: softreg_resp[i].data <= {TX.len, TX.tx_data, TX.tx_valid};
 				32'h128: softreg_resp[i].data <= {rbf_q, rbf_full, rbf_empty};
-				32'h130: softreg_resp[i].data <= {recv_done[i], send_done[i], rst_recv[i], add_meta_idx[i], use_s_creds[i], add_s_data_cred[i], rst_send[i], add_recv_idx[i], add_r_meta_creds[i], add_r_creds[i]};
-				32'h138: softreg_resp[i].data <= {FIFO[i].r_data_limit, FIFO[i].r_limit, FIFO[i].send_limit};
+				32'h130: softreg_resp[i].data <= {recv_done[i], send_done[i], rst_recv[i], add_meta_idx[i], use_s_creds[i], send_data_done[i], rst_send[i], add_recv_idx[i], add_r_meta_creds[i], add_r_creds[i]};
+				32'h138: softreg_resp[i].data <= {FIFO[i].r_data_limit, FIFO[i].r_limit, FIFO[i].s_data_limit, FIFO[i].s_limit};
 				
 				32'h140: softreg_resp[i].data <= {axi_s.awaddr[48:0], axi_s.awlen, axi_s.awvalid, axi_s.awready};
 				32'h148: softreg_resp[i].data <= {axi_s.wdata[60:0], axi_s.wlast, axi_s.wvalid, axi_s.wready};

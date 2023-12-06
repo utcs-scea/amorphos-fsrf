@@ -218,6 +218,11 @@ restartTransaction:
     void listen_loop() {
         fd_set fds;
         aos_socket_command cmd;
+        
+        cpu_set_t cpu_set;
+        CPU_ZERO(&cpu_set);
+        CPU_SET(0, &cpu_set);
+        pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
 
         while (1) {
             startTransaction(fds);

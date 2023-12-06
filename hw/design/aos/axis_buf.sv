@@ -125,7 +125,7 @@ logic sdf_rdreq;
 
 HullFIFO #(
 	.TYPE(3),
-	.TYPES("BRAM"),
+	//.TYPES("BRAM"),
 	.WIDTH(512),
 	.LOG_DEPTH(SEND_FIFO_LD)
 ) send_data_fifo (
@@ -222,7 +222,7 @@ logic rdf_rdreq;
 
 HullFIFO #(
 	.TYPE(3),
-	.TYPES("BRAM"),
+	//.TYPES("BRAM"),
 	.WIDTH(512+5+1),
 	.LOG_DEPTH(RECV_FIFO_LD)
 ) recv_data_fifo (
@@ -385,6 +385,8 @@ end
 // Credit requests (sqf)
 // Data payloads (spf, sdf)
 begin: TX
+	reg [6:0] cyc;
+	
 	reg [20:0] tx_data;
 	reg tx_valid;
 	wire tx_rd = axi_m.wready && axi_m.wvalid && axi_m.wlast;
@@ -404,7 +406,7 @@ begin: TX
 		
 		data_addr_off = spf_q[11] ? (4096 + 64*(63-spf_q[10:5])) : 0;
 		
-		if (!rpf_empty) begin
+		if ((cyc == 0) && !rpf_empty) begin
 			axi_m.awaddr = cntrl_addr[rpf_q[4:0]];
 			axi_m.awlen = 0;
 			axi_m.awvalid = tx_ready;
@@ -412,7 +414,7 @@ begin: TX
 			tx_next[20:8] = rpf_q[17:5];
 			tx_next[1:0] = 2'd0;
 			rpf_rdreq = axi_m.awready && axi_m.awvalid;
-		end else if (!sqf_empty) begin
+		end else if ((cyc == 1) && !sqf_empty) begin
 			axi_m.awaddr = cntrl_addr[sqf_q[4:0]];
 			axi_m.awlen = 0;
 			axi_m.awvalid = tx_ready;
@@ -420,7 +422,7 @@ begin: TX
 			tx_next[20:8] = sqf_q[17:5];
 			tx_next[1:0] = 2'd1;
 			sqf_rdreq = axi_m.awready && axi_m.awvalid;
-		end else if (!spf_empty) begin
+		end else if ((cyc == 2) && !spf_empty) begin
 			axi_m.awaddr = data_addr[spf_q[4:0]] | data_addr_off;
 			axi_m.awlen = spf_q[10:5];
 			axi_m.awvalid = tx_ready;
@@ -475,12 +477,15 @@ begin: TX
 	end
 	
 	always_ff @(posedge clk) begin
+		cyc <= (cyc + 1) % 67;
+		
 		tx_valid <= tx_wr || (tx_valid && !tx_rd);
 		if (tx_wr && (!tx_valid || tx_rd)) tx_data <= tx_next;
 		
 		if (axi_m.wready && axi_m.wvalid) len <= axi_m.wlast ? 0 : (len + 1);
 		
 		if (rst) begin
+			cyc <= 0;
 			tx_valid <= 0;
 			len <= 0;
 		end
