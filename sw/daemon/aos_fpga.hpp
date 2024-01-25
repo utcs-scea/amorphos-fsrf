@@ -103,6 +103,7 @@ public:
 		for (uint64_t app_id = 0; app_id < 4; ++app_id) {
 			const uint64_t src = 4*slot_id + app_id;
 			for (uint64_t dst = 0; dst < 8; ++dst) {
+				const uint64_t sm4 = src % 4;
 				const uint64_t dm4 = dst % 4;
 				
 				// Local addrs
@@ -119,8 +120,8 @@ public:
 				
 				// Host FIFO
 				if (src == dst) {
-					cntrl_addr = (uint64_t{1}<<36) + (1<<15) + (src<<6);
-					data_addr = (uint64_t{1}<<36) + (src<<13);
+					cntrl_addr = (uint64_t{1}<<36) + (1<<15) + (sm4<<6);
+					data_addr = (uint64_t{1}<<36) + (sm4<<13);
 				}
 				
 				// Stream enable on data addr write
