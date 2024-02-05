@@ -188,6 +188,9 @@ file copy -force $CL_DIR/design/conv/conv.v $TARGET_DIR
 # Strm
 #file copy -force $CL_DIR/design/strm/strm.sv $TARGET_DIR
 file copy -force $CL_DIR/design/strm/axis_strm.sv $TARGET_DIR
+# HLS SHA STRM
+file copy -force $CL_DIR/design/hls_sha_strm/hls_sha_strm_wrapper.sv $TARGET_DIR
+file copy -force {*}[glob $CL_DIR/design/hls_sha_strm/fpga/*.v] $TARGET_DIR
 
 # Top level module
 file copy -force $CL_DIR/design/cl_aos.sv $TARGET_DIR

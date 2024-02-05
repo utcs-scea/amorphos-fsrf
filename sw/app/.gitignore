@@ -14,6 +14,7 @@ hls_pgrnk
 rng
 sha
 hls_sha
+hls_sha_strm
 strm
 strm_host
 strm_p2p
