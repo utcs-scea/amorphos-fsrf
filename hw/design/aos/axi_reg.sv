@@ -1,6 +1,7 @@
 module axi_reg #(
     parameter EN_WR = 1,
-    parameter EN_RD = 0
+    parameter EN_RD = 0,
+    parameter FIFO_LD = 1
 ) (
 	input clk,
 	input rst_n,
@@ -8,8 +9,6 @@ module axi_reg #(
 	axi_bus_t.master axi_s,
 	axi_bus_t.slave axi_m
 );
-
-localparam FIFO_LD = 1;
 
 generate if (EN_WR) begin
     // AW channel
