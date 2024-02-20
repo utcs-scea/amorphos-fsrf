@@ -554,8 +554,8 @@ private:
     aos_errcode aos_stream_read_return() {
         // return credits?
         bool req = false;
-        req |= stream_read_meta_credits >= (stream_meta_size / 4 / 8);
-        req |= stream_read_data_credits >= (stream_read_size / 64 / 8);
+        req |= stream_read_meta_credits >= (stream_meta_size/4 * 15/16);
+        req |= stream_read_data_credits >= (stream_read_size/64 * 15/16);
         if (req) {
             // create the packet
             aos_stream_read_request_packet cmd_pckt;
@@ -578,8 +578,8 @@ private:
     aos_errcode aos_stream_write_return(uint64_t len, bool last) {
         // request credits?
         bool req = false;
-        req |= stream_write_meta_credits <= (32 / 8);
-        req |= stream_write_data_credits <= (stream_write_size / 64 / 8);
+        req |= stream_write_meta_credits <= (32 * 1/16);
+        req |= stream_write_data_credits <= (stream_write_size/64 * 1/16);
         // create the packet
         if ((len == 0) && !req) return aos_errcode::SUCCESS;
         aos_stream_write_request_packet cmd_pckt;
