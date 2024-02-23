@@ -40,7 +40,7 @@ public:
 			perror("mlock error");
 		}
 		meta_phys = virt_to_phys((uint64_t)meta_addr);
-		printf("meta: %d 0x%lx\n", meta_shmid, meta_phys);
+		//printf("meta: %d 0x%lx\n", meta_shmid, meta_phys);
 		
 		recv_shmid = shmget(key+global_app_id*3+1, (1<<21),
 			SHM_HUGETLB | IPC_CREAT | SHM_R | SHM_W);
@@ -51,7 +51,7 @@ public:
 			perror("mlock error");
 		}
 		recv_phys = virt_to_phys((uint64_t)recv_addr);
-		printf("recv: %d 0x%lx\n", recv_shmid, recv_phys);
+		//printf("recv: %d 0x%lx\n", recv_shmid, recv_phys);
 		
 		send_shmid = shmget(key+global_app_id*3+2, (1<<21),
 			SHM_HUGETLB | IPC_CREAT | SHM_R | SHM_W);
@@ -62,7 +62,7 @@ public:
 			perror("mlock error");
 		}
 		send_phys = virt_to_phys((uint64_t)send_addr);
-		printf("send: %d 0x%lx\n", send_shmid, send_phys);
+		//printf("send: %d 0x%lx\n", send_shmid, send_phys);
 	}
 	
 	~aos_stream() {
@@ -90,6 +90,10 @@ public:
 		fpga->write_sys_reg(4+app_id, 0x10, send_phys);
 		fpga->write_sys_reg(4+app_id, 0x20, recv_phys);
 		fpga->write_sys_reg(4+app_id, 0x28, meta_phys);
+		
+		memset(meta_addr, 0, (1<<12));
+		memset(recv_addr, 0, (1<<21));
+		memset(send_addr, 0, (1<<21));
 		
 		sd = global_app_id;
 		meta_shmid = this->meta_shmid;
