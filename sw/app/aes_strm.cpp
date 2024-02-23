@@ -35,14 +35,18 @@ struct thread_config {
 void host_thread(thread_config tc) {
 	const uint64_t words = uint64_t{1} << tc.length;
 	
-	if (true) {
+	if (false) {
 		cpu_set_t cpu_set;
 		CPU_ZERO(&cpu_set);
-		const uint64_t tid[] = {2, 3, 6, 7};
+		const uint64_t tid[] = {2, 3, 6, 7, 10, 11, 14, 15};
 		CPU_SET(tid[0], &cpu_set);
 		CPU_SET(tid[1], &cpu_set);
 		CPU_SET(tid[2], &cpu_set);
 		CPU_SET(tid[3], &cpu_set);
+		CPU_SET(tid[4], &cpu_set);
+		CPU_SET(tid[5], &cpu_set);
+		CPU_SET(tid[6], &cpu_set);
+		CPU_SET(tid[7], &cpu_set);
 		pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
 	}
 	
@@ -68,6 +72,10 @@ void host_thread(thread_config tc) {
 			end = bytes == write_left;
 			aos[tc.app]->aos_stream_write(bytes, end);
 			write_left -= bytes;
+			if (bytes < write_bytes) {
+				//printf("%lu sleeping...\n", tc.app);
+				usleep(25);
+			}
 		}
 	}
 }
@@ -93,7 +101,7 @@ int main(int argc, char *argv[]) {
 	assert(length <= 34);
 	++argi;
 	
-	uint64_t send_size = 1024;
+	uint64_t send_size = 2048;
 	if (argi < argc) send_size = atol(argv[argi]);
 	++argi;
 	

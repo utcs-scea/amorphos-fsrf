@@ -513,16 +513,17 @@ public:
         }
         stream_write_data_credits -= len;
         if (len > 0) {
+            // TODO: fix multiple writes per alloc
             stream_write_meta_credits -= 1;
         }
-        return aos_stream_write_return(0, false);
+        return aos_stream_write_return(false, len, false);
     }
     
     aos_errcode aos_stream_write(uint64_t bytes, bool last) {
         assert(connectionOpen);
         assert(stream_write_addr != nullptr);
         const uint64_t len = bytes / 64;
-        return aos_stream_write_return(len, last);
+        return aos_stream_write_return(true, len, last);
     }
 
 private:
@@ -554,8 +555,8 @@ private:
     aos_errcode aos_stream_read_return() {
         // return credits?
         bool req = false;
-        req |= stream_read_meta_credits >= (stream_meta_size/4 * 15/16);
-        req |= stream_read_data_credits >= (stream_read_size/64 * 15/16);
+        req |= stream_read_meta_credits >= (stream_meta_size/4 * 1/2);
+        req |= stream_read_data_credits >= (stream_read_size/64 * 1/2);
         if (req) {
             // create the packet
             aos_stream_read_request_packet cmd_pckt;
@@ -575,17 +576,18 @@ private:
         return aos_errcode::SUCCESS;
     }
     
-    aos_errcode aos_stream_write_return(uint64_t len, bool last) {
+    aos_errcode aos_stream_write_return(bool send, uint64_t len, bool last) {
         // request credits?
         bool req = false;
-        req |= stream_write_meta_credits <= (32 * 1/16);
-        req |= stream_write_data_credits <= (stream_write_size/64 * 1/16);
+        req |= send && (stream_write_meta_credits == 0);
+        req |= send && (stream_write_data_credits < (stream_write_size/64 * 1/16));
+        req |= (!send) && (len == 0);
         // create the packet
-        if ((len == 0) && !req) return aos_errcode::SUCCESS;
+        if (!(send || req)) return aos_errcode::SUCCESS;
         aos_stream_write_request_packet cmd_pckt;
         cmd_pckt.slot_id = slot_id;
         cmd_pckt.app_id = app_id;
-        cmd_pckt.len = len;
+        cmd_pckt.len = send ? len : 0;
         cmd_pckt.last = last;
         cmd_pckt.credit_req = req;
         // send over the request
