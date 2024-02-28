@@ -39,7 +39,7 @@ public:
 		
 		// Allocate huge pages
 		fd = open("/proc/sys/vm/nr_hugepages", O_WRONLY);
-		pwrite(fd, "16\n", 3, 0);
+		pwrite(fd, "64\n", 3, 0);
 		close(fd);
 		
 		// Open XDMA device files
@@ -102,7 +102,7 @@ public:
 		// Set up app streams
 		for (uint64_t app_id = 0; app_id < 4; ++app_id) {
 			const uint64_t src = 4*slot_id + app_id;
-			for (uint64_t dst = 0; dst < 8; ++dst) {
+			for (uint64_t dst = 0; dst < 32; ++dst) {
 				const uint64_t sm4 = src % 4;
 				const uint64_t dm4 = dst % 4;
 				

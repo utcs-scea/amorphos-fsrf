@@ -20,8 +20,8 @@ struct config {
 	uint64_t in_vnr;
 };
 
-config configs[8];
-aos_client *aos[8];
+config configs[32];
+aos_client *aos[32];
 
 struct thread_config {
 	uint64_t app;
@@ -93,7 +93,7 @@ int main(int argc, char *argv[]) {
 	
 	uint64_t num_apps = 1;
 	if (argi < argc) num_apps = atol(argv[argi]);
-	assert((num_apps >= 1) && (num_apps <= 8));
+	assert((num_apps >= 1) && (num_apps <= 32));
 	++argi;
 	
 	uint64_t length = 25;
@@ -106,11 +106,11 @@ int main(int argc, char *argv[]) {
 	++argi;
 	
 	// configuration
-	uint64_t srcs[8];
-	uint64_t dests[8];
-	bool host_rd[8];
-	bool host_wr[8];
-	int sd[8];
+	uint64_t srcs[32];
+	uint64_t dests[32];
+	bool host_rd[32];
+	bool host_wr[32];
+	int sd[32];
 	
 	util.num_apps = num_apps;
 	util.setup_aos_client(aos);
@@ -139,8 +139,8 @@ int main(int argc, char *argv[]) {
 		aos[app]->aos_cntrlreg_write(addr, dests[app]);
 	}
 	
-	high_resolution_clock::time_point start, end[8];
-	std::thread threads[8];
+	high_resolution_clock::time_point start, end[32];
+	std::thread threads[32];
 	
 	// start runs
 	start = high_resolution_clock::now();
