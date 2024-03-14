@@ -1,7 +1,8 @@
 module axi_reg #(
     parameter EN_WR = 1,
     parameter EN_RD = 0,
-    parameter FIFO_LD = 1
+    parameter FIFO_LD = 1,
+    parameter META_FIFO_LD = 1
 ) (
 	input clk,
 	input rst_n,
@@ -20,9 +21,9 @@ generate if (EN_WR) begin
     wire awf_rdreq;
     
     HullFIFO #(
-        .TYPE(0),
+        .TYPE(META_FIFO_LD > 7 ? 3 : 0),
         .WIDTH(16+64+8+3),
-        .LOG_DEPTH(FIFO_LD)
+        .LOG_DEPTH(META_FIFO_LD)
     ) aw_fifo (
         .clock(clk),
         .reset_n(rst_n),
@@ -52,7 +53,7 @@ generate if (EN_WR) begin
     wire wf_rdreq;
     
     HullFIFO #(
-        .TYPE(0),
+        .TYPE((FIFO_LD > 7) ? 3 : 0),
         .WIDTH(512+64+1),
         .LOG_DEPTH(FIFO_LD)
     ) w_fifo (
@@ -84,9 +85,9 @@ generate if (EN_WR) begin
     wire bf_rdreq;
     
     HullFIFO #(
-        .TYPE(0),
+        .TYPE(META_FIFO_LD > 7 ? 3 : 0),
         .WIDTH(16+2),
-        .LOG_DEPTH(FIFO_LD)
+        .LOG_DEPTH(META_FIFO_LD)
     ) b_fifo (
         .clock(clk),
         .reset_n(rst_n),
@@ -117,9 +118,9 @@ generate if (EN_RD) begin
     wire arf_rdreq;
     
     HullFIFO #(
-        .TYPE(0),
+        .TYPE(META_FIFO_LD > 7 ? 3 : 0),
         .WIDTH(16+64+8+3),
-        .LOG_DEPTH(FIFO_LD)
+        .LOG_DEPTH(META_FIFO_LD)
     ) ar_fifo (
         .clock(clk),
         .reset_n(rst_n),
@@ -149,7 +150,7 @@ generate if (EN_RD) begin
     wire rf_rdreq;
     
     HullFIFO #(
-        .TYPE(0),
+        .TYPE(FIFO_LD > 7 ? 3 : 0),
         .WIDTH(16+512+2+1),
         .LOG_DEPTH(FIFO_LD)
     ) r_fifo (

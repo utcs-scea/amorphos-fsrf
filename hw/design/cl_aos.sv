@@ -348,7 +348,10 @@ end
 assign cl_sh_dma_rd_full  = 1'b0;
 assign cl_sh_dma_wr_full  = 1'b0;
 
-axi_reg pcis_ar_m (
+axi_reg #(
+	.META_FIFO_LD(10),
+	.FIFO_LD(12)
+) pcis_ar_m (
 	.clk(global_clk),
 	.rst_n(rst_n[1]),
 	
