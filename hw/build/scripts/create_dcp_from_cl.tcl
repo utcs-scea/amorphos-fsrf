@@ -349,7 +349,7 @@ if {$implement} {
    ##############################
    # CL Post-Route Optimization
    ##############################
-   set SLACK [get_property SLACK [get_timing_paths]]
+   set SLACK [get_property SLACK [get_timing_paths -setup -hold]]
    #Post-route phys_opt will not be run if slack is positive.
    if {$route_phys_opt && $SLACK < 0} {
       puts "\nAWS FPGA: ([clock format [clock seconds] -format %T]) - Running post-route optimization";

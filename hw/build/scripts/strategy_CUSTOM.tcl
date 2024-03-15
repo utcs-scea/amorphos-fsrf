@@ -50,7 +50,7 @@ set route_postHookTcl ""
 
 set route_phys_opt 1
 set post_phys_options    ""
-set post_phys_directive  ""
+set post_phys_directive  "ExploreWithAggressiveHoldFix"
 set post_phys_preHookTcl ""
 set post_phys_postHookTcl ""
 
