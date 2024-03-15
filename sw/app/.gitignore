@@ -21,3 +21,4 @@ strm_p2p
 strm_p2p2
 hls_tri
 cpu_rng
+parse_log

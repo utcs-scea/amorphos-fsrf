@@ -20,8 +20,8 @@ struct config {
 	uint64_t read_cyc;
 };
 
-config configs[8];
-aos_client *aos[8];
+config configs[32];
+aos_client *aos[32];
 
 struct thread_config {
 	uint64_t app;
@@ -35,16 +35,12 @@ struct thread_config {
 void host_thread(thread_config tc) {
 	const uint64_t words = uint64_t{1} << tc.length;
 	
-	if (true) {
-		cpu_set_t cpu_set;
-		CPU_ZERO(&cpu_set);
-		const uint64_t tid[] = {2, 3, 6, 7};
-		CPU_SET(tid[0], &cpu_set);
-		CPU_SET(tid[1], &cpu_set);
-		CPU_SET(tid[2], &cpu_set);
-		CPU_SET(tid[3], &cpu_set);
-		pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
-	}
+	const int num_threads = sysconf(_SC_NPROCESSORS_ONLN);
+	cpu_set_t cpu_set;
+	pthread_getaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
+	CPU_CLR(0, &cpu_set);
+	CPU_CLR(num_threads, &cpu_set);
+	pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
 	
 	uint64_t read_left = tc.read ? (words * 64) : 0;
 	uint64_t write_left = tc.write ? (words * 64) : 0;
@@ -93,7 +89,7 @@ int main(int argc, char *argv[]) {
 	
 	uint64_t cfg_num = 1;
 	if (argi < argc) cfg_num = atol(argv[argi]);
-	assert((cfg_num >= 1) && (cfg_num <= 8));
+	assert((cfg_num >= 1) && (cfg_num <= 32));
 	++argi;
 	
 	cfg_rw_t cfg_rw = C_RDWR;
@@ -116,25 +112,23 @@ int main(int argc, char *argv[]) {
 	
 	// configuration
 	uint64_t num_apps;
-	uint64_t dests[8];
-	bool active[8];
-	bool accl_rd[8];
-	bool accl_wr[8];
-	bool host_rd[8];
-	bool host_wr[8];
-	int sd[8];
+	uint64_t dests[32];
+	bool active[32];
+	bool accl_rd[32];
+	bool accl_wr[32];
+	bool host_rd[32];
+	bool host_wr[32];
+	int sd[32];
 	
 	num_apps = cfg_num;
 	if (cfg_arch == C_LOOP) {
 		if (cfg_dist == C_LOCAL) {
-			num_apps = 2 * cfg_num;
-			assert((cfg_num >= 1) && (cfg_num <= 4));
+			assert((cfg_num >= 2) && (cfg_num % 2 == 0));
 		} else if (cfg_dist == C_REMOTE) {
-			num_apps = 4 + cfg_num;
-			assert((cfg_num >= 1) && (cfg_num <= 4));
+			num_apps = (cfg_num + 7) / 8 * 8;
+			assert((cfg_num >= 2) && (cfg_num % 2 == 0));
 		} else if (cfg_dist == C_HOST) {
-			num_apps = cfg_num;
-			assert((cfg_num >= 1) && (cfg_num <= 8));
+			// Nothing needed
 		}
 	} else if (cfg_arch == C_PIPE) {
 		num_apps = cfg_num;
@@ -162,10 +156,10 @@ int main(int argc, char *argv[]) {
 			if (cfg_dist == C_LOCAL) {
 				dests[app] = (app % 2 == 0) ? app + 1 : app - 1;
 			} else if (cfg_dist == C_REMOTE) {
-				dests[app] = (app / 4 == 0) ? app + 4 : app - 4;
-				active[app] = (app % 4) < cfg_num;
+				dests[app] = ((app / 4) % 2 == 0) ? app + 4 : app - 4;
+				active[app] = (app % 4) < (cfg_num / 2);  // TODO: extend to more cases?
 			} else if (cfg_dist == C_HOST) {
-				dests[app] = app;
+				dests[app] = sd[app];
 				host_rd[app] = true;
 				host_wr[app] = true;
 			}
@@ -175,7 +169,7 @@ int main(int argc, char *argv[]) {
 			} else if (cfg_dist == C_REMOTE) {
 				dests[app] = (app + 1) % num_apps;
 			} else if (cfg_dist == C_HOST) {
-				dests[app] = (app == (num_apps - 1)) ? app : app + 1;
+				dests[app] = (app == (num_apps - 1)) ? sd[app] : app + 1;
 				host_rd[app] = app == (num_apps - 1);
 				host_wr[app] = app == 0;
 			}
@@ -191,8 +185,8 @@ int main(int argc, char *argv[]) {
 		aos[app]->aos_cntrlreg_write(0x18, pckt_len);
 	}
 	
-	high_resolution_clock::time_point start, end[8];
-	std::thread threads[8];
+	high_resolution_clock::time_point start, end[32];
+	std::thread threads[32];
 	
 	// start runs
 	start = high_resolution_clock::now();
@@ -262,16 +256,16 @@ int main(int argc, char *argv[]) {
 		
 		duration<double> diff = end[app] - start;
 		double seconds = diff.count();
-		printf("%g ", seconds);
+		//printf("%g ", seconds);
 		
 		sum_sec += seconds;
 		if (seconds > max_sec) max_sec = seconds;
 	}
 	
-	const double avg_sec = sum_sec / active_apps;
-	const double avg_tput = ((double)total_bytes)/avg_sec/(1<<30);
+	//const double avg_sec = sum_sec / active_apps;
+	//const double avg_tput = ((double)total_bytes)/avg_sec/(1<<30);
 	const double min_tput = ((double)total_bytes)/max_sec/(1<<30);
-	printf("%g %g\n", avg_tput, min_tput);
+	printf("%g %g\n", max_sec, min_tput);
 	}
 	
 	// print cycle-based stats

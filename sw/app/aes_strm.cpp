@@ -35,20 +35,12 @@ struct thread_config {
 void host_thread(thread_config tc) {
 	const uint64_t words = uint64_t{1} << tc.length;
 	
-	if (false) {
-		cpu_set_t cpu_set;
-		CPU_ZERO(&cpu_set);
-		const uint64_t tid[] = {2, 3, 6, 7, 10, 11, 14, 15};
-		CPU_SET(tid[0], &cpu_set);
-		CPU_SET(tid[1], &cpu_set);
-		CPU_SET(tid[2], &cpu_set);
-		CPU_SET(tid[3], &cpu_set);
-		CPU_SET(tid[4], &cpu_set);
-		CPU_SET(tid[5], &cpu_set);
-		CPU_SET(tid[6], &cpu_set);
-		CPU_SET(tid[7], &cpu_set);
-		pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
-	}
+	const int num_threads = sysconf(_SC_NPROCESSORS_ONLN);
+	cpu_set_t cpu_set;
+	pthread_getaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
+	CPU_CLR(0, &cpu_set);
+	CPU_CLR(num_threads, &cpu_set);
+	pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
 	
 	uint64_t read_left = tc.read ? (words * 64) : 0;
 	uint64_t write_left = tc.write ? (words * 64) : 0;
@@ -72,10 +64,6 @@ void host_thread(thread_config tc) {
 			end = bytes == write_left;
 			aos[tc.app]->aos_stream_write(bytes, end);
 			write_left -= bytes;
-			if (bytes < write_bytes) {
-				//printf("%lu sleeping...\n", tc.app);
-				usleep(25);
-			}
 		}
 	}
 }

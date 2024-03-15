@@ -13,8 +13,8 @@ struct config {
 	uint64_t num_words;
 };
 
-config configs[8];
-aos_client *aos[8];
+config configs[32];
+aos_client *aos[32];
 
 struct thread_config {
 	uint64_t app;
@@ -28,16 +28,12 @@ struct thread_config {
 void host_thread(thread_config tc) {
 	const uint64_t words = uint64_t{1} << tc.length;
 	
-	if (true) {
-		cpu_set_t cpu_set;
-		CPU_ZERO(&cpu_set);
-		const uint64_t tid[] = {2, 3, 6, 7};
-		CPU_SET(tid[0], &cpu_set);
-		CPU_SET(tid[1], &cpu_set);
-		CPU_SET(tid[2], &cpu_set);
-		CPU_SET(tid[3], &cpu_set);
-		pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
-	}
+	const int num_threads = sysconf(_SC_NPROCESSORS_ONLN);
+	cpu_set_t cpu_set;
+	pthread_getaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
+	CPU_CLR(0, &cpu_set);
+	CPU_CLR(num_threads, &cpu_set);
+	pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
 	
 	uint64_t read_left = tc.read ? (words * 64) : 0;
 	uint64_t write_left = tc.write ? (words * 64) : 0;
@@ -78,7 +74,7 @@ int main(int argc, char *argv[]) {
 	
 	uint64_t num_apps = 1;
 	if (argi < argc) num_apps = atol(argv[argi]);
-	assert((num_apps >= 1) && (num_apps <= 8));
+	assert((num_apps >= 1) && (num_apps <= 32));
 	++argi;
 	
 	uint64_t length = 25;
@@ -86,16 +82,16 @@ int main(int argc, char *argv[]) {
 	assert(length <= 34);
 	++argi;
 	
-	uint64_t send_size = 1024;
+	uint64_t send_size = 2048;
 	if (argi < argc) send_size = atol(argv[argi]);
 	++argi;
 	
 	// configuration
-	//uint64_t srcs[8];
-	uint64_t dests[8];
-	bool host_rd[8];
-	bool host_wr[8];
-	int sd[8];
+	//uint64_t srcs[32];
+	uint64_t dests[32];
+	bool host_rd[32];
+	bool host_wr[32];
+	int sd[32];
 	
 	util.num_apps = num_apps;
 	util.setup_aos_client(aos);
@@ -118,8 +114,8 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	
-	high_resolution_clock::time_point start, end[8];
-	std::thread threads[8];
+	high_resolution_clock::time_point start, end[32];
+	std::thread threads[32];
 	
 	// start runs
 	start = high_resolution_clock::now();

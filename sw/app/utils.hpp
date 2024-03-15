@@ -107,15 +107,15 @@ public:
 		for (uint64_t app = 0; app < num_apps; ++app) {
 			duration<double> diff = end[app] - start;
 			double seconds = diff.count();
-			printf("%g ", seconds);
+			//printf("%g ", seconds);
 			
 			sum_sec += seconds;
 			if (seconds > max_sec) max_sec = seconds;
 		}
 		
-		const double avg_sec = sum_sec / num_apps;
-		const double avg_tput = ((double)total_bytes)/avg_sec/(1<<30);
+		//const double avg_sec = sum_sec / num_apps;
+		//const double avg_tput = ((double)total_bytes)/avg_sec/(1<<30);
 		const double min_tput = ((double)total_bytes)/max_sec/(1<<30);
-		printf("%g %g\n", avg_tput, min_tput);
+		printf("%g %g\n", max_sec, min_tput);
 	}
 };
