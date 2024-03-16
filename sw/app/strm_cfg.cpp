@@ -176,6 +176,8 @@ int main(int argc, char *argv[]) {
 		}
 		accl_rd[app] = active[app] && ((cfg_rw == C_RD) || (cfg_rw == C_RDWR));
 		accl_wr[app] = active[app] && ((cfg_rw == C_WR) || (cfg_rw == C_RDWR));
+		host_rd[app] = host_rd[app] && ((cfg_rw == C_WR) || (cfg_rw == C_RDWR));
+		host_wr[app] = host_wr[app] && ((cfg_rw == C_RD) || (cfg_rw == C_RDWR));
 	}
 	
 	// prepare for runs
