@@ -7,6 +7,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <sys/shm.h>
 #include <sys/mman.h>
 #include <pthread.h>
 #include <cstdlib>
@@ -29,40 +30,57 @@ public:
 		this->app_id = app_id;
 		global_app_id = 4*fpga->get_slot_id() + app_id;
 		
+		// Host buffer permissions
+		char *uid_str = getenv("SUDO_UID");
+		assert(uid_str != nullptr);
+		int uid = atoi(uid_str);
+		assert(uid != 0);
+		char *gid_str = getenv("SUDO_GID");
+		assert(gid_str != nullptr);
+		int gid = atoi(gid_str);
+		assert(gid != 0);
+		shmid_ds shm_ds;
+		shm_ds.shm_perm.uid = uid;
+		shm_ds.shm_perm.gid = gid;
+		shm_ds.shm_perm.mode = 0660;
+		
 		// Reserve host buffers
 		const uint64_t key = 0x0FEE0000;
 		meta_shmid = shmget(key+global_app_id*3+0, (1<<12),
 			IPC_CREAT | SHM_R | SHM_W);
 		assert(meta_shmid != -1);
+		//shm_ds.shm_perm.__key = key+global_app_id*3+0;
+		assert(shmctl(meta_shmid, IPC_SET, &shm_ds) != -1);
 		meta_addr = shmat(meta_shmid, nullptr, 0);
 		assert(meta_addr != (void*)-1);
 		if (mlock(meta_addr, 1<<12)) {
 			perror("mlock error");
 		}
 		meta_phys = virt_to_phys((uint64_t)meta_addr);
-		//printf("meta: %d 0x%lx\n", meta_shmid, meta_phys);
 		
 		recv_shmid = shmget(key+global_app_id*3+1, (1<<21),
 			SHM_HUGETLB | IPC_CREAT | SHM_R | SHM_W);
 		assert(recv_shmid != -1);
+		//shm_ds.shm_perm.__key = key+global_app_id*3+1;
+		assert(shmctl(recv_shmid, IPC_SET, &shm_ds) != -1);
 		recv_addr = shmat(recv_shmid, nullptr, 0);
 		assert(recv_addr != (void*)-1);
 		if (mlock(recv_addr, 1<<21)) {
 			perror("mlock error");
 		}
 		recv_phys = virt_to_phys((uint64_t)recv_addr);
-		//printf("recv: %d 0x%lx\n", recv_shmid, recv_phys);
 		
 		send_shmid = shmget(key+global_app_id*3+2, (1<<21),
 			SHM_HUGETLB | IPC_CREAT | SHM_R | SHM_W);
 		assert(send_shmid != -1);
+		//shm_ds.shm_perm.__key = key+global_app_id*3+2;
+		assert(shmctl(send_shmid, IPC_SET, &shm_ds) != -1);
 		send_addr = shmat(send_shmid, nullptr, 0);
 		assert(send_addr != (void*)-1);
 		if (mlock(send_addr, 1<<21)) {
 			perror("mlock error");
 		}
 		send_phys = virt_to_phys((uint64_t)send_addr);
-		//printf("send: %d 0x%lx\n", send_shmid, send_phys);
 	}
 	
 	~aos_stream() {
