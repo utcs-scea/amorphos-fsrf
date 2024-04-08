@@ -6,6 +6,7 @@ dnn
 hls_flow
 gups
 hls_hll
+hls_hll_strm
 md5
 md5_strm
 multi

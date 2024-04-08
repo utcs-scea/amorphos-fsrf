@@ -1,0 +1,164 @@
+#include <pthread.h>
+#include <atomic>
+#include <chrono>
+#include <thread>
+#include <numeric>
+#include "aos.hpp"
+#include "utils.hpp"
+
+using namespace std::chrono;
+
+struct config {
+	float f;
+	uint64_t dest;
+	uint64_t N;
+};
+
+config configs[32];
+aos_client *aos[32];
+
+struct thread_config {
+	uint64_t app;
+	uint64_t length;
+	uint64_t send_size;
+	
+	bool read;
+	bool write;
+};
+
+void host_thread(thread_config tc) {
+	const uint64_t words = uint64_t{1} << tc.length;
+	
+	const int num_threads = sysconf(_SC_NPROCESSORS_ONLN);
+	cpu_set_t cpu_set;
+	pthread_getaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
+	CPU_CLR(0, &cpu_set);
+	CPU_CLR(num_threads, &cpu_set);
+	pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
+	
+	uint64_t read_left = tc.read ? (words * 64) : 0;
+	uint64_t write_left = tc.write ? (words * 64) : 0;
+	uint64_t write_bytes = tc.send_size * 64;
+	uint64_t bytes;
+	bool end;
+	while (read_left || write_left) {
+		if (read_left) {
+			void *read_buf;
+			end = true;
+			aos[tc.app]->aos_stream_read(read_buf, bytes, end);
+			(void)read_buf;
+			read_left -= bytes;
+			aos[tc.app]->aos_stream_free(bytes);
+		}
+		if (write_left) {
+			void *write_buf;
+			bytes = std::min(write_bytes, write_left);
+			aos[tc.app]->aos_stream_alloc(write_buf, bytes);
+			(void)write_buf;
+			end = bytes == write_left;
+			aos[tc.app]->aos_stream_write(bytes, end);
+			write_left -= bytes;
+		}
+	}
+}
+
+int main(int argc, char *argv[]) {
+	int argi = 1;
+	utils util;
+	
+	enum cfg_arch_t {C_LOOP = 0, C_PIPE};
+	
+	cfg_arch_t cfg_arch = C_LOOP;
+	if (argi < argc) cfg_arch = (cfg_arch_t)atol(argv[argi]);
+	assert(cfg_arch <= 1);
+	++argi;
+	
+	uint64_t num_apps = 1;
+	if (argi < argc) num_apps = atol(argv[argi]);
+	assert((num_apps >= 1) && (num_apps <= 32));
+	++argi;
+	
+	uint64_t length = 25;
+	if (argi < argc) length = atol(argv[argi]);
+	assert(length <= 34);
+	++argi;
+	
+	uint64_t send_size = 2048;
+	if (argi < argc) send_size = atol(argv[argi]);
+	++argi;
+	
+	// configuration
+	//uint64_t srcs[32];
+	uint64_t dests[32];
+	bool host_rd[32];
+	bool host_wr[32];
+	int sd[32];
+	
+	util.num_apps = num_apps;
+	util.setup_aos_client(aos);
+	
+	for (uint64_t app = 0; app < num_apps; ++app) {
+		aos[app]->aos_stream_open(true, true, sd[app]);
+	}
+	
+	for (uint64_t app = 0; app < num_apps; ++app) {
+		if (cfg_arch == C_LOOP) {
+			//srcs[app] = sd[app];
+			dests[app] = sd[app];
+			host_rd[app] = true;
+			host_wr[app] = true;
+		} else if (cfg_arch == C_PIPE) {
+			//srcs[app] = (app == 0) ? sd[app] : app - 1;
+			dests[app] = (app == (num_apps - 1)) ? sd[app] : app + 1;
+			host_rd[app] = app == (num_apps - 1);
+			host_wr[app] = app == 0;
+		}
+	}
+	
+	high_resolution_clock::time_point start, end[32];
+	std::thread threads[32];
+	
+	// start runs
+	start = high_resolution_clock::now();
+	for (uint64_t app = 0; app < num_apps; ++app) {
+		aos[app]->aos_cntrlreg_write(0x40, uint64_t{1}<<length);
+		aos[app]->aos_cntrlreg_write(0x30, dests[app]);
+		aos[app]->aos_cntrlreg_write(0x00, 0x1);
+		
+		if (host_rd[app] || host_wr[app]) {
+			thread_config tc;
+			tc.app = app;
+			tc.length = length;
+			tc.send_size = send_size;
+			tc.read = host_rd[app];
+			tc.write = host_wr[app];
+			threads[app] = std::thread(host_thread, tc);
+		}
+	}
+	
+	for (uint64_t app = 0; app < num_apps; ++app) {
+		if (host_rd[app] || host_wr[app]) threads[app].join();
+	}
+	
+	// end runs
+	util.finish_runs(aos, end, 0x00, true, 0x2, 0x2);
+	
+	for (uint64_t app = 0; app < num_apps; ++app) {
+		aos[app]->aos_cntrlreg_write(0x00, 0x10);
+	}
+	
+	// print stats
+	const uint64_t accl_bytes = (uint64_t{64} << length);
+	const uint64_t total_accl_bytes = num_apps * accl_bytes;
+	const uint64_t host_bytes = (cfg_arch == C_LOOP) ? total_accl_bytes : accl_bytes;
+	const uint64_t total_bytes = total_accl_bytes + host_bytes;
+	const uint64_t app_bytes = total_bytes / num_apps;
+	util.print_stats("hls_hll_strm", app_bytes, start, end);
+	
+	// clean up
+	for (uint64_t app = 0; app < num_apps; ++app) {
+		aos[app]->aos_stream_close(sd[app]);
+	}
+	
+	return 0;
+}

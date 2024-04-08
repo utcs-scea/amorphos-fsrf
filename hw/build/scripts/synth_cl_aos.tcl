@@ -49,6 +49,9 @@ read_verilog [glob $ENC_SRC_DIR/*.v]
 foreach file [glob $CL_DIR/design/hls_hll/fpga/*.tcl] {
 	source $file
 }
+foreach file [glob $CL_DIR/design/hls_hll_strm/fpga/*.tcl] {
+	source $file
+}
 
 #---- End of section replaced by User ----
 
