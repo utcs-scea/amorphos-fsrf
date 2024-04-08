@@ -98,13 +98,13 @@ logic rst_n [2:0];
 */
 
 // AXIL2SR to AmorphOS System
-SoftRegReq  sys_softreg_req[7:0];
-SoftRegReq  sys_softreg_req_[7:0];
+SoftRegReq  sys_softreg_req[15:0];
+SoftRegReq  sys_softreg_req_[15:0];
 SoftRegReq  sys_softreg_req_buf;
 logic       sys_softreg_req_grant;
 
-SoftRegResp sys_softreg_resp[7:0];
-SoftRegResp sys_softreg_resp_[7:0];
+SoftRegResp sys_softreg_resp[15:0];
+SoftRegResp sys_softreg_resp_[15:0];
 SoftRegResp sys_softreg_resp_buf;
 logic       sys_softreg_resp_grant;
 
@@ -150,7 +150,7 @@ AXIL2SR sys_axil2sr (
 );
 assign sys_softreg_req_grant = 1;
 
-AmorphOSSoftReg_RouteTree #(.SR_NUM_APPS(8))
+AmorphOSSoftReg_RouteTree #(.SR_NUM_APPS(16))
 sys_sr_tree
 (
 	// User clock and reset
@@ -164,7 +164,7 @@ sys_sr_tree
 	.app_softreg_resp(sys_softreg_resp_)
 );
 
-for (i = 0; i < 8; i = i + 1) begin : sys_sr_pipe
+for (i = 0; i < 9; i = i + 1) begin : sys_sr_pipe
 	lib_pipe #(
 		.WIDTH(98),
 		.STAGES(2)
@@ -244,9 +244,32 @@ axi_xbar ax (
 // PCIe
 //------------------------------------
 
+SoftRegReq  pl_softreg_req;
+SoftRegResp pl_softreg_resp;
+
+lib_pipe #(
+	.WIDTH(98),
+	.STAGES(2)
+) PIPE_PL_SR_REQ (
+	.clk(global_clk),
+	.rst_n(rst_n[0]),
+	.in_bus(sys_softreg_req[8]),
+	.out_bus(pl_softreg_req)
+);
+lib_pipe #(
+	.WIDTH(65),
+	.STAGES(2)
+) PIPE_PL_SR_RESP (
+	.clk(global_clk),
+	.rst_n(rst_n[0]),
+	.in_bus(pl_softreg_resp),
+	.out_bus(sys_softreg_resp[8])
+);
+
 // PCIM interface bridge
 axi_bus_t pcim_axi_s ();
 axi_bus_t pcim_axi_ar ();
+axi_bus_t pcim_axi_lim ();
 axi_bus_t cl_sh_pcim ();
 
 axi_reg #(
@@ -258,13 +281,26 @@ axi_reg #(
 	.axi_s(pcim_axi_s),
 	.axi_m(pcim_axi_ar)
 );
+
+pcim_limit pcim_lim (
+	.clk(global_clk),
+	.rst(!rst_n[0]),
+	
+	.softreg_req(pl_softreg_req),
+	.softreg_resp(pl_softreg_resp),
+	
+	.axi_s(pcim_axi_ar),
+	.axi_m(pcim_axi_lim)
+);
+
 axi_reg #(
-	.EN_RD(1)
+	.EN_RD(1),
+	.FIFO_LD(6)
 ) pcim_ar0 (
 	.clk(global_clk),
 	.rst_n(rst_n[0]),
 	
-	.axi_s(pcim_axi_ar),
+	.axi_s(pcim_axi_lim),
 	.axi_m(cl_sh_pcim)
 );
 
@@ -710,22 +746,23 @@ for (app_num = 0; app_num < F1_NUM_APPS; app_num = app_num + 1) begin : app
 			.axis_m(app_axis_m),
 			.axis_s(app_axis_s)
 		);
-	end
-	
-	/*
-	if (F1_CONFIG_APPS == 1) begin : aes
-		AESWrapper aes_inst (
+	end else if (F1_CONFIG_APPS == 5) begin : hls_hll_strm
+		HLSHLLStrmWrapper hls_hll_strm_inst (
 			// General signals
 			.clk(global_clk),
 			.rst(app_rst),
 			
-			// Virtual memory interface
-			.axi_m(app_axi_bus),
-			
 			// SoftReg control interface
 			.softreg_req(app_softreg_req),
-			.softreg_resp(app_softreg_resp)
+			.softreg_resp(app_softreg_resp),
+			
+			// Virtual stream interface
+			.axis_m(app_axis_m),
+			.axis_s(app_axis_s)
 		);
+	end
+	
+	/*
 	end else if (F1_CONFIG_APPS == 2) begin : conv
 		ConvWrapper conv_inst (
 			// General signals
@@ -752,47 +789,8 @@ for (app_num = 0; app_num < F1_NUM_APPS; app_num = app_num + 1) begin : app
 			.softreg_req(app_softreg_req),
 			.softreg_resp(app_softreg_resp)
 		);
-	end else if (F1_CONFIG_APPS == 6) begin : hls_hll
-		HLSHLLWrapper hls_hll_inst (
-			// General signals
-			.clk(global_clk),
-			.rst(app_rst),
-			
-			// Virtual memory interface
-			.axi_m(app_axi_bus),
-			
-			// SoftReg control interface
-			.softreg_req(app_softreg_req),
-			.softreg_resp(app_softreg_resp)
-		);
-	end else if (F1_CONFIG_APPS == 7) begin : md5
-		MD5Wrapper md5_inst (
-			// General signals
-			.clk(global_clk),
-			.rst(app_rst),
-			
-			// Virtual memory interface
-			.axi_m(app_axi_bus),
-			
-			// SoftReg control interface
-			.softreg_req(app_softreg_req),
-			.softreg_resp(app_softreg_resp)
-		);
 	end else if (F1_CONFIG_APPS == 11) begin : sha
 		SHAWrapper sha_inst (
-			// General signals
-			.clk(global_clk),
-			.rst(app_rst),
-			
-			// Virtual memory interface
-			.axi_m(app_axi_bus),
-			
-			// SoftReg control interface
-			.softreg_req(app_softreg_req),
-			.softreg_resp(app_softreg_resp)
-		);
-	end else if (F1_CONFIG_APPS == 12) begin : hls_sha
-		HLSSHAWrapper hls_sha_inst (
 			// General signals
 			.clk(global_clk),
 			.rst(app_rst),

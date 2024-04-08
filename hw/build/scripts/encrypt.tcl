@@ -76,6 +76,8 @@ file copy -force $CL_DIR/design/aos/axi_xbar.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/axis_buf.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/host_fifo.sv $TARGET_DIR
 file copy -force $CL_DIR/design/aos/axi_fork.sv $TARGET_DIR
+file copy -force $CL_DIR/design/aos/pcim_limit.sv $TARGET_DIR
+#file copy -force $CL_DIR/design/aos/arbs.sv $TARGET_DIR
 # F1 interfaces
 file copy -force $CL_DIR/design/aos/AXIL2SR.sv $TARGET_DIR
 # Parameterization
@@ -191,6 +193,13 @@ file copy -force $CL_DIR/design/strm/axis_strm.sv $TARGET_DIR
 # HLS SHA STRM
 file copy -force $CL_DIR/design/hls_sha_strm/hls_sha_strm_wrapper.sv $TARGET_DIR
 file copy -force {*}[glob $CL_DIR/design/hls_sha_strm/fpga/*.v] $TARGET_DIR
+# HLS HyperLogLog STRM
+file copy -force $CL_DIR/design/hls_hll_strm/hls_hll_strm_wrapper.sv $TARGET_DIR
+file copy -force {*}[glob $CL_DIR/design/hls_hll_strm/fpga/*.v] $TARGET_DIR
+# HLS Flow Strm
+#file copy -force $CL_DIR/design/hls_flow_strm/hls_flow_strm_wrapper.sv $TARGET_DIR
+#file copy -force {*}[glob $CL_DIR/design/hls_flow_strm/fpga/*.v] $TARGET_DIR
+#file copy -force {*}[glob $CL_DIR/design/hls_flow_strm/fpga/*.dat] $TARGET_DIR
 
 # Top level module
 file copy -force $CL_DIR/design/cl_aos.sv $TARGET_DIR

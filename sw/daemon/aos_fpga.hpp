@@ -134,6 +134,9 @@ public:
 			}
 		}
 		
+		write_sys_reg(8, 0x0, 0); // 7?
+		write_sys_reg(8, 0x8, 0); // 4?
+		
 		// TODO: Enable PCIM?
 		
 		return;

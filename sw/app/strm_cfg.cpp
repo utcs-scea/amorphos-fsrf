@@ -110,6 +110,14 @@ int main(int argc, char *argv[]) {
 	if (argi < argc) send_size = atol(argv[argi]);
 	++argi;
 	
+	uint64_t w_minus = 6;
+	if (argi < argc) w_minus = atol(argv[argi]);
+	++argi;
+	
+	uint64_t w_plus = 4;
+	if (argi < argc) w_plus = atol(argv[argi]);
+	++argi;
+	
 	// configuration
 	uint64_t num_apps;
 	uint64_t dests[32];
@@ -146,6 +154,7 @@ int main(int argc, char *argv[]) {
 	
 	for (uint64_t app = 0; app < num_apps; ++app) {
 		aos[app]->aos_stream_open(true, true, sd[app]);
+		if (app % 4 == 0) aos[app]->aos_set_mode(10, (w_plus << 32) | w_minus);
 	}
 	
 	for (uint64_t app = 0; app < num_apps; ++app) {

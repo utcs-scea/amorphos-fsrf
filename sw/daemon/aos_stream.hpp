@@ -201,6 +201,9 @@ public:
 				}
 				printf("\n");
 				return;
+			case 10:
+				fpga->write_sys_reg(8, 0x0, data & 0xFF);
+				fpga->write_sys_reg(8, 0x8, data >> 32);
 			default:
 				return;
 		}
