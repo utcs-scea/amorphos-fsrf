@@ -16,9 +16,13 @@ sha
 hls_sha
 hls_sha_strm
 strm
+strm_cfg
 strm_host
 strm_p2p
 strm_p2p2
 hls_tri
 cpu_rng
 parse_log
+
+# Folders
+logs
