@@ -2,6 +2,7 @@
 aes
 aes_strm
 conv
+hls_conv_strm
 dnn
 hls_flow
 gups

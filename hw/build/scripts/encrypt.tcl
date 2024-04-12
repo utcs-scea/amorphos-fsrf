@@ -196,6 +196,9 @@ file copy -force {*}[glob $CL_DIR/design/hls_sha_strm/fpga/*.v] $TARGET_DIR
 # HLS HyperLogLog STRM
 file copy -force $CL_DIR/design/hls_hll_strm/hls_hll_strm_wrapper.sv $TARGET_DIR
 file copy -force {*}[glob $CL_DIR/design/hls_hll_strm/fpga/*.v] $TARGET_DIR
+# HLS Convolution STRM
+file copy -force $CL_DIR/design/hls_conv_strm/hls_conv_strm_wrapper.sv $TARGET_DIR
+file copy -force {*}[glob $CL_DIR/design/hls_conv_strm/fpga/*.v] $TARGET_DIR
 # HLS Flow Strm
 #file copy -force $CL_DIR/design/hls_flow_strm/hls_flow_strm_wrapper.sv $TARGET_DIR
 #file copy -force {*}[glob $CL_DIR/design/hls_flow_strm/fpga/*.v] $TARGET_DIR
