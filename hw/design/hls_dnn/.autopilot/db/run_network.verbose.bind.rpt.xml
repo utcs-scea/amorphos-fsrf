@@ -1,0 +1,49 @@
+<profile>
+
+<section name = "Vitis HLS Report for 'run_network'" level="0">
+<item name = "Date">Mon Apr 15 00:16:25 2024
+</item>
+<item name = "Version">2020.2 (Build 3064766 on Wed Nov 18 09:12:47 MST 2020)</item>
+<item name = "Project">img0_takeB</item>
+<item name = "Solution">solution1 (Vivado IP Flow Target)</item>
+<item name = "Product family">virtexuplus</item>
+<item name = "Target device">xcvu9p-flgb2104-2-i</item>
+</section>
+
+<section name = "Performance Estimates" level="0">
+<item name = "Timing">
+<section name = "" level="1">
+<item name = "Summary"><table name="" hasTotal="0">
+<keys size="4">Clock, Target, Estimated, Uncertainty</keys>
+<column name="ap_clk">3.30 ns, 2.367 ns, 0.89 ns</column>
+</table>
+</item>
+</section>
+</item>
+<item name = "Latency">
+<section name = "" level="1">
+<item name = "Summary"><table name="" hasTotal="0">
+<keys size="8">, min, max, min, max, min, max, Type</keys>
+<column name="">624, 624, 2.059 us, 2.059 us, 523, 523, dataflow</column>
+</table>
+</item>
+<item name = "Detail">
+<section name = "" level="1">
+<item name = "Instance"><table name="" hasTotal="0">
+<keys size="9">Instance, Module, min, max, min, max, min, max, Type</keys>
+<column name="grp_global_pooling2d_cl_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig6_s_fu_410">global_pooling2d_cl_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig6_s, 26, 26, 85.800 ns, 85.800 ns, 26, 26, none</column>
+<column name="grp_dense_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_s_fu_478">dense_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_s, 522, 522, 1.723 us, 1.723 us, 522, 522, none</column>
+<column name="grp_dense_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_fu_614">dense_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s, 6, 6, 19.800 ns, 19.800 ns, 6, 6, none</column>
+<column name="grp_relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_krelu_config5_s_fu_682">relu_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_krelu_config5_s, 67, 67, 0.221 us, 0.221 us, 67, 67, none</column>
+</table>
+</item>
+<item name = "Loop"><table name="" hasTotal="0">
+<keys size="8">Loop Name, min, max, Latency, achieved, target, Count, Pipelined</keys>
+</table>
+</item>
+</section>
+</item>
+</section>
+</item>
+</section>
+</profile>

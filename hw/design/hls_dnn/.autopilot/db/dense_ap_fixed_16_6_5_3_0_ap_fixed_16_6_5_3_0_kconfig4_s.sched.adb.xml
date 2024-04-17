@@ -1,0 +1,78 @@
+<stg><name>dense<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig4></name>
+
+
+<trans_list>
+
+<trans id="6" from="1" to="2">
+<condition id="-1">
+<or_exp><and_exp></and_exp></or_exp>
+</condition>
+</trans>
+</trans_list>
+
+
+
+<state_list>
+
+<state id="1" st_id="1">
+
+<operation id="3" st_id="1" stage="2" lat="2">
+<core></core>
+<MemPortIdVec></MemPortIdVec>
+<condition id="-1">
+<or_exp><and_exp></and_exp></or_exp>
+</condition>
+
+<Node id="68" bw="0" op_0_bw="0" op_1_bw="16" op_2_bw="16" op_3_bw="16" op_4_bw="16" op_5_bw="16" op_6_bw="16" op_7_bw="16" op_8_bw="16" op_9_bw="16" op_10_bw="16" op_11_bw="16" op_12_bw="16" op_13_bw="16" op_14_bw="16" op_15_bw="16" op_16_bw="16" op_17_bw="16" op_18_bw="16" op_19_bw="16" op_20_bw="16" op_21_bw="16" op_22_bw="16" op_23_bw="16" op_24_bw="16" op_25_bw="16" op_26_bw="16" op_27_bw="16" op_28_bw="16" op_29_bw="16" op_30_bw="16" op_31_bw="16" op_32_bw="16" op_33_bw="16" op_34_bw="16" op_35_bw="16" op_36_bw="16" op_37_bw="16" op_38_bw="16" op_39_bw="16" op_40_bw="16" op_41_bw="16" op_42_bw="16" op_43_bw="16" op_44_bw="16" op_45_bw="16" op_46_bw="16" op_47_bw="16" op_48_bw="16" op_49_bw="16" op_50_bw="16" op_51_bw="16" op_52_bw="16" op_53_bw="16" op_54_bw="16" op_55_bw="16" op_56_bw="16" op_57_bw="16" op_58_bw="16" op_59_bw="16" op_60_bw="16" op_61_bw="16" op_62_bw="16" op_63_bw="16" op_64_bw="16" op_65_bw="16" op_66_bw="9">
+<![CDATA[
+:0 %call_ln41 = call void @dense_latency<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig4>, i16 %data, i16 %data1, i16 %data2, i16 %data3, i16 %data4, i16 %data5, i16 %data6, i16 %data7, i16 %data8, i16 %data9, i16 %data10, i16 %data11, i16 %data12, i16 %data13, i16 %data14, i16 %data15, i16 %data16, i16 %data17, i16 %data18, i16 %data19, i16 %data20, i16 %data21, i16 %data22, i16 %data23, i16 %data24, i16 %data25, i16 %data26, i16 %data27, i16 %data28, i16 %data29, i16 %data30, i16 %data31, i16 %data32, i16 %data33, i16 %data34, i16 %data35, i16 %data36, i16 %data37, i16 %data38, i16 %data39, i16 %data40, i16 %data41, i16 %data42, i16 %data43, i16 %data44, i16 %data45, i16 %data46, i16 %data47, i16 %data48, i16 %data49, i16 %data50, i16 %data51, i16 %data52, i16 %data53, i16 %data54, i16 %data55, i16 %data56, i16 %data57, i16 %data58, i16 %data59, i16 %data60, i16 %data61, i16 %data62, i16 %data63, i16 %res, i9 %w7_V
+
+]]></Node>
+<StgValue><ssdm name="call_ln41"/></StgValue>
+</operation>
+</state>
+
+<state id="2" st_id="2">
+
+<operation id="4" st_id="2" stage="1" lat="2">
+<core></core>
+<MemPortIdVec></MemPortIdVec>
+<condition id="-1">
+<or_exp><and_exp></and_exp></or_exp>
+</condition>
+
+<Node id="68" bw="0" op_0_bw="0" op_1_bw="16" op_2_bw="16" op_3_bw="16" op_4_bw="16" op_5_bw="16" op_6_bw="16" op_7_bw="16" op_8_bw="16" op_9_bw="16" op_10_bw="16" op_11_bw="16" op_12_bw="16" op_13_bw="16" op_14_bw="16" op_15_bw="16" op_16_bw="16" op_17_bw="16" op_18_bw="16" op_19_bw="16" op_20_bw="16" op_21_bw="16" op_22_bw="16" op_23_bw="16" op_24_bw="16" op_25_bw="16" op_26_bw="16" op_27_bw="16" op_28_bw="16" op_29_bw="16" op_30_bw="16" op_31_bw="16" op_32_bw="16" op_33_bw="16" op_34_bw="16" op_35_bw="16" op_36_bw="16" op_37_bw="16" op_38_bw="16" op_39_bw="16" op_40_bw="16" op_41_bw="16" op_42_bw="16" op_43_bw="16" op_44_bw="16" op_45_bw="16" op_46_bw="16" op_47_bw="16" op_48_bw="16" op_49_bw="16" op_50_bw="16" op_51_bw="16" op_52_bw="16" op_53_bw="16" op_54_bw="16" op_55_bw="16" op_56_bw="16" op_57_bw="16" op_58_bw="16" op_59_bw="16" op_60_bw="16" op_61_bw="16" op_62_bw="16" op_63_bw="16" op_64_bw="16" op_65_bw="16" op_66_bw="9">
+<![CDATA[
+:0 %call_ln41 = call void @dense_latency<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig4>, i16 %data, i16 %data1, i16 %data2, i16 %data3, i16 %data4, i16 %data5, i16 %data6, i16 %data7, i16 %data8, i16 %data9, i16 %data10, i16 %data11, i16 %data12, i16 %data13, i16 %data14, i16 %data15, i16 %data16, i16 %data17, i16 %data18, i16 %data19, i16 %data20, i16 %data21, i16 %data22, i16 %data23, i16 %data24, i16 %data25, i16 %data26, i16 %data27, i16 %data28, i16 %data29, i16 %data30, i16 %data31, i16 %data32, i16 %data33, i16 %data34, i16 %data35, i16 %data36, i16 %data37, i16 %data38, i16 %data39, i16 %data40, i16 %data41, i16 %data42, i16 %data43, i16 %data44, i16 %data45, i16 %data46, i16 %data47, i16 %data48, i16 %data49, i16 %data50, i16 %data51, i16 %data52, i16 %data53, i16 %data54, i16 %data55, i16 %data56, i16 %data57, i16 %data58, i16 %data59, i16 %data60, i16 %data61, i16 %data62, i16 %data63, i16 %res, i9 %w7_V
+
+]]></Node>
+<StgValue><ssdm name="call_ln41"/></StgValue>
+</operation>
+
+<operation id="5" st_id="2" stage="1" lat="1">
+<core>NULL</core>
+<MemPortIdVec></MemPortIdVec>
+<condition id="-1">
+<or_exp><and_exp></and_exp></or_exp>
+</condition>
+
+<Node id="69" bw="0">
+<![CDATA[
+:1 %ret_ln45 = ret
+
+]]></Node>
+<StgValue><ssdm name="ret_ln45"/></StgValue>
+</operation>
+</state>
+</state_list>
+
+
+<ports>
+</ports>
+
+
+<dataflows>
+</dataflows>
+
+
+</stg>

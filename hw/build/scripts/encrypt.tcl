@@ -203,6 +203,10 @@ file copy -force {*}[glob $CL_DIR/design/hls_conv_strm/fpga/*.v] $TARGET_DIR
 #file copy -force $CL_DIR/design/hls_flow_strm/hls_flow_strm_wrapper.sv $TARGET_DIR
 #file copy -force {*}[glob $CL_DIR/design/hls_flow_strm/fpga/*.v] $TARGET_DIR
 #file copy -force {*}[glob $CL_DIR/design/hls_flow_strm/fpga/*.dat] $TARGET_DIR
+# HLS DNN
+file copy -force $CL_DIR/design/hls_dnn/hls_dnn_wrapper.sv $TARGET_DIR
+file copy -force {*}[glob $CL_DIR/design/hls_dnn/fpga/*.dat] $TARGET_DIR
+file copy -force {*}[glob $CL_DIR/design/hls_dnn/fpga/*.v] $TARGET_DIR
 
 # Top level module
 file copy -force $CL_DIR/design/cl_aos.sv $TARGET_DIR

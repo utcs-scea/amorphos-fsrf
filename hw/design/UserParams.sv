@@ -4,7 +4,7 @@
 package UserParams;
 
 parameter NUM_APPS = 4;
-parameter CONFIG_APPS = 1;
+parameter CONFIG_APPS = 7;
 
 endpackage
 `endif 

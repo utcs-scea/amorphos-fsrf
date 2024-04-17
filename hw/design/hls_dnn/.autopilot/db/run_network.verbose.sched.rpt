@@ -1,0 +1,293 @@
+
+
+================================================================
+== Vitis HLS Report for 'run_network'
+================================================================
+* Date:           Mon Apr 15 00:16:21 2024
+
+* Version:        2020.2 (Build 3064766 on Wed Nov 18 09:12:47 MST 2020)
+* Project:        img0_takeB
+* Solution:       solution1 (Vivado IP Flow Target)
+* Product family: virtexuplus
+* Target device:  xcvu9p-flgb2104-2-i
+
+
+================================================================
+== Performance Estimates
+================================================================
++ Timing: 
+    * Summary: 
+    +--------+---------+----------+------------+
+    |  Clock |  Target | Estimated| Uncertainty|
+    +--------+---------+----------+------------+
+    |ap_clk  |  3.30 ns|  2.367 ns|     0.89 ns|
+    +--------+---------+----------+------------+
+
++ Latency: 
+    * Summary: 
+    +---------+---------+----------+----------+-----+-----+----------+
+    |  Latency (cycles) |  Latency (absolute) |  Interval | Pipeline |
+    |   min   |   max   |    min   |    max   | min | max |   Type   |
+    +---------+---------+----------+----------+-----+-----+----------+
+    |      624|      624|  2.059 us|  2.059 us|  523|  523|  dataflow|
+    +---------+---------+----------+----------+-----+-----+----------+
+
+    + Detail: 
+        * Instance: 
+        N/A
+
+        * Loop: 
+        N/A
+
+============================================================
++ Verbose Summary: Synthesis Manager
+============================================================
+InlineROM: 1
+ExposeGlobal: 0
+============================================================
++ Verbose Summary: CDFG Model
+============================================================
+IsTopModel: 0
+ResetActiveHigh: 1
+IsCombinational: 2
+IsDatapathOnly: 0
+HasWiredReturn: 1
+HasMFsm: 0
+HasVarLatency: 1
+IsPipeline: 0
+IsRtlPipelined: 0
+IsInstanceOverlapped: 0
+IsDontTouch: 0
+HasImplIP: 0
+IsGatedGlobalClock: 0
+
+
+============================================================
++ Verbose Summary: Schedule
+============================================================
+* Number of FSM states : 8
+* Pipeline : 0
+* Dataflow Pipeline: 1
+  DF-Pipeline-0: Size = 8, States = { 1 2 3 4 5 6 7 8 }
+
+* FSM state transitions: 
+1 --> 2 
+2 --> 3 
+3 --> 4 
+4 --> 5 
+5 --> 6 
+6 --> 7 
+7 --> 8 
+8 --> 
+
+* FSM state operations: 
+
+State 1 <SV = 0> <Delay = 0.00>
+ST_1 : Operation 9 [1/1] (0.00ns)   --->   "%layer4_out_V_0 = alloca i64 1" [firmware/myproject.cpp:125]   --->   Operation 9 'alloca' 'layer4_out_V_0' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 10 [1/1] (0.00ns)   --->   "%layer5_out_V_0 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 10 'alloca' 'layer5_out_V_0' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 11 [1/1] (0.00ns)   --->   "%layer5_out_V_1 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 11 'alloca' 'layer5_out_V_1' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 12 [1/1] (0.00ns)   --->   "%layer5_out_V_2 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 12 'alloca' 'layer5_out_V_2' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 13 [1/1] (0.00ns)   --->   "%layer5_out_V_3 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 13 'alloca' 'layer5_out_V_3' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 14 [1/1] (0.00ns)   --->   "%layer5_out_V_4 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 14 'alloca' 'layer5_out_V_4' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 15 [1/1] (0.00ns)   --->   "%layer5_out_V_5 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 15 'alloca' 'layer5_out_V_5' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 16 [1/1] (0.00ns)   --->   "%layer5_out_V_6 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 16 'alloca' 'layer5_out_V_6' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 17 [1/1] (0.00ns)   --->   "%layer5_out_V_7 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 17 'alloca' 'layer5_out_V_7' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 18 [1/1] (0.00ns)   --->   "%layer5_out_V_8 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 18 'alloca' 'layer5_out_V_8' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 19 [1/1] (0.00ns)   --->   "%layer5_out_V_9 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 19 'alloca' 'layer5_out_V_9' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 20 [1/1] (0.00ns)   --->   "%layer5_out_V_10 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 20 'alloca' 'layer5_out_V_10' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 21 [1/1] (0.00ns)   --->   "%layer5_out_V_11 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 21 'alloca' 'layer5_out_V_11' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 22 [1/1] (0.00ns)   --->   "%layer5_out_V_12 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 22 'alloca' 'layer5_out_V_12' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 23 [1/1] (0.00ns)   --->   "%layer5_out_V_13 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 23 'alloca' 'layer5_out_V_13' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 24 [1/1] (0.00ns)   --->   "%layer5_out_V_14 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 24 'alloca' 'layer5_out_V_14' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 25 [1/1] (0.00ns)   --->   "%layer5_out_V_15 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 25 'alloca' 'layer5_out_V_15' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 26 [1/1] (0.00ns)   --->   "%layer5_out_V_16 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 26 'alloca' 'layer5_out_V_16' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 27 [1/1] (0.00ns)   --->   "%layer5_out_V_17 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 27 'alloca' 'layer5_out_V_17' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 28 [1/1] (0.00ns)   --->   "%layer5_out_V_18 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 28 'alloca' 'layer5_out_V_18' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 29 [1/1] (0.00ns)   --->   "%layer5_out_V_19 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 29 'alloca' 'layer5_out_V_19' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 30 [1/1] (0.00ns)   --->   "%layer5_out_V_20 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 30 'alloca' 'layer5_out_V_20' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 31 [1/1] (0.00ns)   --->   "%layer5_out_V_21 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 31 'alloca' 'layer5_out_V_21' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 32 [1/1] (0.00ns)   --->   "%layer5_out_V_22 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 32 'alloca' 'layer5_out_V_22' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 33 [1/1] (0.00ns)   --->   "%layer5_out_V_23 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 33 'alloca' 'layer5_out_V_23' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 34 [1/1] (0.00ns)   --->   "%layer5_out_V_24 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 34 'alloca' 'layer5_out_V_24' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 35 [1/1] (0.00ns)   --->   "%layer5_out_V_25 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 35 'alloca' 'layer5_out_V_25' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 36 [1/1] (0.00ns)   --->   "%layer5_out_V_26 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 36 'alloca' 'layer5_out_V_26' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 37 [1/1] (0.00ns)   --->   "%layer5_out_V_27 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 37 'alloca' 'layer5_out_V_27' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 38 [1/1] (0.00ns)   --->   "%layer5_out_V_28 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 38 'alloca' 'layer5_out_V_28' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 39 [1/1] (0.00ns)   --->   "%layer5_out_V_29 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 39 'alloca' 'layer5_out_V_29' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 40 [1/1] (0.00ns)   --->   "%layer5_out_V_30 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 40 'alloca' 'layer5_out_V_30' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 41 [1/1] (0.00ns)   --->   "%layer5_out_V_31 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 41 'alloca' 'layer5_out_V_31' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 42 [1/1] (0.00ns)   --->   "%layer5_out_V_32 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 42 'alloca' 'layer5_out_V_32' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 43 [1/1] (0.00ns)   --->   "%layer5_out_V_33 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 43 'alloca' 'layer5_out_V_33' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 44 [1/1] (0.00ns)   --->   "%layer5_out_V_34 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 44 'alloca' 'layer5_out_V_34' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 45 [1/1] (0.00ns)   --->   "%layer5_out_V_35 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 45 'alloca' 'layer5_out_V_35' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 46 [1/1] (0.00ns)   --->   "%layer5_out_V_36 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 46 'alloca' 'layer5_out_V_36' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 47 [1/1] (0.00ns)   --->   "%layer5_out_V_37 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 47 'alloca' 'layer5_out_V_37' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 48 [1/1] (0.00ns)   --->   "%layer5_out_V_38 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 48 'alloca' 'layer5_out_V_38' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 49 [1/1] (0.00ns)   --->   "%layer5_out_V_39 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 49 'alloca' 'layer5_out_V_39' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 50 [1/1] (0.00ns)   --->   "%layer5_out_V_40 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 50 'alloca' 'layer5_out_V_40' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 51 [1/1] (0.00ns)   --->   "%layer5_out_V_41 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 51 'alloca' 'layer5_out_V_41' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 52 [1/1] (0.00ns)   --->   "%layer5_out_V_42 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 52 'alloca' 'layer5_out_V_42' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 53 [1/1] (0.00ns)   --->   "%layer5_out_V_43 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 53 'alloca' 'layer5_out_V_43' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 54 [1/1] (0.00ns)   --->   "%layer5_out_V_44 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 54 'alloca' 'layer5_out_V_44' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 55 [1/1] (0.00ns)   --->   "%layer5_out_V_45 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 55 'alloca' 'layer5_out_V_45' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 56 [1/1] (0.00ns)   --->   "%layer5_out_V_46 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 56 'alloca' 'layer5_out_V_46' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 57 [1/1] (0.00ns)   --->   "%layer5_out_V_47 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 57 'alloca' 'layer5_out_V_47' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 58 [1/1] (0.00ns)   --->   "%layer5_out_V_48 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 58 'alloca' 'layer5_out_V_48' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 59 [1/1] (0.00ns)   --->   "%layer5_out_V_49 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 59 'alloca' 'layer5_out_V_49' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 60 [1/1] (0.00ns)   --->   "%layer5_out_V_50 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 60 'alloca' 'layer5_out_V_50' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 61 [1/1] (0.00ns)   --->   "%layer5_out_V_51 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 61 'alloca' 'layer5_out_V_51' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 62 [1/1] (0.00ns)   --->   "%layer5_out_V_52 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 62 'alloca' 'layer5_out_V_52' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 63 [1/1] (0.00ns)   --->   "%layer5_out_V_53 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 63 'alloca' 'layer5_out_V_53' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 64 [1/1] (0.00ns)   --->   "%layer5_out_V_54 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 64 'alloca' 'layer5_out_V_54' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 65 [1/1] (0.00ns)   --->   "%layer5_out_V_55 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 65 'alloca' 'layer5_out_V_55' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 66 [1/1] (0.00ns)   --->   "%layer5_out_V_56 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 66 'alloca' 'layer5_out_V_56' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 67 [1/1] (0.00ns)   --->   "%layer5_out_V_57 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 67 'alloca' 'layer5_out_V_57' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 68 [1/1] (0.00ns)   --->   "%layer5_out_V_58 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 68 'alloca' 'layer5_out_V_58' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 69 [1/1] (0.00ns)   --->   "%layer5_out_V_59 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 69 'alloca' 'layer5_out_V_59' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 70 [1/1] (0.00ns)   --->   "%layer5_out_V_60 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 70 'alloca' 'layer5_out_V_60' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 71 [1/1] (0.00ns)   --->   "%layer5_out_V_61 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 71 'alloca' 'layer5_out_V_61' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 72 [1/1] (0.00ns)   --->   "%layer5_out_V_62 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 72 'alloca' 'layer5_out_V_62' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 73 [1/1] (0.00ns)   --->   "%layer5_out_V_63 = alloca i64 1" [firmware/myproject.cpp:129]   --->   Operation 73 'alloca' 'layer5_out_V_63' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 74 [2/2] (0.00ns)   --->   "%call_ln127 = call void @dense<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig4>, i16 %input_1, i16 %input_11, i16 %input_12, i16 %input_13, i16 %input_14, i16 %input_15, i16 %input_16, i16 %input_17, i16 %input_18, i16 %input_19, i16 %input_110, i16 %input_111, i16 %input_112, i16 %input_113, i16 %input_114, i16 %input_115, i16 %input_116, i16 %input_117, i16 %input_118, i16 %input_119, i16 %input_120, i16 %input_121, i16 %input_122, i16 %input_123, i16 %input_124, i16 %input_125, i16 %input_126, i16 %input_127, i16 %input_128, i16 %input_129, i16 %input_130, i16 %input_131, i16 %input_132, i16 %input_133, i16 %input_134, i16 %input_135, i16 %input_136, i16 %input_137, i16 %input_138, i16 %input_139, i16 %input_140, i16 %input_141, i16 %input_142, i16 %input_143, i16 %input_144, i16 %input_145, i16 %input_146, i16 %input_147, i16 %input_148, i16 %input_149, i16 %input_150, i16 %input_151, i16 %input_152, i16 %input_153, i16 %input_154, i16 %input_155, i16 %input_156, i16 %input_157, i16 %input_158, i16 %input_159, i16 %input_160, i16 %input_161, i16 %input_162, i16 %input_163, i16 %layer4_out_V_0, i9 %w7_V" [firmware/myproject.cpp:127]   --->   Operation 74 'call' 'call_ln127' <Predicate = true> <Delay = 0.00> <CoreType = "Generic">   --->   Core 0 '' <Latency = 0> <II = 1> <Delay = 1.00> <Generic> <Opcode : >
+
+State 2 <SV = 1> <Delay = 0.00>
+ST_2 : Operation 75 [1/2] (0.00ns)   --->   "%call_ln127 = call void @dense<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig4>, i16 %input_1, i16 %input_11, i16 %input_12, i16 %input_13, i16 %input_14, i16 %input_15, i16 %input_16, i16 %input_17, i16 %input_18, i16 %input_19, i16 %input_110, i16 %input_111, i16 %input_112, i16 %input_113, i16 %input_114, i16 %input_115, i16 %input_116, i16 %input_117, i16 %input_118, i16 %input_119, i16 %input_120, i16 %input_121, i16 %input_122, i16 %input_123, i16 %input_124, i16 %input_125, i16 %input_126, i16 %input_127, i16 %input_128, i16 %input_129, i16 %input_130, i16 %input_131, i16 %input_132, i16 %input_133, i16 %input_134, i16 %input_135, i16 %input_136, i16 %input_137, i16 %input_138, i16 %input_139, i16 %input_140, i16 %input_141, i16 %input_142, i16 %input_143, i16 %input_144, i16 %input_145, i16 %input_146, i16 %input_147, i16 %input_148, i16 %input_149, i16 %input_150, i16 %input_151, i16 %input_152, i16 %input_153, i16 %input_154, i16 %input_155, i16 %input_156, i16 %input_157, i16 %input_158, i16 %input_159, i16 %input_160, i16 %input_161, i16 %input_162, i16 %input_163, i16 %layer4_out_V_0, i9 %w7_V" [firmware/myproject.cpp:127]   --->   Operation 75 'call' 'call_ln127' <Predicate = true> <Delay = 0.00> <CoreType = "Generic">   --->   Core 0 '' <Latency = 0> <II = 1> <Delay = 1.00> <Generic> <Opcode : >
+
+State 3 <SV = 2> <Delay = 0.00>
+ST_3 : Operation 76 [2/2] (0.00ns)   --->   "%call_ln131 = call void @relu<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, krelu_config5>, i16 %layer4_out_V_0, i15 %layer5_out_V_0, i1 %layer5_out_V_1, i1 %layer5_out_V_2, i1 %layer5_out_V_3, i1 %layer5_out_V_4, i1 %layer5_out_V_5, i1 %layer5_out_V_6, i1 %layer5_out_V_7, i1 %layer5_out_V_8, i1 %layer5_out_V_9, i1 %layer5_out_V_10, i1 %layer5_out_V_11, i1 %layer5_out_V_12, i1 %layer5_out_V_13, i1 %layer5_out_V_14, i1 %layer5_out_V_15, i15 %layer5_out_V_16, i1 %layer5_out_V_17, i1 %layer5_out_V_18, i1 %layer5_out_V_19, i1 %layer5_out_V_20, i1 %layer5_out_V_21, i1 %layer5_out_V_22, i1 %layer5_out_V_23, i1 %layer5_out_V_24, i1 %layer5_out_V_25, i1 %layer5_out_V_26, i1 %layer5_out_V_27, i1 %layer5_out_V_28, i1 %layer5_out_V_29, i1 %layer5_out_V_30, i1 %layer5_out_V_31, i15 %layer5_out_V_32, i1 %layer5_out_V_33, i1 %layer5_out_V_34, i1 %layer5_out_V_35, i1 %layer5_out_V_36, i1 %layer5_out_V_37, i1 %layer5_out_V_38, i1 %layer5_out_V_39, i1 %layer5_out_V_40, i1 %layer5_out_V_41, i1 %layer5_out_V_42, i1 %layer5_out_V_43, i1 %layer5_out_V_44, i1 %layer5_out_V_45, i1 %layer5_out_V_46, i1 %layer5_out_V_47, i15 %layer5_out_V_48, i1 %layer5_out_V_49, i1 %layer5_out_V_50, i1 %layer5_out_V_51, i1 %layer5_out_V_52, i1 %layer5_out_V_53, i1 %layer5_out_V_54, i1 %layer5_out_V_55, i1 %layer5_out_V_56, i1 %layer5_out_V_57, i1 %layer5_out_V_58, i1 %layer5_out_V_59, i1 %layer5_out_V_60, i1 %layer5_out_V_61, i1 %layer5_out_V_62, i1 %layer5_out_V_63" [firmware/myproject.cpp:131]   --->   Operation 76 'call' 'call_ln131' <Predicate = true> <Delay = 0.00> <CoreType = "Generic">   --->   Core 0 '' <Latency = 0> <II = 1> <Delay = 1.00> <Generic> <Opcode : >
+
+State 4 <SV = 3> <Delay = 0.00>
+ST_4 : Operation 77 [1/2] (0.00ns)   --->   "%call_ln131 = call void @relu<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, krelu_config5>, i16 %layer4_out_V_0, i15 %layer5_out_V_0, i1 %layer5_out_V_1, i1 %layer5_out_V_2, i1 %layer5_out_V_3, i1 %layer5_out_V_4, i1 %layer5_out_V_5, i1 %layer5_out_V_6, i1 %layer5_out_V_7, i1 %layer5_out_V_8, i1 %layer5_out_V_9, i1 %layer5_out_V_10, i1 %layer5_out_V_11, i1 %layer5_out_V_12, i1 %layer5_out_V_13, i1 %layer5_out_V_14, i1 %layer5_out_V_15, i15 %layer5_out_V_16, i1 %layer5_out_V_17, i1 %layer5_out_V_18, i1 %layer5_out_V_19, i1 %layer5_out_V_20, i1 %layer5_out_V_21, i1 %layer5_out_V_22, i1 %layer5_out_V_23, i1 %layer5_out_V_24, i1 %layer5_out_V_25, i1 %layer5_out_V_26, i1 %layer5_out_V_27, i1 %layer5_out_V_28, i1 %layer5_out_V_29, i1 %layer5_out_V_30, i1 %layer5_out_V_31, i15 %layer5_out_V_32, i1 %layer5_out_V_33, i1 %layer5_out_V_34, i1 %layer5_out_V_35, i1 %layer5_out_V_36, i1 %layer5_out_V_37, i1 %layer5_out_V_38, i1 %layer5_out_V_39, i1 %layer5_out_V_40, i1 %layer5_out_V_41, i1 %layer5_out_V_42, i1 %layer5_out_V_43, i1 %layer5_out_V_44, i1 %layer5_out_V_45, i1 %layer5_out_V_46, i1 %layer5_out_V_47, i15 %layer5_out_V_48, i1 %layer5_out_V_49, i1 %layer5_out_V_50, i1 %layer5_out_V_51, i1 %layer5_out_V_52, i1 %layer5_out_V_53, i1 %layer5_out_V_54, i1 %layer5_out_V_55, i1 %layer5_out_V_56, i1 %layer5_out_V_57, i1 %layer5_out_V_58, i1 %layer5_out_V_59, i1 %layer5_out_V_60, i1 %layer5_out_V_61, i1 %layer5_out_V_62, i1 %layer5_out_V_63" [firmware/myproject.cpp:131]   --->   Operation 77 'call' 'call_ln131' <Predicate = true> <Delay = 0.00> <CoreType = "Generic">   --->   Core 0 '' <Latency = 0> <II = 1> <Delay = 1.00> <Generic> <Opcode : >
+
+State 5 <SV = 4> <Delay = 0.00>
+ST_5 : Operation 78 [2/2] (0.00ns)   --->   "%call_ret = call i992 @global_pooling2d_cl<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig6>, i15 %layer5_out_V_0, i1 %layer5_out_V_1, i1 %layer5_out_V_2, i1 %layer5_out_V_3, i1 %layer5_out_V_4, i1 %layer5_out_V_5, i1 %layer5_out_V_6, i1 %layer5_out_V_7, i1 %layer5_out_V_8, i1 %layer5_out_V_9, i1 %layer5_out_V_10, i1 %layer5_out_V_11, i1 %layer5_out_V_12, i1 %layer5_out_V_13, i1 %layer5_out_V_14, i1 %layer5_out_V_15, i15 %layer5_out_V_16, i1 %layer5_out_V_17, i1 %layer5_out_V_18, i1 %layer5_out_V_19, i1 %layer5_out_V_20, i1 %layer5_out_V_21, i1 %layer5_out_V_22, i1 %layer5_out_V_23, i1 %layer5_out_V_24, i1 %layer5_out_V_25, i1 %layer5_out_V_26, i1 %layer5_out_V_27, i1 %layer5_out_V_28, i1 %layer5_out_V_29, i1 %layer5_out_V_30, i1 %layer5_out_V_31, i15 %layer5_out_V_32, i1 %layer5_out_V_33, i1 %layer5_out_V_34, i1 %layer5_out_V_35, i1 %layer5_out_V_36, i1 %layer5_out_V_37, i1 %layer5_out_V_38, i1 %layer5_out_V_39, i1 %layer5_out_V_40, i1 %layer5_out_V_41, i1 %layer5_out_V_42, i1 %layer5_out_V_43, i1 %layer5_out_V_44, i1 %layer5_out_V_45, i1 %layer5_out_V_46, i1 %layer5_out_V_47, i15 %layer5_out_V_48, i1 %layer5_out_V_49, i1 %layer5_out_V_50, i1 %layer5_out_V_51, i1 %layer5_out_V_52, i1 %layer5_out_V_53, i1 %layer5_out_V_54, i1 %layer5_out_V_55, i1 %layer5_out_V_56, i1 %layer5_out_V_57, i1 %layer5_out_V_58, i1 %layer5_out_V_59, i1 %layer5_out_V_60, i1 %layer5_out_V_61, i1 %layer5_out_V_62, i1 %layer5_out_V_63" [firmware/myproject.cpp:135]   --->   Operation 78 'call' 'call_ret' <Predicate = true> <Delay = 0.00> <CoreType = "Generic">   --->   Core 0 '' <Latency = 0> <II = 1> <Delay = 1.00> <Generic> <Opcode : >
+
+State 6 <SV = 5> <Delay = 1.83>
+ST_6 : Operation 79 [1/2] (1.83ns)   --->   "%call_ret = call i992 @global_pooling2d_cl<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig6>, i15 %layer5_out_V_0, i1 %layer5_out_V_1, i1 %layer5_out_V_2, i1 %layer5_out_V_3, i1 %layer5_out_V_4, i1 %layer5_out_V_5, i1 %layer5_out_V_6, i1 %layer5_out_V_7, i1 %layer5_out_V_8, i1 %layer5_out_V_9, i1 %layer5_out_V_10, i1 %layer5_out_V_11, i1 %layer5_out_V_12, i1 %layer5_out_V_13, i1 %layer5_out_V_14, i1 %layer5_out_V_15, i15 %layer5_out_V_16, i1 %layer5_out_V_17, i1 %layer5_out_V_18, i1 %layer5_out_V_19, i1 %layer5_out_V_20, i1 %layer5_out_V_21, i1 %layer5_out_V_22, i1 %layer5_out_V_23, i1 %layer5_out_V_24, i1 %layer5_out_V_25, i1 %layer5_out_V_26, i1 %layer5_out_V_27, i1 %layer5_out_V_28, i1 %layer5_out_V_29, i1 %layer5_out_V_30, i1 %layer5_out_V_31, i15 %layer5_out_V_32, i1 %layer5_out_V_33, i1 %layer5_out_V_34, i1 %layer5_out_V_35, i1 %layer5_out_V_36, i1 %layer5_out_V_37, i1 %layer5_out_V_38, i1 %layer5_out_V_39, i1 %layer5_out_V_40, i1 %layer5_out_V_41, i1 %layer5_out_V_42, i1 %layer5_out_V_43, i1 %layer5_out_V_44, i1 %layer5_out_V_45, i1 %layer5_out_V_46, i1 %layer5_out_V_47, i15 %layer5_out_V_48, i1 %layer5_out_V_49, i1 %layer5_out_V_50, i1 %layer5_out_V_51, i1 %layer5_out_V_52, i1 %layer5_out_V_53, i1 %layer5_out_V_54, i1 %layer5_out_V_55, i1 %layer5_out_V_56, i1 %layer5_out_V_57, i1 %layer5_out_V_58, i1 %layer5_out_V_59, i1 %layer5_out_V_60, i1 %layer5_out_V_61, i1 %layer5_out_V_62, i1 %layer5_out_V_63" [firmware/myproject.cpp:135]   --->   Operation 79 'call' 'call_ret' <Predicate = true> <Delay = 1.83> <CoreType = "Generic">   --->   Core 0 '' <Latency = 0> <II = 1> <Delay = 1.00> <Generic> <Opcode : >
+ST_6 : Operation 80 [1/1] (0.00ns)   --->   "%layer6_out_V_0 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 80 'extractvalue' 'layer6_out_V_0' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 81 [1/1] (0.00ns)   --->   "%layer6_out_V_1 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 81 'extractvalue' 'layer6_out_V_1' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 82 [1/1] (0.00ns)   --->   "%layer6_out_V_2 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 82 'extractvalue' 'layer6_out_V_2' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 83 [1/1] (0.00ns)   --->   "%layer6_out_V_3 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 83 'extractvalue' 'layer6_out_V_3' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 84 [1/1] (0.00ns)   --->   "%layer6_out_V_4 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 84 'extractvalue' 'layer6_out_V_4' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 85 [1/1] (0.00ns)   --->   "%layer6_out_V_5 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 85 'extractvalue' 'layer6_out_V_5' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 86 [1/1] (0.00ns)   --->   "%layer6_out_V_6 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 86 'extractvalue' 'layer6_out_V_6' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 87 [1/1] (0.00ns)   --->   "%layer6_out_V_7 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 87 'extractvalue' 'layer6_out_V_7' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 88 [1/1] (0.00ns)   --->   "%layer6_out_V_8 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 88 'extractvalue' 'layer6_out_V_8' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 89 [1/1] (0.00ns)   --->   "%layer6_out_V_9 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 89 'extractvalue' 'layer6_out_V_9' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 90 [1/1] (0.00ns)   --->   "%layer6_out_V_10 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 90 'extractvalue' 'layer6_out_V_10' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 91 [1/1] (0.00ns)   --->   "%layer6_out_V_11 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 91 'extractvalue' 'layer6_out_V_11' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 92 [1/1] (0.00ns)   --->   "%layer6_out_V_12 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 92 'extractvalue' 'layer6_out_V_12' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 93 [1/1] (0.00ns)   --->   "%layer6_out_V_13 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 93 'extractvalue' 'layer6_out_V_13' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 94 [1/1] (0.00ns)   --->   "%layer6_out_V_14 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 94 'extractvalue' 'layer6_out_V_14' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 95 [1/1] (0.00ns)   --->   "%layer6_out_V_15 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 95 'extractvalue' 'layer6_out_V_15' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 96 [1/1] (0.00ns)   --->   "%layer6_out_V_16 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 96 'extractvalue' 'layer6_out_V_16' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 97 [1/1] (0.00ns)   --->   "%layer6_out_V_17 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 97 'extractvalue' 'layer6_out_V_17' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 98 [1/1] (0.00ns)   --->   "%layer6_out_V_18 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 98 'extractvalue' 'layer6_out_V_18' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 99 [1/1] (0.00ns)   --->   "%layer6_out_V_19 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 99 'extractvalue' 'layer6_out_V_19' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 100 [1/1] (0.00ns)   --->   "%layer6_out_V_20 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 100 'extractvalue' 'layer6_out_V_20' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 101 [1/1] (0.00ns)   --->   "%layer6_out_V_21 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 101 'extractvalue' 'layer6_out_V_21' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 102 [1/1] (0.00ns)   --->   "%layer6_out_V_22 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 102 'extractvalue' 'layer6_out_V_22' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 103 [1/1] (0.00ns)   --->   "%layer6_out_V_23 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 103 'extractvalue' 'layer6_out_V_23' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 104 [1/1] (0.00ns)   --->   "%layer6_out_V_24 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 104 'extractvalue' 'layer6_out_V_24' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 105 [1/1] (0.00ns)   --->   "%layer6_out_V_25 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 105 'extractvalue' 'layer6_out_V_25' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 106 [1/1] (0.00ns)   --->   "%layer6_out_V_26 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 106 'extractvalue' 'layer6_out_V_26' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 107 [1/1] (0.00ns)   --->   "%layer6_out_V_27 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 107 'extractvalue' 'layer6_out_V_27' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 108 [1/1] (0.00ns)   --->   "%layer6_out_V_28 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 108 'extractvalue' 'layer6_out_V_28' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 109 [1/1] (0.00ns)   --->   "%layer6_out_V_29 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 109 'extractvalue' 'layer6_out_V_29' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 110 [1/1] (0.00ns)   --->   "%layer6_out_V_30 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 110 'extractvalue' 'layer6_out_V_30' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 111 [1/1] (0.00ns)   --->   "%layer6_out_V_31 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 111 'extractvalue' 'layer6_out_V_31' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 112 [1/1] (0.00ns)   --->   "%layer6_out_V_32 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 112 'extractvalue' 'layer6_out_V_32' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 113 [1/1] (0.00ns)   --->   "%layer6_out_V_33 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 113 'extractvalue' 'layer6_out_V_33' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 114 [1/1] (0.00ns)   --->   "%layer6_out_V_34 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 114 'extractvalue' 'layer6_out_V_34' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 115 [1/1] (0.00ns)   --->   "%layer6_out_V_35 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 115 'extractvalue' 'layer6_out_V_35' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 116 [1/1] (0.00ns)   --->   "%layer6_out_V_36 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 116 'extractvalue' 'layer6_out_V_36' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 117 [1/1] (0.00ns)   --->   "%layer6_out_V_37 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 117 'extractvalue' 'layer6_out_V_37' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 118 [1/1] (0.00ns)   --->   "%layer6_out_V_38 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 118 'extractvalue' 'layer6_out_V_38' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 119 [1/1] (0.00ns)   --->   "%layer6_out_V_39 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 119 'extractvalue' 'layer6_out_V_39' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 120 [1/1] (0.00ns)   --->   "%layer6_out_V_40 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 120 'extractvalue' 'layer6_out_V_40' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 121 [1/1] (0.00ns)   --->   "%layer6_out_V_41 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 121 'extractvalue' 'layer6_out_V_41' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 122 [1/1] (0.00ns)   --->   "%layer6_out_V_42 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 122 'extractvalue' 'layer6_out_V_42' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 123 [1/1] (0.00ns)   --->   "%layer6_out_V_43 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 123 'extractvalue' 'layer6_out_V_43' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 124 [1/1] (0.00ns)   --->   "%layer6_out_V_44 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 124 'extractvalue' 'layer6_out_V_44' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 125 [1/1] (0.00ns)   --->   "%layer6_out_V_45 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 125 'extractvalue' 'layer6_out_V_45' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 126 [1/1] (0.00ns)   --->   "%layer6_out_V_46 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 126 'extractvalue' 'layer6_out_V_46' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 127 [1/1] (0.00ns)   --->   "%layer6_out_V_47 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 127 'extractvalue' 'layer6_out_V_47' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 128 [1/1] (0.00ns)   --->   "%layer6_out_V_48 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 128 'extractvalue' 'layer6_out_V_48' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 129 [1/1] (0.00ns)   --->   "%layer6_out_V_49 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 129 'extractvalue' 'layer6_out_V_49' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 130 [1/1] (0.00ns)   --->   "%layer6_out_V_50 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 130 'extractvalue' 'layer6_out_V_50' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 131 [1/1] (0.00ns)   --->   "%layer6_out_V_51 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 131 'extractvalue' 'layer6_out_V_51' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 132 [1/1] (0.00ns)   --->   "%layer6_out_V_52 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 132 'extractvalue' 'layer6_out_V_52' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 133 [1/1] (0.00ns)   --->   "%layer6_out_V_54 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 133 'extractvalue' 'layer6_out_V_54' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 134 [1/1] (0.00ns)   --->   "%layer6_out_V_55 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 134 'extractvalue' 'layer6_out_V_55' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 135 [1/1] (0.00ns)   --->   "%layer6_out_V_57 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 135 'extractvalue' 'layer6_out_V_57' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 136 [1/1] (0.00ns)   --->   "%layer6_out_V_58 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 136 'extractvalue' 'layer6_out_V_58' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 137 [1/1] (0.00ns)   --->   "%layer6_out_V_59 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 137 'extractvalue' 'layer6_out_V_59' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 138 [1/1] (0.00ns)   --->   "%layer6_out_V_60 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 138 'extractvalue' 'layer6_out_V_60' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 139 [1/1] (0.00ns)   --->   "%layer6_out_V_61 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 139 'extractvalue' 'layer6_out_V_61' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 140 [1/1] (0.00ns)   --->   "%layer6_out_V_62 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 140 'extractvalue' 'layer6_out_V_62' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+ST_6 : Operation 141 [1/1] (0.00ns)   --->   "%layer6_out_V_63 = extractvalue i992 %call_ret" [firmware/myproject.cpp:135]   --->   Operation 141 'extractvalue' 'layer6_out_V_63' <Predicate = true> <Delay = 0.00> <CoreInst = "FIFO_LUTRAM">   --->   Core 80 'FIFO_LUTRAM' <Latency = 0> <II = 1> <Delay = 1.44> <Storage> <Opcode : 'read' 'write' 'nbread' 'nbwrite'> <Ports = 0> <Width = 16> <Depth = 2> <FIFO>
+
+State 7 <SV = 6> <Delay = 2.36>
+ST_7 : Operation 142 [2/2] (2.36ns)   --->   "%call_ln137 = call void @dense<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig7>, i16 %layer6_out_V_0, i16 %layer6_out_V_1, i16 %layer6_out_V_2, i16 %layer6_out_V_3, i16 %layer6_out_V_4, i16 %layer6_out_V_5, i16 %layer6_out_V_6, i16 %layer6_out_V_7, i16 %layer6_out_V_8, i16 %layer6_out_V_9, i16 %layer6_out_V_10, i16 %layer6_out_V_11, i16 %layer6_out_V_12, i16 %layer6_out_V_13, i16 %layer6_out_V_14, i16 %layer6_out_V_15, i16 %layer6_out_V_16, i16 %layer6_out_V_17, i16 %layer6_out_V_18, i16 %layer6_out_V_19, i16 %layer6_out_V_20, i16 %layer6_out_V_21, i16 %layer6_out_V_22, i16 %layer6_out_V_23, i16 %layer6_out_V_24, i16 %layer6_out_V_25, i16 %layer6_out_V_26, i16 %layer6_out_V_27, i16 %layer6_out_V_28, i16 %layer6_out_V_29, i16 %layer6_out_V_30, i16 %layer6_out_V_31, i16 %layer6_out_V_32, i16 %layer6_out_V_33, i16 %layer6_out_V_34, i16 %layer6_out_V_35, i16 %layer6_out_V_36, i16 %layer6_out_V_37, i16 %layer6_out_V_38, i16 %layer6_out_V_39, i16 %layer6_out_V_40, i16 %layer6_out_V_41, i16 %layer6_out_V_42, i16 %layer6_out_V_43, i16 %layer6_out_V_44, i16 %layer6_out_V_45, i16 %layer6_out_V_46, i16 %layer6_out_V_47, i16 %layer6_out_V_48, i16 %layer6_out_V_49, i16 %layer6_out_V_50, i16 %layer6_out_V_51, i16 %layer6_out_V_52, i16 %layer6_out_V_54, i16 %layer6_out_V_55, i16 %layer6_out_V_57, i16 %layer6_out_V_58, i16 %layer6_out_V_59, i16 %layer6_out_V_60, i16 %layer6_out_V_61, i16 %layer6_out_V_62, i16 %layer6_out_V_63, i16 %layer7_out_0" [firmware/myproject.cpp:137]   --->   Operation 142 'call' 'call_ln137' <Predicate = true> <Delay = 2.36> <CoreType = "Generic">   --->   Core 0 '' <Latency = 0> <II = 1> <Delay = 1.00> <Generic> <Opcode : >
+
+State 8 <SV = 7> <Delay = 2.02>
+ST_8 : Operation 143 [1/1] (0.00ns)   --->   "%specdataflowpipeline_ln0 = specdataflowpipeline void @_ssdm_op_SpecDataflowPipeline, i32 4294967295, i32 0, void @empty_6"   --->   Operation 143 'specdataflowpipeline' 'specdataflowpipeline_ln0' <Predicate = true> <Delay = 0.00>
+ST_8 : Operation 144 [1/2] (2.02ns)   --->   "%call_ln137 = call void @dense<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig7>, i16 %layer6_out_V_0, i16 %layer6_out_V_1, i16 %layer6_out_V_2, i16 %layer6_out_V_3, i16 %layer6_out_V_4, i16 %layer6_out_V_5, i16 %layer6_out_V_6, i16 %layer6_out_V_7, i16 %layer6_out_V_8, i16 %layer6_out_V_9, i16 %layer6_out_V_10, i16 %layer6_out_V_11, i16 %layer6_out_V_12, i16 %layer6_out_V_13, i16 %layer6_out_V_14, i16 %layer6_out_V_15, i16 %layer6_out_V_16, i16 %layer6_out_V_17, i16 %layer6_out_V_18, i16 %layer6_out_V_19, i16 %layer6_out_V_20, i16 %layer6_out_V_21, i16 %layer6_out_V_22, i16 %layer6_out_V_23, i16 %layer6_out_V_24, i16 %layer6_out_V_25, i16 %layer6_out_V_26, i16 %layer6_out_V_27, i16 %layer6_out_V_28, i16 %layer6_out_V_29, i16 %layer6_out_V_30, i16 %layer6_out_V_31, i16 %layer6_out_V_32, i16 %layer6_out_V_33, i16 %layer6_out_V_34, i16 %layer6_out_V_35, i16 %layer6_out_V_36, i16 %layer6_out_V_37, i16 %layer6_out_V_38, i16 %layer6_out_V_39, i16 %layer6_out_V_40, i16 %layer6_out_V_41, i16 %layer6_out_V_42, i16 %layer6_out_V_43, i16 %layer6_out_V_44, i16 %layer6_out_V_45, i16 %layer6_out_V_46, i16 %layer6_out_V_47, i16 %layer6_out_V_48, i16 %layer6_out_V_49, i16 %layer6_out_V_50, i16 %layer6_out_V_51, i16 %layer6_out_V_52, i16 %layer6_out_V_54, i16 %layer6_out_V_55, i16 %layer6_out_V_57, i16 %layer6_out_V_58, i16 %layer6_out_V_59, i16 %layer6_out_V_60, i16 %layer6_out_V_61, i16 %layer6_out_V_62, i16 %layer6_out_V_63, i16 %layer7_out_0" [firmware/myproject.cpp:137]   --->   Operation 144 'call' 'call_ln137' <Predicate = true> <Delay = 2.02> <CoreType = "Generic">   --->   Core 0 '' <Latency = 0> <II = 1> <Delay = 1.00> <Generic> <Opcode : >
+ST_8 : Operation 145 [1/1] (0.00ns)   --->   "%ret_ln138 = ret" [firmware/myproject.cpp:138]   --->   Operation 145 'ret' 'ret_ln138' <Predicate = true> <Delay = 0.00>
+
+
+============================================================
++ Verbose Summary: Timing violations
+============================================================
+Target clock period: 3.3ns, clock uncertainty: 0.891ns.
+
+ <State 1>: 0ns
+The critical path consists of the following:
+
+ <State 2>: 0ns
+The critical path consists of the following:
+
+ <State 3>: 0ns
+The critical path consists of the following:
+
+ <State 4>: 0ns
+The critical path consists of the following:
+
+ <State 5>: 0ns
+The critical path consists of the following:
+
+ <State 6>: 1.84ns
+The critical path consists of the following:
+	'call' operation ('call_ret', firmware/myproject.cpp:135) to 'global_pooling2d_cl<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig6>' [136]  (1.84 ns)
+
+ <State 7>: 2.37ns
+The critical path consists of the following:
+	'call' operation ('call_ln137', firmware/myproject.cpp:137) to 'dense<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig7>' [199]  (2.37 ns)
+
+ <State 8>: 2.03ns
+The critical path consists of the following:
+	'call' operation ('call_ln137', firmware/myproject.cpp:137) to 'dense<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig7>' [199]  (2.03 ns)
+
+
+============================================================
++ Verbose Summary: Binding
+============================================================
+N/A
+* FSMD analyzer results:
+  - Output states:
+ - Input state : 
+  - Chain level:
+	State 1
+	State 2
+	State 3
+	State 4
+	State 5
+	State 6
+	State 7
+	State 8
+
+
+============================================================
++ Verbose Summary: Datapath Resource usage 
+============================================================
+N/A

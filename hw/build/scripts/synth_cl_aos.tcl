@@ -55,6 +55,9 @@ foreach file [glob $CL_DIR/design/hls_hll_strm/fpga/*.tcl] {
 foreach file [glob $CL_DIR/design/hls_conv_strm/fpga/*.tcl] {
 	source $file
 }
+foreach file [glob $CL_DIR/design/hls_dnn/fpga/*.tcl] {
+	source $file
+}
 
 #---- End of section replaced by User ----
 

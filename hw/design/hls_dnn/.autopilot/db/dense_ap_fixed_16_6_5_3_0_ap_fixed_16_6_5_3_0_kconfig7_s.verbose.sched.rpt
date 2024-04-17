@@ -1,0 +1,179 @@
+
+
+================================================================
+== Vitis HLS Report for 'dense_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s'
+================================================================
+* Date:           Mon Apr 15 00:16:21 2024
+
+* Version:        2020.2 (Build 3064766 on Wed Nov 18 09:12:47 MST 2020)
+* Project:        img0_takeB
+* Solution:       solution1 (Vivado IP Flow Target)
+* Product family: virtexuplus
+* Target device:  xcvu9p-flgb2104-2-i
+
+
+================================================================
+== Performance Estimates
+================================================================
++ Timing: 
+    * Summary: 
+    +--------+---------+----------+------------+
+    |  Clock |  Target | Estimated| Uncertainty|
+    +--------+---------+----------+------------+
+    |ap_clk  |  3.30 ns|  2.367 ns|     0.89 ns|
+    +--------+---------+----------+------------+
+
++ Latency: 
+    * Summary: 
+    +---------+---------+-----------+-----------+-----+-----+---------+
+    |  Latency (cycles) |   Latency (absolute)  |  Interval | Pipeline|
+    |   min   |   max   |    min    |    max    | min | max |   Type  |
+    +---------+---------+-----------+-----------+-----+-----+---------+
+    |        6|        6|  19.800 ns|  19.800 ns|    6|    6|     none|
+    +---------+---------+-----------+-----------+-----+-----+---------+
+
+    + Detail: 
+        * Instance: 
+        N/A
+
+        * Loop: 
+        N/A
+
+============================================================
++ Verbose Summary: Synthesis Manager
+============================================================
+InlineROM: 1
+ExposeGlobal: 0
+============================================================
++ Verbose Summary: CDFG Model
+============================================================
+IsTopModel: 0
+ResetActiveHigh: 1
+IsCombinational: 2
+IsDatapathOnly: 0
+HasWiredReturn: 1
+HasMFsm: 0
+HasVarLatency: 1
+IsPipeline: 0
+IsRtlPipelined: 0
+IsInstanceOverlapped: 0
+IsDontTouch: 0
+HasImplIP: 0
+IsGatedGlobalClock: 0
+
+
+============================================================
++ Verbose Summary: Schedule
+============================================================
+* Number of FSM states : 2
+* Pipeline : 0
+* Dataflow Pipeline: 0
+
+* FSM state transitions: 
+1 --> 2 
+2 --> 
+
+* FSM state operations: 
+
+State 1 <SV = 0> <Delay = 2.36>
+ST_1 : Operation 3 [1/1] (0.00ns)   --->   "%p_read_67 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read61" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 3 'read' 'p_read_67' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 4 [1/1] (0.00ns)   --->   "%p_read_68 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read60" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 4 'read' 'p_read_68' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 5 [1/1] (0.00ns)   --->   "%p_read_69 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read59" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 5 'read' 'p_read_69' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 6 [1/1] (0.00ns)   --->   "%p_read_70 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read58" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 6 'read' 'p_read_70' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 7 [1/1] (0.00ns)   --->   "%p_read_71 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read57" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 7 'read' 'p_read_71' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 8 [1/1] (0.00ns)   --->   "%p_read_72 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read56" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 8 'read' 'p_read_72' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 9 [1/1] (0.00ns)   --->   "%p_read_73 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read55" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 9 'read' 'p_read_73' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 10 [1/1] (0.00ns)   --->   "%p_read_74 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read54" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 10 'read' 'p_read_74' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 11 [1/1] (0.00ns)   --->   "%p_read_75 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read53" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 11 'read' 'p_read_75' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 12 [1/1] (0.00ns)   --->   "%p_read_76 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read52" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 12 'read' 'p_read_76' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 13 [1/1] (0.00ns)   --->   "%p_read_77 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read51" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 13 'read' 'p_read_77' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 14 [1/1] (0.00ns)   --->   "%p_read_78 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read50" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 14 'read' 'p_read_78' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 15 [1/1] (0.00ns)   --->   "%p_read_79 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read49" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 15 'read' 'p_read_79' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 16 [1/1] (0.00ns)   --->   "%p_read_80 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read48" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 16 'read' 'p_read_80' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 17 [1/1] (0.00ns)   --->   "%p_read_81 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read47" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 17 'read' 'p_read_81' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 18 [1/1] (0.00ns)   --->   "%p_read_82 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read46" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 18 'read' 'p_read_82' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 19 [1/1] (0.00ns)   --->   "%p_read_83 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read45" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 19 'read' 'p_read_83' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 20 [1/1] (0.00ns)   --->   "%p_read_84 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read44" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 20 'read' 'p_read_84' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 21 [1/1] (0.00ns)   --->   "%p_read_85 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read43" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 21 'read' 'p_read_85' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 22 [1/1] (0.00ns)   --->   "%p_read_86 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read42" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 22 'read' 'p_read_86' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 23 [1/1] (0.00ns)   --->   "%p_read_87 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read41" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 23 'read' 'p_read_87' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 24 [1/1] (0.00ns)   --->   "%p_read_88 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read40" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 24 'read' 'p_read_88' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 25 [1/1] (0.00ns)   --->   "%p_read_89 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read39" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 25 'read' 'p_read_89' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 26 [1/1] (0.00ns)   --->   "%p_read_90 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read38" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 26 'read' 'p_read_90' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 27 [1/1] (0.00ns)   --->   "%p_read_91 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read37" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 27 'read' 'p_read_91' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 28 [1/1] (0.00ns)   --->   "%p_read_92 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read36" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 28 'read' 'p_read_92' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 29 [1/1] (0.00ns)   --->   "%p_read_93 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read35" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 29 'read' 'p_read_93' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 30 [1/1] (0.00ns)   --->   "%p_read_94 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read34" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 30 'read' 'p_read_94' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 31 [1/1] (0.00ns)   --->   "%p_read_95 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read33" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 31 'read' 'p_read_95' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 32 [1/1] (0.00ns)   --->   "%p_read_96 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read32" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 32 'read' 'p_read_96' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 33 [1/1] (0.00ns)   --->   "%p_read_97 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read31" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 33 'read' 'p_read_97' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 34 [1/1] (0.00ns)   --->   "%p_read3092 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read30" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 34 'read' 'p_read3092' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 35 [1/1] (0.00ns)   --->   "%p_read_98 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read29" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 35 'read' 'p_read_98' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 36 [1/1] (0.00ns)   --->   "%p_read_99 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read28" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 36 'read' 'p_read_99' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 37 [1/1] (0.00ns)   --->   "%p_read_100 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read27" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 37 'read' 'p_read_100' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 38 [1/1] (0.00ns)   --->   "%p_read_101 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read26" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 38 'read' 'p_read_101' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 39 [1/1] (0.00ns)   --->   "%p_read_102 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read25" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 39 'read' 'p_read_102' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 40 [1/1] (0.00ns)   --->   "%p_read_103 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read24" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 40 'read' 'p_read_103' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 41 [1/1] (0.00ns)   --->   "%p_read_104 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read23" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 41 'read' 'p_read_104' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 42 [1/1] (0.00ns)   --->   "%p_read_105 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read22" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 42 'read' 'p_read_105' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 43 [1/1] (0.00ns)   --->   "%p_read_106 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read21" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 43 'read' 'p_read_106' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 44 [1/1] (0.00ns)   --->   "%p_read2082 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read20" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 44 'read' 'p_read2082' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 45 [1/1] (0.00ns)   --->   "%p_read_107 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read19" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 45 'read' 'p_read_107' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 46 [1/1] (0.00ns)   --->   "%p_read_108 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read18" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 46 'read' 'p_read_108' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 47 [1/1] (0.00ns)   --->   "%p_read_109 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read17" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 47 'read' 'p_read_109' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 48 [1/1] (0.00ns)   --->   "%p_read_110 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read16" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 48 'read' 'p_read_110' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 49 [1/1] (0.00ns)   --->   "%p_read_111 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read15" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 49 'read' 'p_read_111' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 50 [1/1] (0.00ns)   --->   "%p_read_112 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read14" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 50 'read' 'p_read_112' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 51 [1/1] (0.00ns)   --->   "%p_read_113 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read13" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 51 'read' 'p_read_113' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 52 [1/1] (0.00ns)   --->   "%p_read_114 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read12" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 52 'read' 'p_read_114' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 53 [1/1] (0.00ns)   --->   "%p_read_115 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read11" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 53 'read' 'p_read_115' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 54 [1/1] (0.00ns)   --->   "%p_read1072 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read10" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 54 'read' 'p_read1072' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 55 [1/1] (0.00ns)   --->   "%p_read971 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read9" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 55 'read' 'p_read971' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 56 [1/1] (0.00ns)   --->   "%p_read870 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read8" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 56 'read' 'p_read870' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 57 [1/1] (0.00ns)   --->   "%p_read769 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read7" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 57 'read' 'p_read769' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 58 [1/1] (0.00ns)   --->   "%p_read668 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read6" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 58 'read' 'p_read668' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 59 [1/1] (0.00ns)   --->   "%p_read567 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read5" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 59 'read' 'p_read567' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 60 [1/1] (0.00ns)   --->   "%p_read466 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read4" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 60 'read' 'p_read466' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 61 [1/1] (0.00ns)   --->   "%p_read365 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read3" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 61 'read' 'p_read365' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 62 [1/1] (0.00ns)   --->   "%p_read264 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read2" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 62 'read' 'p_read264' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 63 [1/1] (0.00ns)   --->   "%p_read163 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read1" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 63 'read' 'p_read163' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 64 [1/1] (0.00ns)   --->   "%p_read62 = read i16 @_ssdm_op_Read.ap_auto.i16, i16 %p_read" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 64 'read' 'p_read62' <Predicate = true> <Delay = 0.00>
+ST_1 : Operation 65 [2/2] (2.36ns)   --->   "%call_ret = call i16 @dense_latency<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig7>, i16 %p_read62, i16 %p_read163, i16 %p_read264, i16 %p_read365, i16 %p_read466, i16 %p_read567, i16 %p_read668, i16 %p_read769, i16 %p_read870, i16 %p_read971, i16 %p_read1072, i16 %p_read_115, i16 %p_read_114, i16 %p_read_113, i16 %p_read_112, i16 %p_read_111, i16 %p_read_110, i16 %p_read_109, i16 %p_read_108, i16 %p_read_107, i16 %p_read2082, i16 %p_read_106, i16 %p_read_105, i16 %p_read_104, i16 %p_read_103, i16 %p_read_102, i16 %p_read_101, i16 %p_read_100, i16 %p_read_99, i16 %p_read_98, i16 %p_read3092, i16 %p_read_97, i16 %p_read_96, i16 %p_read_95, i16 %p_read_94, i16 %p_read_93, i16 %p_read_92, i16 %p_read_91, i16 %p_read_90, i16 %p_read_89, i16 %p_read_88, i16 %p_read_87, i16 %p_read_86, i16 %p_read_85, i16 %p_read_84, i16 %p_read_83, i16 %p_read_82, i16 %p_read_81, i16 %p_read_80, i16 %p_read_79, i16 %p_read_78, i16 %p_read_77, i16 %p_read_76, i16 %p_read_75, i16 %p_read_74, i16 %p_read_73, i16 %p_read_72, i16 %p_read_71, i16 %p_read_70, i16 %p_read_69, i16 %p_read_68, i16 %p_read_67" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 65 'call' 'call_ret' <Predicate = true> <Delay = 2.36> <CoreType = "Generic">   --->   Core 0 '' <Latency = 0> <II = 1> <Delay = 1.00> <Generic> <Opcode : >
+
+State 2 <SV = 1> <Delay = 2.02>
+ST_2 : Operation 66 [1/2] (2.02ns)   --->   "%call_ret = call i16 @dense_latency<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig7>, i16 %p_read62, i16 %p_read163, i16 %p_read264, i16 %p_read365, i16 %p_read466, i16 %p_read567, i16 %p_read668, i16 %p_read769, i16 %p_read870, i16 %p_read971, i16 %p_read1072, i16 %p_read_115, i16 %p_read_114, i16 %p_read_113, i16 %p_read_112, i16 %p_read_111, i16 %p_read_110, i16 %p_read_109, i16 %p_read_108, i16 %p_read_107, i16 %p_read2082, i16 %p_read_106, i16 %p_read_105, i16 %p_read_104, i16 %p_read_103, i16 %p_read_102, i16 %p_read_101, i16 %p_read_100, i16 %p_read_99, i16 %p_read_98, i16 %p_read3092, i16 %p_read_97, i16 %p_read_96, i16 %p_read_95, i16 %p_read_94, i16 %p_read_93, i16 %p_read_92, i16 %p_read_91, i16 %p_read_90, i16 %p_read_89, i16 %p_read_88, i16 %p_read_87, i16 %p_read_86, i16 %p_read_85, i16 %p_read_84, i16 %p_read_83, i16 %p_read_82, i16 %p_read_81, i16 %p_read_80, i16 %p_read_79, i16 %p_read_78, i16 %p_read_77, i16 %p_read_76, i16 %p_read_75, i16 %p_read_74, i16 %p_read_73, i16 %p_read_72, i16 %p_read_71, i16 %p_read_70, i16 %p_read_69, i16 %p_read_68, i16 %p_read_67" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 66 'call' 'call_ret' <Predicate = true> <Delay = 2.02> <CoreType = "Generic">   --->   Core 0 '' <Latency = 0> <II = 1> <Delay = 1.00> <Generic> <Opcode : >
+ST_2 : Operation 67 [1/1] (0.00ns)   --->   "%write_ln41 = write void @_ssdm_op_Write.ap_auto.i16P0A, i16 %res_0, i16 %call_ret" [firmware/nnet_utils/nnet_dense.h:41]   --->   Operation 67 'write' 'write_ln41' <Predicate = true> <Delay = 0.00>
+ST_2 : Operation 68 [1/1] (0.00ns)   --->   "%ret_ln45 = ret" [firmware/nnet_utils/nnet_dense.h:45]   --->   Operation 68 'ret' 'ret_ln45' <Predicate = true> <Delay = 0.00>
+
+
+============================================================
++ Verbose Summary: Timing violations
+============================================================
+Target clock period: 3.3ns, clock uncertainty: 0.891ns.
+
+ <State 1>: 2.37ns
+The critical path consists of the following:
+	wire read on port 'p_read61' (firmware/nnet_utils/nnet_dense.h:41) [64]  (0 ns)
+	'call' operation ('call_ret', firmware/nnet_utils/nnet_dense.h:41) to 'dense_latency<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig7>' [126]  (2.37 ns)
+
+ <State 2>: 2.03ns
+The critical path consists of the following:
+	'call' operation ('call_ret', firmware/nnet_utils/nnet_dense.h:41) to 'dense_latency<ap_fixed<16, 6, 5, 3, 0>, ap_fixed<16, 6, 5, 3, 0>, kconfig7>' [126]  (2.03 ns)
+
+
+============================================================
++ Verbose Summary: Binding
+============================================================
+N/A
+* FSMD analyzer results:
+  - Output states:
+ - Input state : 
+  - Chain level:
+	State 1
+	State 2
+
+
+============================================================
++ Verbose Summary: Datapath Resource usage 
+============================================================
+N/A
