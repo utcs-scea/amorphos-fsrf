@@ -3,12 +3,12 @@
 // Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
 // ==============================================================
 `timescale 1 ns / 1 ps
-module myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom (
+module myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom (
 addr0, ce0, q0, addr1, ce1, q1, addr2, ce2, q2, addr3, ce3, q3, addr4, ce4, q4, addr5, ce5, q5, addr6, ce6, q6, addr7, ce7, q7, addr8, ce8, q8, addr9, ce9, q9, addr10, ce10, q10, addr11, ce11, q11, addr12, ce12, q12, addr13, ce13, q13, addr14, ce14, q14, addr15, ce15, q15, addr16, ce16, q16, addr17, ce17, q17, addr18, ce18, q18, addr19, ce19, q19, addr20, ce20, q20, addr21, ce21, q21, addr22, ce22, q22, addr23, ce23, q23, addr24, ce24, q24, addr25, ce25, q25, addr26, ce26, q26, addr27, ce27, q27, addr28, ce28, q28, addr29, ce29, q29, addr30, ce30, q30, addr31, ce31, q31, addr32, ce32, q32, addr33, ce33, q33, addr34, ce34, q34, addr35, ce35, q35, addr36, ce36, q36, addr37, ce37, q37, addr38, ce38, q38, addr39, ce39, q39, addr40, ce40, q40, addr41, ce41, q41, addr42, ce42, q42, addr43, ce43, q43, addr44, ce44, q44, addr45, ce45, q45, addr46, ce46, q46, addr47, ce47, q47, addr48, ce48, q48, addr49, ce49, q49, addr50, ce50, q50, addr51, ce51, q51, addr52, ce52, q52, addr53, ce53, q53, addr54, ce54, q54, addr55, ce55, q55, addr56, ce56, q56, addr57, ce57, q57, addr58, ce58, q58, addr59, ce59, q59, addr60, ce60, q60, addr61, ce61, q61, addr62, ce62, q62, addr63, ce63, q63, clk);
 
 parameter DWIDTH = 9;
-parameter AWIDTH = 8;
-parameter MEM_SIZE = 256;
+parameter AWIDTH = 14;
+parameter MEM_SIZE = 16384;
 
 input[AWIDTH-1:0] addr0;
 input ce0;
@@ -238,38 +238,38 @@ reg [DWIDTH-1:0] ram30[0:MEM_SIZE-1];
 reg [DWIDTH-1:0] ram31[0:MEM_SIZE-1];
 
 initial begin
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram0);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram1);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram2);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram3);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram4);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram5);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram6);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram7);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram8);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram9);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram10);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram11);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram12);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram13);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram14);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram15);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram16);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram17);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram18);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram19);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram20);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram21);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram22);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram23);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram24);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram25);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram26);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram27);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram28);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram29);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram30);
-    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom.dat", ram31);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram0);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram1);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram2);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram3);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram4);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram5);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram6);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram7);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram8);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram9);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram10);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram11);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram12);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram13);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram14);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram15);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram16);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram17);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram18);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram19);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram20);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram21);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram22);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram23);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram24);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram25);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram26);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram27);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram28);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram29);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram30);
+    $readmemh("./myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom.dat", ram31);
 end
 
 
@@ -917,7 +917,7 @@ end
 endmodule
 
 `timescale 1 ns / 1 ps
-module myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V(
+module myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V(
     reset,
     clk,
     address0,
@@ -1114,8 +1114,8 @@ module myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_
     q63);
 
 parameter DataWidth = 32'd9;
-parameter AddressRange = 32'd256;
-parameter AddressWidth = 32'd8;
+parameter AddressRange = 32'd16384;
+parameter AddressWidth = 32'd14;
 input reset;
 input clk;
 input[AddressWidth - 1:0] address0;
@@ -1313,7 +1313,7 @@ output[DataWidth - 1:0] q63;
 
 
 
-myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig7_s_w7_V_rom_U(
+myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom myproject_dense_latency_ap_fixed_16_6_5_3_0_ap_fixed_16_6_5_3_0_kconfig4_0_0_kw0_V_rom_U(
     .clk( clk ),
     .addr0( address0 ),
     .ce0( ce0 ),

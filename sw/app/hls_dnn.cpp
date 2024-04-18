@@ -41,8 +41,9 @@ void host_thread(thread_config tc) {
 	CPU_CLR(num_threads, &cpu_set);
 	pthread_setaffinity_np(pthread_self(), sizeof(cpu_set_t), &cpu_set);
 	
-    uint64_t read_left = tc.read ? (tc.nimages * 64) : 0; // each word is 64 bytes, each image gets one word out
+    //uint64_t read_left = tc.read ? (tc.nimages * 64) : 0; // each word is 64 bytes, each image gets one word out
 	uint64_t write_left = tc.write ? (tc.nimages * 16384) : 0; // each image is 16384 bytes
+    uint64_t read_left = write_left;
 	uint64_t write_bytes = 64 * 16384; // 4096 bytes read size, one image 64 bytes -> 64 images at a time i guess
 	uint64_t bytes;
 	bool end;

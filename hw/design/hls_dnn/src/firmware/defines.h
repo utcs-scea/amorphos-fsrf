@@ -50,4 +50,8 @@ typedef ap_uint<8> uint8;
 
 typedef ap_fixed<16,6> k_t;
 
+#define INPUT_SIZE (N_INPUT_1_1*N_INPUT_2_1*N_INPUT_3_1)
+#define OUTPUT_SIZE (1)
+#define AXIWORDS_IN_INPUT (INPUT_SIZE / 64)
+
 #endif

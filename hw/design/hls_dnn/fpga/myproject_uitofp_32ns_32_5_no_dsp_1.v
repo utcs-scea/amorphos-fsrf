@@ -7,7 +7,7 @@
 
 module myproject_uitofp_32ns_32_5_no_dsp_1
 #(parameter
-    ID         = 65,
+    ID         = 45,
     NUM_STAGE  = 5,
     din0_WIDTH = 32,
     dout_WIDTH = 32

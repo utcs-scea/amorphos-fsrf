@@ -3,6 +3,8 @@
 #include "myproject.h"
 #include "parameters.h"
 
+#define KFLOW
+
 #ifdef KDEBUG
 #define LOG(...) printf(__VA_ARGS__)
 #else
@@ -14,10 +16,6 @@ void kzero (char *ptr, int n) {
         ptr[i] = 0;
     }
 }
-
-#define INPUT_SIZE (N_INPUT_1_1*N_INPUT_2_1*N_INPUT_3_1)
-#define OUTPUT_SIZE (1)
-#define AXIWORDS_IN_INPUT (INPUT_SIZE / 64)
 
 struct krelu_config5 : nnet::activ_config {
     static const unsigned n_in = INPUT_SIZE;
@@ -78,79 +76,20 @@ struct kconfig4 : nnet::dense_config {
     using product = nnet::product::mult<x_T, y_T>;
 };
 
-void run_network (input_t input_1[INPUT_SIZE], result_t layer7_out[N_LAYER_7]) {
-#pragma HLS DATAFLOW
-
-    k_t layer4a_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer4a_out cyclic factor=64
-    nnet::dense<input_t, k_t, kconfig4>(input_1, layer4a_out, kw0, kb0); // dense
-
-    layer5_t layer5a_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer5a_out cyclic factor=64
-    nnet::relu<k_t, layer5_t, krelu_config5>(layer4a_out, layer5a_out);
-    /*
-    k_t layer4b_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer4b_out cyclic factor=64
-    nnet::dense<input_t, k_t, kconfig4>(layer5a_out, layer4b_out, kw1, kb1); // dense
-
-    layer5_t layer5b_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer5b_out cyclic factor=64
-    nnet::relu<k_t, layer5_t, krelu_config5>(layer4b_out, layer5b_out);
-
-    k_t layer4c_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer4c_out cyclic factor=64
-    nnet::dense<input_t, k_t, kconfig4>(layer5b_out, layer4c_out, kw2, kb2); // dense
-
-    layer5_t layer5c_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer5c_out cyclic factor=64
-    nnet::relu<k_t, layer5_t, krelu_config5>(layer4c_out, layer5c_out);
-
-    k_t layer4d_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer4d_out cyclic factor=64
-    nnet::dense<input_t, k_t, kconfig4>(layer5c_out, layer4d_out, kw3, kb3); // dense
-
-    layer5_t layer5d_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer5d_out cyclic factor=64
-    nnet::relu<k_t, layer5_t, krelu_config5>(layer4d_out, layer5d_out);
-
-    k_t layer4e_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer4e_out cyclic factor=64
-    nnet::dense<input_t, k_t, kconfig4>(layer5d_out, layer4e_out, kw4, kb4); // dense
-
-    layer5_t layer5e_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer5e_out cyclic factor=64
-    nnet::relu<k_t, layer5_t, krelu_config5>(layer4e_out, layer5e_out);
-
-    k_t layer4f_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer4f_out cyclic factor=64
-    nnet::dense<input_t, k_t, kconfig4>(layer5e_out, layer4f_out, kw5, kb5); // dense
-
-    layer5_t layer5f_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer5f_out cyclic factor=64
-    nnet::relu<k_t, layer5_t, krelu_config5>(layer4f_out, layer5f_out);
-    */
-    layer6_t layer6_out[256];
-#pragma HLS ARRAY_PARTITION variable=layer6_out cyclic factor=64
-    nnet::global_pooling2d_cl<layer5_t, layer6_t, kconfig6>(layer5a_out, layer6_out); // global_average_pooling2d
-        
-    nnet::dense<layer6_t, result_t, kconfig7>(layer6_out, layer7_out, w7, b7); // dense
-}
-
-void fill_input_helper (input_t input_1[INPUT_SIZE], uint512 data, int i) {
+void fill_input_helper (k_t input_1[INPUT_SIZE], uint512 &data, int i) {
     for (int j = 0; j < 64; j++)
-#pragma HLS UNROLL factor=64
+#pragma HLS UNROLL factor=16
     {
         uint8 tmp = data((j * 8) + 7, j * 8);
         float tmpf = tmp;
         tmpf /= 255;
         input_1[i * 64 + j] = tmpf;
-        //input_1[i * 64 + j] = 0.1;
     }    
 }
 
-void fill_input (input_t input_1[INPUT_SIZE], hls::stream<axis512> &axis_in) {
+void fill_input (k_t input_1[INPUT_SIZE], hls::stream<axis512> &axis_in) {
     for (int i = 0; i < AXIWORDS_IN_INPUT; i++) 
-#pragma HLS PIPELINE
+#pragma HLS PIPELINE II=2
     {
         axis512 word = axis_in.read();
         uint512 data = word.data;
@@ -158,24 +97,32 @@ void fill_input (input_t input_1[INPUT_SIZE], hls::stream<axis512> &axis_in) {
     }
 }
 
-void write_output (result_t layer7_out[N_LAYER_7], hls::stream<axis512> &axis_out, uint64 dest, int img) {
-    uint512 out_raw = 0;
-    union {
-        float f;
-        uint32_t u;
-    };
-    f = layer7_out[0];
-    out_raw(31, 0) = u;
-    axis512 word;
-    word.data = out_raw;
-    word.last = img == 1 ? 1 : 0;
-    word.dest = dest;
-    word.keep = -1;
-    word.strb = -1;
-    axis_out.write(word);
+void write_output_helper (k_t buf[INPUT_SIZE], uint512 &data, int i) {
+    for (int j = 0; j < 64; j++)
+        //#pragma HLS UNROLL factor=16
+    {
+        float tmpf = buf[i * 64 + j];
+        uint8 tmpi = tmpf;
+        data((j * 8) + 7, j * 8) = tmpi;
+    }    
 }
 
-void myproject(
+void write_output (k_t buf[INPUT_SIZE], hls::stream<axis512> &axis_out, uint64 dest, int img) {
+    for (int i = 0; i < AXIWORDS_IN_INPUT; i++) 
+#pragma HLS PIPELINE
+    {
+        axis512 word;
+        uint512 data = word.data;
+        write_output_helper(buf, data, i);
+        word.last = (img == 1 && i == AXIWORDS_IN_INPUT - 1) ? 1 : 0;
+        word.dest = dest;
+        word.keep = -1;
+        word.strb = -1;
+        axis_out.write(word);
+    }
+}
+
+void myproject (
                hls::stream<axis512> &axis_in,
                hls::stream<axis512> &axis_out,
                uint64 nimages,
@@ -189,87 +136,50 @@ void myproject(
 
 #pragma HLS DATAFLOW
 
-    LOG("nimages %d\n", nimages);
-
-    input_t input_1[N_INPUT_1_1*N_INPUT_2_1*N_INPUT_3_1];
+    k_t input_1[INPUT_SIZE];
 #pragma HLS ARRAY_PARTITION variable=input_1 cyclic factor=64
-    result_t layer7_out[N_LAYER_7];
-
-#ifdef KFLOW
     k_t layer4a_out[INPUT_SIZE];
 #pragma HLS ARRAY_PARTITION variable=layer4a_out cyclic factor=64
-    layer5_t layer5a_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer5a_out cyclic factor=64
     k_t layer4b_out[INPUT_SIZE];
 #pragma HLS ARRAY_PARTITION variable=layer4b_out cyclic factor=64
-    layer5_t layer5b_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer5b_out cyclic factor=64
     k_t layer4c_out[INPUT_SIZE];
 #pragma HLS ARRAY_PARTITION variable=layer4c_out cyclic factor=64
-    layer5_t layer5c_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer5c_out cyclic factor=64
     k_t layer4d_out[INPUT_SIZE];
 #pragma HLS ARRAY_PARTITION variable=layer4d_out cyclic factor=64
-    layer5_t layer5d_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer5d_out cyclic factor=64
     k_t layer4e_out[INPUT_SIZE];
 #pragma HLS ARRAY_PARTITION variable=layer4e_out cyclic factor=64
-    layer5_t layer5e_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer5e_out cyclic factor=64
     k_t layer4f_out[INPUT_SIZE];
 #pragma HLS ARRAY_PARTITION variable=layer4f_out cyclic factor=64
-    layer5_t layer5f_out[INPUT_SIZE];
-#pragma HLS ARRAY_PARTITION variable=layer5f_out cyclic factor=64
-    layer6_t layer6_out[256];
-#pragma HLS ARRAY_PARTITION variable=layer6_out cyclic factor=64
-#endif    
+//     k_t layer4g_out[INPUT_SIZE];
+// #pragma HLS ARRAY_PARTITION variable=layer4g_out cyclic factor=64
+//     k_t layer4h_out[INPUT_SIZE];
+// #pragma HLS ARRAY_PARTITION variable=layer4h_out cyclic factor=64
+//     k_t layer4i_out[INPUT_SIZE];
+// #pragma HLS ARRAY_PARTITION variable=layer4i_out cyclic factor=64
+//     k_t layer4j_out[INPUT_SIZE];
+// #pragma HLS ARRAY_PARTITION variable=layer4j_out cyclic factor=64
+//     k_t layer4k_out[INPUT_SIZE];
+// #pragma HLS ARRAY_PARTITION variable=layer4k_out cyclic factor=64
+//     k_t layer4l_out[INPUT_SIZE];
+// #pragma HLS ARRAY_PARTITION variable=layer4l_out cyclic factor=64
 
     for (int i = 0; i < nimages; i++)
     {
 #pragma HLS DATAFLOW
-
-#ifdef KFLOW
-        LOG("image %d\n", i+1);
-
-        fill_input(input_1, axis_in);
-
-        LOG("read input\n");
-
-        nnet::dense<input_t, k_t, kconfig4>(input_1, layer4a_out, kw0, kb0); // dense
-
-        nnet::relu<k_t, layer5_t, krelu_config5>(layer4a_out, layer5a_out);
-
-        nnet::dense<input_t, k_t, kconfig4>(layer5a_out, layer4b_out, kw1, kb1); // dense
-
-        nnet::relu<k_t, layer5_t, krelu_config5>(layer4b_out, layer5b_out);
-
-        nnet::dense<input_t, k_t, kconfig4>(layer5b_out, layer4c_out, kw2, kb2); // dense
-
-        nnet::relu<k_t, layer5_t, krelu_config5>(layer4c_out, layer5c_out);
-
-        nnet::dense<input_t, k_t, kconfig4>(layer5c_out, layer4d_out, kw3, kb3); // dense
-
-        nnet::relu<k_t, layer5_t, krelu_config5>(layer4d_out, layer5d_out);
-
-        nnet::dense<input_t, k_t, kconfig4>(layer5d_out, layer4e_out, kw4, kb4); // dense
-
-        nnet::relu<k_t, layer5_t, krelu_config5>(layer4e_out, layer5e_out);
-
-        nnet::dense<input_t, k_t, kconfig4>(layer5e_out, layer4f_out, kw5, kb5); // dense
-
-        nnet::relu<k_t, layer5_t, krelu_config5>(layer4f_out, layer5f_out);
-
-        nnet::global_pooling2d_cl<layer5_t, layer6_t, kconfig6>(layer5f_out, layer6_out); // global_average_pooling2d
         
-        nnet::dense<layer6_t, result_t, kconfig7>(layer6_out, layer7_out, w7, b7); // dense
-
-        write_output(layer7_out, axis_out, dest, nimages - i);
-
-        LOG("wrote output\n");
-#else
         fill_input(input_1, axis_in);
-        run_network(input_1, layer7_out);
-        write_output(layer7_out, axis_out, dest, nimages - i);
-#endif
+        nnet::dense_latency<k_t, k_t, kconfig4>(input_1, layer4a_out, kw0, kb0);
+        nnet::dense_latency<k_t, k_t, kconfig4>(layer4a_out, layer4b_out, kw1, kb1);
+        nnet::dense_latency<k_t, k_t, kconfig4>(layer4b_out, layer4c_out, kw2, kb3);
+        nnet::dense_latency<k_t, k_t, kconfig4>(layer4c_out, layer4d_out, kw3, kb2);
+        nnet::dense_latency<k_t, k_t, kconfig4>(layer4d_out, layer4e_out, kw4, kb4);
+        nnet::dense_latency<k_t, k_t, kconfig4>(layer4e_out, layer4f_out, kw5, kb5);
+        // nnet::dense_latency<k_t, k_t, kconfig4>(layer4f_out, layer4g_out, kw6, kb6);
+        // nnet::dense_latency<k_t, k_t, kconfig4>(layer4g_out, layer4h_out, kw7, kb7);
+        // nnet::dense_latency<k_t, k_t, kconfig4>(layer4h_out, layer4i_out, kw8, kb8);
+        // nnet::dense_latency<k_t, k_t, kconfig4>(layer4i_out, layer4j_out, kw9, kb9);
+        // nnet::dense_latency<k_t, k_t, kconfig4>(layer4j_out, layer4k_out, kwa, kba);
+        // nnet::dense_latency<k_t, k_t, kconfig4>(layer4k_out, layer4l_out, kwb, kbb);
+        write_output(layer4f_out, axis_out, dest, nimages - i);
     }
 }

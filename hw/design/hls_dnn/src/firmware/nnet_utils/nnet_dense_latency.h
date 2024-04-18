@@ -73,6 +73,50 @@ Result:
     }
 }
 
+template <class data_T, class res_T, typename CONFIG_T>
+void dense_latency_exp(data_T data[CONFIG_T::n_in], res_T res[CONFIG_T::n_out],
+                   typename CONFIG_T::weight_t weights[CONFIG_T::n_in * CONFIG_T::n_out],
+                   typename CONFIG_T::bias_t biases[CONFIG_T::n_out]) {
+    //#pragma HLS DATAFLOW
+    // maybe idk
+
+    data_T cache;
+    //typename CONFIG_T::accum_t mult[CONFIG_T::n_in * CONFIG_T::n_out];
+    //#pragma HLS ARRAY_PARTITION variable=mult cyclic factor=64 
+    typename CONFIG_T::accum_t acc[CONFIG_T::n_out];
+#pragma HLS ARRAY_PARTITION variable=acc cyclic factor=64
+    
+    // Use a function_instantiate in case it helps to explicitly optimize unchanging weights/biases
+#pragma HLS function_instantiate variable=weights,biases
+    
+    // Initialize accumulator with input biases
+    // ResetAccum:
+    for (int iacc = 0; iacc < CONFIG_T::n_out; iacc++) 
+#pragma HLS UNROLL factor=64
+    {
+        acc[iacc] = (typename CONFIG_T::accum_t)biases[iacc];
+    }
+
+    for (int x = 0; x < CONFIG_T::n_in; x++) 
+    {
+        cache = data[x];
+        for (int y = 0; y < CONFIG_T::n_out; y++) 
+#pragma HLS UNROLL factor=64
+        {
+            int index = x * CONFIG_T::n_out + y;
+            acc[y] += CONFIG_T::template product<data_T, typename CONFIG_T::weight_t>::product(cache, weights[index]);
+        }
+    }
+
+// Cast to "res_t" type
+    for (int ires = 0; ires < CONFIG_T::n_out; ires++) 
+#pragma HLS UNROLL factor=64
+    {
+        // res[ires] = (res_T) (acc[ires]);
+        res[ires] = cast<data_T, res_T, CONFIG_T>(acc[ires]);
+    }
+}
+    
 } // namespace nnet
 
 #endif

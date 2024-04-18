@@ -5,12 +5,12 @@
 
 `timescale 1ns/1ps
 
-module myproject_fifo_w5_d3_D_ram
+module myproject_start_for_dataflow_in_loop_VITIS_LOOP_166_1_entry21_U0_ram
 #(parameter
     MEM_STYLE   = "distributed",
-    DATA_WIDTH  = 5,
-    ADDR_WIDTH  = 2,
-    DEPTH       = 3
+    DATA_WIDTH  = 1,
+    ADDR_WIDTH  = 1,
+    DEPTH       = 2
 )
 (
     input  wire                  clk,
@@ -41,12 +41,12 @@ assign dout = mem[raddr_reg];
 
 endmodule
 
-module myproject_fifo_w5_d3_D
+module myproject_start_for_dataflow_in_loop_VITIS_LOOP_166_1_entry21_U0
 #(parameter
     MEM_STYLE   = "distributed",
-    DATA_WIDTH  = 5,
-    ADDR_WIDTH  = 2,
-    DEPTH       = 3
+    DATA_WIDTH  = 1,
+    ADDR_WIDTH  = 1,
+    DEPTH       = 2
 )
 (
     // system signal
@@ -80,13 +80,13 @@ reg                   empty_n = 1'b0;
 
 
 //------------------------Instantiation------------------
-myproject_fifo_w5_d3_D_ram
+myproject_start_for_dataflow_in_loop_VITIS_LOOP_166_1_entry21_U0_ram
 #(
  .MEM_STYLE(MEM_STYLE),
  .DATA_WIDTH(DATA_WIDTH),
  .ADDR_WIDTH(ADDR_WIDTH),
  .DEPTH(DEPTH))
-U_myproject_fifo_w5_d3_D_ram(
+U_myproject_start_for_dataflow_in_loop_VITIS_LOOP_166_1_entry21_U0_ram(
  .clk(clk),
  .we(push),
  .waddr(waddr),

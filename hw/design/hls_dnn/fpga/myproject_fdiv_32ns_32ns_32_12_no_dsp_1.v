@@ -7,7 +7,7 @@
 
 module myproject_fdiv_32ns_32ns_32_12_no_dsp_1
 #(parameter
-    ID         = 1,
+    ID         = 13,
     NUM_STAGE  = 12,
     din0_WIDTH = 32,
     din1_WIDTH = 32,

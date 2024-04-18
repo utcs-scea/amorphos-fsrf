@@ -135,30 +135,23 @@ int main(int argc, char **argv) {
         myproject(axis_in, axis_out, nimages, 0);
 	
         for (int h = 0; h < nimages; h++) {
-            axis512 word_;
-            uint512 word;
-            axis_out >> word_;
-            word = word_.data;
-            // this is legacy code, N_OUT is 1
-            for (int i = 0; i < N_OUT; i++) {
-                union {
-                    float f;
-                    uint32_t u;
-                };
-                printf("raw bits are %08x\n", (uint32_t) word((i * 32) + 31, (i * 32)));
-                u = (word((i * 32) + 31, (i * 32)));
-                outputs[i].data = f;
-                printf("data is %f\n", outputs[i].data);
-                //outputs[i].data = word((i * 8) + 7, i * 8);
+            for (int i = 0; i < axiwords_in_input; i++) {
+                axis512 word_;
+                axis_out >> word_;
+                if (word_.last) {
+                    assert(h == nimages - 1 && i == axiwords_in_input - 1);
+                } else {
+                    assert(h < nimages - 1 || i < axiwords_in_input - 1);
+                }
             }
         }
 #endif
       
         // hls-fpga-machine-learning insert output
-        nnet::print_result<output_axi_t, N_OUT>(outputs, std::cout, true);
+        //nnet::print_result<output_axi_t, N_OUT>(outputs, std::cout, true);
 
         // hls-fpga-machine-learning insert tb-output
-        nnet::print_result<output_axi_t, N_OUT>(outputs, fout);
+        //nnet::print_result<output_axi_t, N_OUT>(outputs, fout);
     }
 
     fout.close();

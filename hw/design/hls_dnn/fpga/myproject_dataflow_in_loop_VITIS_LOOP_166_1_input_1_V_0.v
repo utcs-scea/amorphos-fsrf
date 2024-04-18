@@ -5,7 +5,7 @@
 
 `timescale 1ns/1ps
 
-module myproject_run_network_layer4a_out_V_0
+module myproject_dataflow_in_loop_VITIS_LOOP_166_1_input_1_V_0
 #(parameter
     DataWidth    = 16,
     AddressRange = 32,
@@ -51,7 +51,7 @@ wire [AddressWidth+IndexWidth-1:0]   memcore_taddr;
 //------------------------Instantiation------------------
 assign memcore_iaddr = {i_address0, iptr};
 assign memcore_taddr = {t_address0, tptr};
-myproject_run_network_layer4a_out_V_0_memcore myproject_run_network_layer4a_out_V_0_memcore_U (
+myproject_dataflow_in_loop_VITIS_LOOP_166_1_input_1_V_0_memcore myproject_dataflow_in_loop_VITIS_LOOP_166_1_input_1_V_0_memcore_U (
     .clk      ( clk ),
     .reset    ( reset ),
     .ce0      ( i_ce0 ),

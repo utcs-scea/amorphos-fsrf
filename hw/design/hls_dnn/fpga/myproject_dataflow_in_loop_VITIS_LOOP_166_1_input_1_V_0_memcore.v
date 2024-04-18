@@ -3,7 +3,7 @@
 // Copyright 1986-2020 Xilinx, Inc. All Rights Reserved.
 // ==============================================================
 `timescale 1 ns / 1 ps
-module myproject_dataflow_in_loop_VITIS_LOOP_204_1_input_1_V_0_memcore_ram (addr0, ce0, d0, we0, q0, addr1, ce1, d1, we1, q1,  clk);
+module myproject_dataflow_in_loop_VITIS_LOOP_166_1_input_1_V_0_memcore_ram (addr0, ce0, d0, we0, q0, addr1, ce1, d1, we1, q1,  clk);
 
 parameter DWIDTH = 16;
 parameter AWIDTH = 9;
@@ -49,7 +49,7 @@ end
 endmodule
 
 `timescale 1 ns / 1 ps
-module myproject_dataflow_in_loop_VITIS_LOOP_204_1_input_1_V_0_memcore(
+module myproject_dataflow_in_loop_VITIS_LOOP_166_1_input_1_V_0_memcore(
     reset,
     clk,
     address0,
@@ -81,7 +81,7 @@ output[DataWidth - 1:0] q1;
 
 
 
-myproject_dataflow_in_loop_VITIS_LOOP_204_1_input_1_V_0_memcore_ram myproject_dataflow_in_loop_VITIS_LOOP_204_1_input_1_V_0_memcore_ram_U(
+myproject_dataflow_in_loop_VITIS_LOOP_166_1_input_1_V_0_memcore_ram myproject_dataflow_in_loop_VITIS_LOOP_166_1_input_1_V_0_memcore_ram_U(
     .clk( clk ),
     .addr0( address0 ),
     .ce0( ce0 ),

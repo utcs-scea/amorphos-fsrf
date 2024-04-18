@@ -5,10 +5,10 @@
 
 `timescale 1ns/1ps
 
-module myproject_fifo_w16_d2_D_ram
+module myproject_fifo_w5_d2_D_ram
 #(parameter
     MEM_STYLE   = "distributed",
-    DATA_WIDTH  = 16,
+    DATA_WIDTH  = 5,
     ADDR_WIDTH  = 1,
     DEPTH       = 2
 )
@@ -41,10 +41,10 @@ assign dout = mem[raddr_reg];
 
 endmodule
 
-module myproject_fifo_w16_d2_D
+module myproject_fifo_w5_d2_D
 #(parameter
     MEM_STYLE   = "distributed",
-    DATA_WIDTH  = 16,
+    DATA_WIDTH  = 5,
     ADDR_WIDTH  = 1,
     DEPTH       = 2
 )
@@ -80,13 +80,13 @@ reg                   empty_n = 1'b0;
 
 
 //------------------------Instantiation------------------
-myproject_fifo_w16_d2_D_ram
+myproject_fifo_w5_d2_D_ram
 #(
  .MEM_STYLE(MEM_STYLE),
  .DATA_WIDTH(DATA_WIDTH),
  .ADDR_WIDTH(ADDR_WIDTH),
  .DEPTH(DEPTH))
-U_myproject_fifo_w16_d2_D_ram(
+U_myproject_fifo_w5_d2_D_ram(
  .clk(clk),
  .we(push),
  .waddr(waddr),

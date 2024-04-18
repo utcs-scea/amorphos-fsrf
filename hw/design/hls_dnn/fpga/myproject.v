@@ -7,7 +7,7 @@
 
 `timescale 1 ns / 1 ps 
 
-(* CORE_GENERATION_INFO="myproject_myproject,hls_ip_2020_2,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xcvu9p-flgb2104-2-i,HLS_INPUT_CLOCK=3.300000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=2.622566,HLS_SYN_LAT=-1,HLS_SYN_TPT=-1,HLS_SYN_MEM=140,HLS_SYN_DSP=0,HLS_SYN_FF=43990,HLS_SYN_LUT=120407,HLS_VERSION=2020_2}" *)
+(* CORE_GENERATION_INFO="myproject_myproject,hls_ip_2020_2,{HLS_INPUT_TYPE=cxx,HLS_INPUT_FLOAT=0,HLS_INPUT_FIXED=0,HLS_INPUT_PART=xcvu9p-flgb2104-2-i,HLS_INPUT_CLOCK=3.300000,HLS_INPUT_ARCH=dataflow,HLS_SYN_CLOCK=3.433000,HLS_SYN_LAT=-1,HLS_SYN_TPT=-1,HLS_SYN_MEM=177,HLS_SYN_DSP=0,HLS_SYN_FF=25195,HLS_SYN_LUT=43614,HLS_VERSION=2020_2}" *)
 
 module myproject (
         s_axi_control_AWVALID,
@@ -100,25 +100,24 @@ wire    ap_start;
 wire    ap_ready;
 wire    ap_done;
 wire    ap_idle;
-wire   [511:0] VITIS_LOOP_204_1_proc_U0_axis_out_TDATA;
-wire   [63:0] VITIS_LOOP_204_1_proc_U0_axis_out_TKEEP;
-wire   [63:0] VITIS_LOOP_204_1_proc_U0_axis_out_TSTRB;
-wire   [0:0] VITIS_LOOP_204_1_proc_U0_axis_out_TLAST;
-wire   [4:0] VITIS_LOOP_204_1_proc_U0_axis_out_TID;
-wire   [4:0] VITIS_LOOP_204_1_proc_U0_axis_out_TDEST;
-wire    VITIS_LOOP_204_1_proc_U0_axis_in_TREADY;
-wire    VITIS_LOOP_204_1_proc_U0_axis_out_TVALID;
-wire    VITIS_LOOP_204_1_proc_U0_ap_start;
-wire    VITIS_LOOP_204_1_proc_U0_ap_done;
-wire    VITIS_LOOP_204_1_proc_U0_ap_ready;
-wire    VITIS_LOOP_204_1_proc_U0_ap_idle;
-wire    VITIS_LOOP_204_1_proc_U0_ap_continue;
-wire    VITIS_LOOP_204_1_proc_U0_nimages_ap_vld;
+wire   [511:0] VITIS_LOOP_166_1_proc_U0_axis_out_TDATA;
+wire   [63:0] VITIS_LOOP_166_1_proc_U0_axis_out_TKEEP;
+wire   [63:0] VITIS_LOOP_166_1_proc_U0_axis_out_TSTRB;
+wire   [0:0] VITIS_LOOP_166_1_proc_U0_axis_out_TLAST;
+wire   [4:0] VITIS_LOOP_166_1_proc_U0_axis_out_TID;
+wire   [4:0] VITIS_LOOP_166_1_proc_U0_axis_out_TDEST;
+wire    VITIS_LOOP_166_1_proc_U0_axis_in_TREADY;
+wire    VITIS_LOOP_166_1_proc_U0_axis_out_TVALID;
+wire    VITIS_LOOP_166_1_proc_U0_ap_start;
+wire    VITIS_LOOP_166_1_proc_U0_ap_done;
+wire    VITIS_LOOP_166_1_proc_U0_ap_ready;
+wire    VITIS_LOOP_166_1_proc_U0_ap_idle;
+wire    VITIS_LOOP_166_1_proc_U0_ap_continue;
 wire    ap_sync_continue;
 wire    ap_sync_done;
 wire    ap_sync_ready;
-wire    VITIS_LOOP_204_1_proc_U0_start_full_n;
-wire    VITIS_LOOP_204_1_proc_U0_start_write;
+wire    VITIS_LOOP_166_1_proc_U0_start_full_n;
+wire    VITIS_LOOP_166_1_proc_U0_start_write;
 
 myproject_control_s_axi #(
     .C_S_AXI_ADDR_WIDTH( C_S_AXI_CONTROL_ADDR_WIDTH ),
@@ -153,7 +152,7 @@ control_s_axi_U(
     .ap_idle(ap_idle)
 );
 
-myproject_VITIS_LOOP_204_1_proc VITIS_LOOP_204_1_proc_U0(
+myproject_VITIS_LOOP_166_1_proc VITIS_LOOP_166_1_proc_U0(
     .nimages(nimages),
     .axis_in_TDATA(axis_in_TDATA),
     .axis_in_TKEEP(axis_in_TKEEP),
@@ -161,42 +160,41 @@ myproject_VITIS_LOOP_204_1_proc VITIS_LOOP_204_1_proc_U0(
     .axis_in_TLAST(axis_in_TLAST),
     .axis_in_TID(axis_in_TID),
     .axis_in_TDEST(axis_in_TDEST),
-    .axis_out_TDATA(VITIS_LOOP_204_1_proc_U0_axis_out_TDATA),
-    .axis_out_TKEEP(VITIS_LOOP_204_1_proc_U0_axis_out_TKEEP),
-    .axis_out_TSTRB(VITIS_LOOP_204_1_proc_U0_axis_out_TSTRB),
-    .axis_out_TLAST(VITIS_LOOP_204_1_proc_U0_axis_out_TLAST),
-    .axis_out_TID(VITIS_LOOP_204_1_proc_U0_axis_out_TID),
-    .axis_out_TDEST(VITIS_LOOP_204_1_proc_U0_axis_out_TDEST),
+    .axis_out_TDATA(VITIS_LOOP_166_1_proc_U0_axis_out_TDATA),
+    .axis_out_TKEEP(VITIS_LOOP_166_1_proc_U0_axis_out_TKEEP),
+    .axis_out_TSTRB(VITIS_LOOP_166_1_proc_U0_axis_out_TSTRB),
+    .axis_out_TLAST(VITIS_LOOP_166_1_proc_U0_axis_out_TLAST),
+    .axis_out_TID(VITIS_LOOP_166_1_proc_U0_axis_out_TID),
+    .axis_out_TDEST(VITIS_LOOP_166_1_proc_U0_axis_out_TDEST),
     .dest(dest),
     .ap_clk(ap_clk),
     .ap_rst(ap_rst_n_inv),
     .axis_in_TVALID(axis_in_TVALID),
-    .axis_in_TREADY(VITIS_LOOP_204_1_proc_U0_axis_in_TREADY),
-    .axis_out_TVALID(VITIS_LOOP_204_1_proc_U0_axis_out_TVALID),
+    .axis_in_TREADY(VITIS_LOOP_166_1_proc_U0_axis_in_TREADY),
+    .axis_out_TVALID(VITIS_LOOP_166_1_proc_U0_axis_out_TVALID),
     .axis_out_TREADY(axis_out_TREADY),
     .dest_ap_vld(1'b1),
-    .ap_start(VITIS_LOOP_204_1_proc_U0_ap_start),
-    .ap_done(VITIS_LOOP_204_1_proc_U0_ap_done),
-    .ap_ready(VITIS_LOOP_204_1_proc_U0_ap_ready),
-    .ap_idle(VITIS_LOOP_204_1_proc_U0_ap_idle),
-    .ap_continue(VITIS_LOOP_204_1_proc_U0_ap_continue)
+    .nimages_ap_vld(1'b1),
+    .ap_start(VITIS_LOOP_166_1_proc_U0_ap_start),
+    .ap_done(VITIS_LOOP_166_1_proc_U0_ap_done),
+    .ap_ready(VITIS_LOOP_166_1_proc_U0_ap_ready),
+    .ap_idle(VITIS_LOOP_166_1_proc_U0_ap_idle),
+    .ap_continue(VITIS_LOOP_166_1_proc_U0_ap_continue)
 );
 
-assign VITIS_LOOP_204_1_proc_U0_ap_continue = 1'b1;
+assign VITIS_LOOP_166_1_proc_U0_ap_continue = 1'b1;
 
-assign VITIS_LOOP_204_1_proc_U0_ap_start = ap_start;
+assign VITIS_LOOP_166_1_proc_U0_ap_start = ap_start;
 
-assign VITIS_LOOP_204_1_proc_U0_nimages_ap_vld = 1'b1;
+assign VITIS_LOOP_166_1_proc_U0_start_full_n = 1'b1;
 
-assign VITIS_LOOP_204_1_proc_U0_start_full_n = 1'b1;
+assign VITIS_LOOP_166_1_proc_U0_start_write = 1'b0;
 
-assign VITIS_LOOP_204_1_proc_U0_start_write = 1'b0;
+assign ap_done = VITIS_LOOP_166_1_proc_U0_ap_done;
 
-assign ap_done = VITIS_LOOP_204_1_proc_U0_ap_done;
+assign ap_idle = VITIS_LOOP_166_1_proc_U0_ap_idle;
 
-assign ap_idle = VITIS_LOOP_204_1_proc_U0_ap_idle;
-
-assign ap_ready = VITIS_LOOP_204_1_proc_U0_ap_ready;
+assign ap_ready = VITIS_LOOP_166_1_proc_U0_ap_ready;
 
 always @ (*) begin
     ap_rst_n_inv = ~ap_rst_n;
@@ -204,24 +202,24 @@ end
 
 assign ap_sync_continue = 1'b1;
 
-assign ap_sync_done = VITIS_LOOP_204_1_proc_U0_ap_done;
+assign ap_sync_done = VITIS_LOOP_166_1_proc_U0_ap_done;
 
-assign ap_sync_ready = VITIS_LOOP_204_1_proc_U0_ap_ready;
+assign ap_sync_ready = VITIS_LOOP_166_1_proc_U0_ap_ready;
 
-assign axis_in_TREADY = VITIS_LOOP_204_1_proc_U0_axis_in_TREADY;
+assign axis_in_TREADY = VITIS_LOOP_166_1_proc_U0_axis_in_TREADY;
 
-assign axis_out_TDATA = VITIS_LOOP_204_1_proc_U0_axis_out_TDATA;
+assign axis_out_TDATA = VITIS_LOOP_166_1_proc_U0_axis_out_TDATA;
 
-assign axis_out_TDEST = VITIS_LOOP_204_1_proc_U0_axis_out_TDEST;
+assign axis_out_TDEST = VITIS_LOOP_166_1_proc_U0_axis_out_TDEST;
 
-assign axis_out_TID = VITIS_LOOP_204_1_proc_U0_axis_out_TID;
+assign axis_out_TID = VITIS_LOOP_166_1_proc_U0_axis_out_TID;
 
-assign axis_out_TKEEP = VITIS_LOOP_204_1_proc_U0_axis_out_TKEEP;
+assign axis_out_TKEEP = VITIS_LOOP_166_1_proc_U0_axis_out_TKEEP;
 
-assign axis_out_TLAST = VITIS_LOOP_204_1_proc_U0_axis_out_TLAST;
+assign axis_out_TLAST = VITIS_LOOP_166_1_proc_U0_axis_out_TLAST;
 
-assign axis_out_TSTRB = VITIS_LOOP_204_1_proc_U0_axis_out_TSTRB;
+assign axis_out_TSTRB = VITIS_LOOP_166_1_proc_U0_axis_out_TSTRB;
 
-assign axis_out_TVALID = VITIS_LOOP_204_1_proc_U0_axis_out_TVALID;
+assign axis_out_TVALID = VITIS_LOOP_166_1_proc_U0_axis_out_TVALID;
 
 endmodule //myproject

@@ -7,7 +7,7 @@
 
 module myproject_fpext_32ns_64_2_no_dsp_1
 #(parameter
-    ID         = 129,
+    ID         = 77,
     NUM_STAGE  = 2,
     din0_WIDTH = 32,
     dout_WIDTH = 64
