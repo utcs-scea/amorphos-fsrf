@@ -6,16 +6,9 @@
 #include "aos.hpp"
 #include "utils.hpp"
 
-#ifdef DEBUG
-#define LOG(...) printf(__VA_ARGS__)
-#else
-#define LOG(...)
-#endif
-
 using namespace std::chrono;
 
 struct config {
-    uint32_t abcde[5];
     uint64_t nimages;
     uint64_t f;
     uint64_t dest;
@@ -77,20 +70,17 @@ int main(int argc, char *argv[]) {
     if (argi < argc) cfg_arch = (cfg_arch_t)atol(argv[argi]);
     assert(cfg_arch <= 1);
     ++argi;
-    printf("cfg_arch is %d\n", cfg_arch);
     
     uint64_t num_apps = 1;
     if (argi < argc) num_apps = atol(argv[argi]);
     assert((num_apps >= 1) && (num_apps <= 32));
     ++argi;
-    printf("num_apps is %lu\n", num_apps);
 
     // uint64_t nimages = 1024; // sixteen batches of 64
     uint64_t nimages = 131072;
     if (argi < argc) nimages = atol(argv[argi]);
     assert(nimages <= (1 << 30)); // XXX: gigantic number of max images
     ++argi;
-    LOG("nimages is %lu, expected output is nimages * 64 bytes = %lu\n", nimages, nimages * 64);
 
     uint64_t send_size = 2048;
     if (argi < argc) send_size = atol(argv[argi]);
@@ -122,8 +112,6 @@ int main(int argc, char *argv[]) {
             host_rd[app] = app == (num_apps - 1);
             host_wr[app] = app == 0;
         }
-        // printf("app %lu: src is %lu, dest is %lu, host_rd is %d, host_wr is %d\n", app, srcs[app], dests[app], host_rd[app], host_wr[app]);
-        printf("app %lu: dest is %lu, host_rd is %d, host_wr is %d\n", app, dests[app], host_rd[app], host_wr[app]);
     }
     
     high_resolution_clock::time_point start, end[32];

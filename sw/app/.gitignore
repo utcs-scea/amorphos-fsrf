@@ -4,6 +4,7 @@ aes_strm
 conv
 hls_conv_strm
 dnn
+hls_dnn_strm
 hls_flow
 gups
 hls_hll
