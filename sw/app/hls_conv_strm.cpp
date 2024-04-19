@@ -43,7 +43,7 @@ void host_thread(thread_config tc) {
 	while (read_left || write_left) {
 		if (read_left) {
 			void *read_buf;
-			end = true;
+			end = false;
 			aos[tc.app]->aos_stream_read(read_buf, bytes, end);
 			(void)read_buf;
 			read_left -= bytes;
@@ -87,7 +87,7 @@ int main(int argc, char *argv[]) {
 	++argi;
 	
 	// configuration
-	//uint64_t srcs[8];
+	//uint64_t srcs[32];
 	uint64_t dests[32];
 	bool host_rd[32];
 	bool host_wr[32];
@@ -137,15 +137,12 @@ int main(int argc, char *argv[]) {
 	
 	for (uint64_t app = 0; app < num_apps; ++app) {
 		if (host_rd[app] || host_wr[app]) threads[app].join();
+ 	 	aos[app]->aos_cntrlreg_write(0x00, 0x10);
 	}
 
 	// end runs
 	util.finish_runs(aos, end, 0x00, true, 0x2, 0x2);
-	
- 	for (uint64_t app = 0; app < num_apps; ++app) {
- 		aos[app]->aos_cntrlreg_write(0x00, 0x10);
- 	}
-	
+
 	// print stats
 	const uint64_t accl_bytes = (uint64_t{64} << length);
 	const uint64_t total_accl_bytes = num_apps * accl_bytes;
