@@ -1116,55 +1116,56 @@ for (genvar i = 0; i < 4; i = i + 1) begin : SR
 		end
 		
 		softreg_resp[i].valid <= softreg_read;
-		if (softreg_read) begin
-			case (softreg_req[i].addr)
-				32'h00: softreg_resp[i].data <= cntrl_addr[i];
-				32'h08: softreg_resp[i].data <= data_addr[i];
-				32'h10: softreg_resp[i].data <= host_send_addr[i];
-				32'h18: softreg_resp[i].data <= {s_creds[i], s_data_creds[i]};
-				32'h20: softreg_resp[i].data <= host_recv_addr[i];
-				32'h28: softreg_resp[i].data <= host_meta_addr[i];
-				32'h30: softreg_resp[i].data <= {FIFO[i].r_meta_creds, FIFO[i].r_creds};
-				32'h38: softreg_resp[i].data <= {meta_idx[i], recv_idx[i]};
-				
-				32'h40: softreg_resp[i].data <= {shf_q[i], shf_full[i], shf_empty[i]};
-				32'h48: softreg_resp[i].data <= {saf_q[i], saf_full[i], saf_empty[i]};
-				32'h50: softreg_resp[i].data <= {sqf_q[i], sqf_full[i], sqf_empty[i]};
-				32'h58: softreg_resp[i].data <= {spf_q[i], spf_full[i], spf_empty[i]};
-				32'h60: softreg_resp[i].data <= {rqf_q[i], rqf_full[i], rqf_empty[i]};
-				32'h68: softreg_resp[i].data <= {rpf_q[i], rpf_full[i], rpf_empty[i]};
-				
-				32'h70: softreg_resp[i].data <= {rmf_q, rmf_full, rmf_empty};
-				32'h78: softreg_resp[i].data <= {rdf_q[61:0], rdf_full, rdf_empty};
-				32'h80: softreg_resp[i].data <= {wmf_q, wmf_full, wmf_empty};
-				32'h88: softreg_resp[i].data <= {wdf_q, wdf_full, wdf_empty};
-				32'h90: softreg_resp[i].data <= {pmf_q, pmf_full, pmf_empty};
-				32'h98: softreg_resp[i].data <= {pmdf_q, pmdf_full, pmdf_empty};
-				
-				32'h100: softreg_resp[i].data <= {FIFO[i].SEND.idx, FIFO[i].SEND.len_done};
-				32'h108: softreg_resp[i].data <= {CONV.len_done};
-				32'h110: softreg_resp[i].data <= {WRITE.len, WRITE.tx_data, WRITE.tx_valid};
-				32'h118: softreg_resp[i].data <= {READ.arb_sel};
-				32'h120: softreg_resp[i].data <= {TX.len, TX.tx_data, TX.tx_valid};
-				32'h128: softreg_resp[i].data <= {rbf_q, rbf_full, rbf_empty};
-				32'h130: softreg_resp[i].data <= {recv_done[i], send_done[i], rst_recv[i], add_meta_idx[i], use_s_creds[i], send_data_done[i], rst_send[i], add_recv_idx[i], add_r_meta_creds[i], add_r_creds[i]};
-				32'h138: softreg_resp[i].data <= {FIFO[i].r_data_limit, FIFO[i].r_limit, FIFO[i].s_data_limit, FIFO[i].s_limit};
-				
-				32'h140: softreg_resp[i].data <= {axi_s.awaddr[48:0], axi_s.awlen, axi_s.awvalid, axi_s.awready};
-				32'h148: softreg_resp[i].data <= {axi_s.wdata[60:0], axi_s.wlast, axi_s.wvalid, axi_s.wready};
-				32'h150: softreg_resp[i].data <= {axi_m.awaddr[48:0], axi_m.awlen, axi_m.awvalid, axi_m.awready};
-				32'h158: softreg_resp[i].data <= {axi_m.wdata[60:0], axi_m.wlast, axi_m.wvalid, axi_m.wready};
-				32'h160: softreg_resp[i].data <= {pcie_m.awaddr[48:0], pcie_m.awlen, pcie_m.awvalid, pcie_m.awready};
-				32'h168: softreg_resp[i].data <= {pcie_m.wstrb[7:0], pcie_m.wdata[52:0], pcie_m.wlast, pcie_m.wvalid, pcie_m.wready};
-				32'h170: softreg_resp[i].data <= {pcie_m.araddr[48:0], pcie_m.arlen, pcie_m.arvalid, pcie_m.arready};
-				32'h178: softreg_resp[i].data <= {pcie_m.rdata[60:0], pcie_m.rlast, pcie_m.rvalid, pcie_m.rready};
-				32'h180: softreg_resp[i].data <= {pcie_m.bvalid, pcie_m.bready, axi_s.bvalid, axi_s.bready, axi_m.bvalid, axi_m.bready};
-				
-				32'h188: softreg_resp[i].data <= {gsqf_q, gsqf_full, gsqf_empty};
-				32'h190: softreg_resp[i].data <= {grpf_q, grpf_full, grpf_empty};
-				default: begin end
-			endcase
-		end
+		case (softreg_req[i].addr)
+			32'h00: softreg_resp[i].data <= cntrl_addr[i];
+			32'h08: softreg_resp[i].data <= data_addr[i];
+			32'h10: softreg_resp[i].data <= host_send_addr[i];
+			32'h18: softreg_resp[i].data <= {s_creds[i], s_data_creds[i]};
+			32'h20: softreg_resp[i].data <= host_recv_addr[i];
+			32'h28: softreg_resp[i].data <= host_meta_addr[i];
+			//32'h30: softreg_resp[i].data <= {FIFO[i].r_meta_creds, FIFO[i].r_creds};
+			//32'h38: softreg_resp[i].data <= {meta_idx[i], recv_idx[i]};
+			
+			/*
+			32'h40: softreg_resp[i].data <= {shf_q[i], shf_full[i], shf_empty[i]};
+			32'h48: softreg_resp[i].data <= {saf_q[i], saf_full[i], saf_empty[i]};
+			32'h50: softreg_resp[i].data <= {sqf_q[i], sqf_full[i], sqf_empty[i]};
+			32'h58: softreg_resp[i].data <= {spf_q[i], spf_full[i], spf_empty[i]};
+			32'h60: softreg_resp[i].data <= {rqf_q[i], rqf_full[i], rqf_empty[i]};
+			32'h68: softreg_resp[i].data <= {rpf_q[i], rpf_full[i], rpf_empty[i]};
+			
+			32'h70: softreg_resp[i].data <= {rmf_q, rmf_full, rmf_empty};
+			32'h78: softreg_resp[i].data <= {rdf_q[61:0], rdf_full, rdf_empty};
+			32'h80: softreg_resp[i].data <= {wmf_q, wmf_full, wmf_empty};
+			32'h88: softreg_resp[i].data <= {wdf_q, wdf_full, wdf_empty};
+			32'h90: softreg_resp[i].data <= {pmf_q, pmf_full, pmf_empty};
+			32'h98: softreg_resp[i].data <= {pmdf_q, pmdf_full, pmdf_empty};
+			
+			32'h100: softreg_resp[i].data <= {FIFO[i].SEND.idx, FIFO[i].SEND.len_done};
+			32'h108: softreg_resp[i].data <= {CONV.len_done};
+			32'h110: softreg_resp[i].data <= {WRITE.len, WRITE.tx_data, WRITE.tx_valid};
+			32'h118: softreg_resp[i].data <= {READ.arb_sel};
+			32'h120: softreg_resp[i].data <= {TX.len, TX.tx_data, TX.tx_valid};
+			32'h128: softreg_resp[i].data <= {rbf_q, rbf_full, rbf_empty};
+			32'h130: softreg_resp[i].data <= {recv_done[i], send_done[i], rst_recv[i], add_meta_idx[i], use_s_creds[i], send_data_done[i], rst_send[i], add_recv_idx[i], add_r_meta_creds[i], add_r_creds[i]};
+			32'h138: softreg_resp[i].data <= {FIFO[i].r_data_limit, FIFO[i].r_limit, FIFO[i].s_data_limit, FIFO[i].s_limit};
+			
+			32'h140: softreg_resp[i].data <= {axi_s.awaddr[48:0], axi_s.awlen, axi_s.awvalid, axi_s.awready};
+			32'h148: softreg_resp[i].data <= {axi_s.wdata[60:0], axi_s.wlast, axi_s.wvalid, axi_s.wready};
+			32'h150: softreg_resp[i].data <= {axi_m.awaddr[48:0], axi_m.awlen, axi_m.awvalid, axi_m.awready};
+			32'h158: softreg_resp[i].data <= {axi_m.wdata[60:0], axi_m.wlast, axi_m.wvalid, axi_m.wready};
+			32'h160: softreg_resp[i].data <= {pcie_m.awaddr[48:0], pcie_m.awlen, pcie_m.awvalid, pcie_m.awready};
+			32'h168: softreg_resp[i].data <= {pcie_m.wstrb[7:0], pcie_m.wdata[52:0], pcie_m.wlast, pcie_m.wvalid, pcie_m.wready};
+			32'h170: softreg_resp[i].data <= {pcie_m.araddr[48:0], pcie_m.arlen, pcie_m.arvalid, pcie_m.arready};
+			32'h178: softreg_resp[i].data <= {pcie_m.rdata[60:0], pcie_m.rlast, pcie_m.rvalid, pcie_m.rready};
+			32'h180: softreg_resp[i].data <= {pcie_m.bvalid, pcie_m.bready, axi_s.bvalid, axi_s.bready, axi_m.bvalid, axi_m.bready};
+			
+			32'h188: softreg_resp[i].data <= {gsqf_q, gsqf_full, gsqf_empty};
+			32'h190: softreg_resp[i].data <= {grpf_q, grpf_full, grpf_empty};
+			*/
+			
+			default: softreg_resp[i].data <= 0;
+		endcase
 	end
 end
 

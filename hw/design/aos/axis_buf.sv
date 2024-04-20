@@ -96,7 +96,9 @@ endmodule
 
 
 
-module axis_buf (
+module axis_buf #(
+	parameter DEBUG = 0
+) (
 	input clk,
 	input rst,
 	
@@ -567,7 +569,7 @@ always_ff @(posedge clk) begin
 	
 	softreg_resp.valid <= softreg_read;
 	if (softreg_read) begin
-		if (softreg_req.addr[9]) begin
+		if (softreg_req.addr[9] && DEBUG) begin
 			case (softreg_req.addr[8:3])
 				0: softreg_resp.data <= r_creds;
 				1: softreg_resp.data <= {sdf_q[61:0], sdf_full, sdf_empty};
